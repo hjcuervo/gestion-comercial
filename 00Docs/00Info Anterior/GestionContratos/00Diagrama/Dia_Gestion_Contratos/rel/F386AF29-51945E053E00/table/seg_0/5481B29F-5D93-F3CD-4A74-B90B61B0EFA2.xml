@@ -1,0 +1,345 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="5481B29F-5D93-F3CD-4A74-B90B61B0EFA2" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="COND_GESTION">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>COND_GESTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<commentInRDBMS><![CDATA[CONDICIONES DE LA GESTION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="AGENTE_COD_AGENTE" id="B51C0150-52F3-9019-2020-712073CD0477">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>AGENTE_COD_AGENTE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>4</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,4,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="E66C1AB8-FE78-63F8-37ED-8BAEE18DCAFF" referredColumn="4F094FB1-203E-238C-0AB0-E307E2EB8314"/>
+</associations>
+</Column>
+<Column name="CONTRATO_ID_CONTRATO" id="7FABD8FD-C5BB-AD3F-F0EC-2AF3DED72263">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>CONTRATO_ID_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>20</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,20,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="2BF6DBA7-6806-1ED1-AF1E-5BF3AB951042" referredColumn="7BD191F0-4BAB-5D70-4C23-AFC8EE591C57"/>
+</associations>
+</Column>
+<Column name="POR_AJU_IMPUESTO_AÑO1" id="BD936094-AA56-494D-FC91-3BF3BFC41739">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_AJU_IMPUESTO_AÑO1</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE DE AJUSTE DE IMPUESTOS AÑO 1]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VLR_CLOUD_AÑO1" id="189F47F8-E426-7A90-3185-445EB9E7EECB">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>VLR_CLOUD_AÑO1</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR CLOUD AÑO 1]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_ASUME_LEGALIZACION" id="D78932C6-23BB-843B-EC06-D880A6DF352B">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_ASUME_LEGALIZACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE QUE SE ASUME DE LA LEGALIZACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_BASE_GESTION" id="EBC43E7E-B79D-30FB-FA38-391EE3A1B9BF">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_BASE_GESTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE PARA PAGO DE GESTION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_COSTO_LEGA_AÑO1" id="06396B7C-8617-1F0C-120D-3C8735B2EBF9">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_COSTO_LEGA_AÑO1</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE DEL COSTO DE LEGALIZACION AÑO 1]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_COSTO_LEGA_AÑO2" id="36AEF899-EF51-23F8-857A-3A4CD52CFB94">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_COSTO_LEGA_AÑO2</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE COSTO LEGALIZACION AÑO 2]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_COSTO_LEGA_AÑO3" id="18866838-911F-1526-9416-75BCE19AC63C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_COSTO_LEGA_AÑO3</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE COSTO DE LEGALIZACION AÑO 3]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_COSTO_LEGA_AÑO4" id="7B7494E8-E4D9-31F9-4C70-F84C68A7E157">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_COSTO_LEGA_AÑO4</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE COSTO LEGALIZACION AÑO 1]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VLR_CLOUD_AÑO2" id="E7B1546C-DEBC-C877-AB0A-9495EE03CCD2">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>VLR_CLOUD_AÑO2</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR CLOUD AÑO 2]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VLR_CLOUD_AÑO3" id="6899310A-4CB2-346F-2037-CD280B3DA415">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>VLR_CLOUD_AÑO3</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR CLOUD AÑO 2]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VLR_CLOUD_AÑO4" id="BAA14515-0FCB-75CB-CB53-55B17E33D819">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>VLR_CLOUD_AÑO4</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR CLOUD AÑO 3]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_AJU_IMPUESTO_AÑO2" id="72481144-2D4B-D2FB-6776-2AB85AB01A8C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_AJU_IMPUESTO_AÑO2</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE DE AJUSTE DE IMPUESTOS AÑO 2]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_AJU_IMPUESTO_AÑO3" id="24777E15-F59B-14B2-C887-C0464CC11151">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_AJU_IMPUESTO_AÑO3</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE DE AJUSTE DE IMPUESTOS AÑO 3]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="POR_AJU_IMPUESTO_AÑO4" id="1EA5CB4C-6DD3-6E89-7BE9-2BDBEE1E4589">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>POR_AJU_IMPUESTO_AÑO4</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PORCENTAJE DE AJUSTE DE IMPUESTOS AÑO 4]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,5,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="SALDO_CONTRATOS_ANTERIORES" id="02E0C0A5-3DFA-E648-1ED6-3349B5ACB496">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>SALDO_CONTRATOS_ANTERIORES</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[SALDO CONTRATOS ANTERIORES]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VLR_CUO_SALDO_ANTERIOR" id="BA9ABD34-FD15-5E1E-EE04-E1D2B3BD65A1">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>COND_GESTION</sourceObjSchema>
+<sourceObjName>VLR_CUO_SALDO_ANTERIOR</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR COMISION CONTRATOS ANTERORES]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="7A44BA48-4791-1469-D3F9-D1A8649E4335" name="COND_GESTION_AGENTE_FK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="B51C0150-52F3-9019-2020-712073CD0477"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="A84F6756-BB4D-2F98-1A71-59813B760A25" name="COND_GESTION_CONTRATO_FK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="7FABD8FD-C5BB-AD3F-F0EC-2AF3DED72263"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

@@ -1,0 +1,63 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="460B1E07-2C15-1B34-8DCB-BAAAF860F818" name="DBA TAB COLUMNS BACK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>3656BC71-D7D2-CF4E-B212-02C293068B56</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="TABLE NAME" id="FDFDA173-E2F3-106D-D803-B050FC9DF8F7">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>B6941EF9-89D4-7D19-D0EE-99A86A5B2E6D</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>128 BYTE</dataTypeSize>
+<ownDataTypeParameters>128 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="COLUMN NAME" id="C562D34B-4CAF-F008-3644-33BD3291112C">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>38A3CB7E-1F1B-6FED-3BAE-2677AFE9160F</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>128 BYTE</dataTypeSize>
+<ownDataTypeParameters>128 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="DATA DEFAULT" id="FD053722-17A2-7816-8103-645D251EB3C2">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>9E97E690-6212-7F23-3FE4-EA05D5AB657D</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+</Entity>

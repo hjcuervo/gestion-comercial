@@ -1,0 +1,54 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="MODI_CONTRATO" directorySegmentName="seg_0" id="B6D892D7-8F14-D7DE-0B98-33B192C99AD0">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>03088D39-B35C-0CAE-BE27-9F5FF5E35DB0</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="VALOR_MODIFICACION" id="02202373-94C6-E9C0-998E-5A30B22257A1">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="TIPO_MODIFICACION" id="3F86257C-0DA8-3CAC-1C3A-4D522E2B01EB">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="FECHA_MODIFICACION" id="452CB3BB-862F-E0B5-0ECA-FAA9FEF7F0A3">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="CONTRATO_ID_CONTRATO" id="5FA77815-6E1E-597A-B931-01327D60CF15">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="MODIFICA_VALOR" id="9DEBEB6E-6274-9D52-7469-E977E495596D">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="MODIFICA_TIEMPO" id="CDFC8CAA-EE24-D41B-A2E5-5477456E6430">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<foreignKeys>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="MODI_CONTRATO_CONTRATO_FK" id="A7718307-EADB-5ED1-8B1D-EB19FF587B75">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ForeignKey>
+</foreignKeys>
+</TableProxyOraclev12c>

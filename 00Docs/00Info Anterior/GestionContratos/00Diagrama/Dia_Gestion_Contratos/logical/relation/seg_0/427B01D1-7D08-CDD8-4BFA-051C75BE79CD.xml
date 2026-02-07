@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Relation class="oracle.dbtools.crest.model.design.logical.Relation" name="COND_GESTION_CONTRATO_FK" directorySegmentName="seg_0" id="427B01D1-7D08-CDD8-4BFA-051C75BE79CD">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>2BF6DBA7-6806-1ED1-AF1E-5BF3AB951042</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<sourcePk>3FCC5EBF-600A-29C7-B1FB-10429EEE5C95</sourcePk>
+<identifying>false</identifying>
+<optionalSource>true</optionalSource>
+<optionalTarget>false</optionalTarget>
+<sourceCardinality>1</sourceCardinality>
+<sourceEntity>C6397C01-EBAF-51E0-F739-9EC1E3182E00</sourceEntity>
+<targetCardinalityString>*</targetCardinalityString>
+<targetEntity>934C0A2A-E792-2B68-1B42-08050B4E8175</targetEntity>
+<transferable>true</transferable>
+<deleteRule>NO ACTION</deleteRule>
+</Relation>

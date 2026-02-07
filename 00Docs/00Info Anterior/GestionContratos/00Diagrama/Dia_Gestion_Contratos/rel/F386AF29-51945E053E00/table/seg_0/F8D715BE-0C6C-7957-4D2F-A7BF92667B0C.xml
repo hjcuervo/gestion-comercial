@@ -1,0 +1,162 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="F8D715BE-0C6C-7957-4D2F-A7BF92667B0C" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="FACTURA_ARCHIVOS">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTURA_ARCHIVOS</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="ID_FACT_ARCHIVO" id="DC2392B6-5C14-B792-7BD7-6959FFBABEE9">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTURA_ARCHIVOS</sourceObjSchema>
+<sourceObjName>ID_FACT_ARCHIVO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL REGISTRO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<defaultValue>NULL</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="NOMBRE_ARCHIVO" id="86C4FF70-3C52-5D8B-5943-C1A62F6D3BB4">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTURA_ARCHIVOS</sourceObjSchema>
+<sourceObjName>NOMBRE_ARCHIVO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[NOMBRE DEL ARCHIVO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>200 BYTE</dataTypeSize>
+<ownDataTypeParameters>200 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="EXTENSION_ARCHIVO" id="4A802E34-5A46-E295-88E7-44C2EC199BBB">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTURA_ARCHIVOS</sourceObjSchema>
+<sourceObjName>EXTENSION_ARCHIVO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[EXTENSION DEL ARCHIVO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20 BYTE</dataTypeSize>
+<ownDataTypeParameters>20 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="BASE_ARCHIVO" id="42B6037C-8A2B-531E-9B99-D6906B4FE5FF">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTURA_ARCHIVOS</sourceObjSchema>
+<sourceObjName>BASE_ARCHIVO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[BASE 64 DEL ARCHIVO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="ID_FACTURA" id="6CE09D04-C019-285B-62F3-3D0FCC2E3923">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTURA_ARCHIVOS</sourceObjSchema>
+<sourceObjName>ID_FACTURA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DE LA FACTURA A LA QUE EL ARCHIVO HACE REFERENCIA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="2E628D93-567B-E1F1-F2A7-C090E6AEACAF" referredColumn="E8E6D82C-9855-5A24-3EE6-FCCE652565AE"/>
+</associations>
+</Column>
+<Column name="ID_CONTRATO" id="CA58985D-A423-8AD9-8B8C-39B6AB481484">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTURA_ARCHIVOS</sourceObjSchema>
+<sourceObjName>ID_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL CONTRATO AL CUAL EL ARCHIVO HACE REFERENCIA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>20</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="9A445C04-B7BA-A3FA-3B7F-7B1072629D71" referredColumn="7BD191F0-4BAB-5D70-4C23-AFC8EE591C57"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="EC988747-854B-7C09-1657-F3043AA05FEA" name="FACTURA_ARCHIVOS_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTURA_ARCHIVOS_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="DC2392B6-5C14-B792-7BD7-6959FFBABEE9"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="06251AFE-E326-72D4-ED97-2F5F9A9BFEE1" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="FACTURA_ARCHIVOS_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTURA_ARCHIVOS_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:33 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="DC2392B6-5C14-B792-7BD7-6959FFBABEE9"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="BA84AFA9-D784-4E3E-BB03-B4228F8C42C7" name="FK_FAFACTURA_FACTURA_ARCHIVOS">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="6CE09D04-C019-285B-62F3-3D0FCC2E3923"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="8C8F9F72-48DD-184B-9F7E-C20C71E45BCF" name="FK_ID_CONTRATO_CONTRATO">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="CA58985D-A423-8AD9-8B8C-39B6AB481484"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

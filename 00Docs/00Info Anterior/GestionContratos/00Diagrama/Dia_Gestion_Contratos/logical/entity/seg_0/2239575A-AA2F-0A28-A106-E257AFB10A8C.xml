@@ -1,0 +1,113 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="2239575A-AA2F-0A28-A106-E257AFB10A8C" name="TRAZA PROCESS">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>F5C1E42E-D7BF-C3ED-D087-DD11F0051F70</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="ID TRAZA" id="0201302A-F602-6545-1D9C-5707A6349650">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[pk de la tabla]]></commentInRDBMS>
+<generatorID>D9E81A79-2C2D-7074-586F-BC239F997698</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="FECHA REGISTRO" id="7E30F1A2-186D-6766-4170-39ADB6EB6429">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[fecha en la que se registra]]></commentInRDBMS>
+<generatorID>3939186E-D12D-E87F-2492-A8C6C5F155F5</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<defaultValue>sysdate</defaultValue>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="PKG PRC NAME" id="2C48D79A-291E-FE42-F904-815DDA5A122C">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[nombre del paquete o prc]]></commentInRDBMS>
+<generatorID>0EB00BCF-B365-63ED-4D4D-01F6E68F8779</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>200 BYTE</dataTypeSize>
+<ownDataTypeParameters>200 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="ERR MSG" id="00953AB4-AB0B-61CF-8806-F0917FC5ECE6">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[mensaje de error de la excepcion]]></commentInRDBMS>
+<generatorID>33611D84-208E-D774-4FCA-1F36D529ECD3</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>4000 BYTE</dataTypeSize>
+<ownDataTypeParameters>4000 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="PROCESS PAYLOAD" id="8D45C25E-97CF-027A-6AD7-1A4F3DFAE16A">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[payload del proceso]]></commentInRDBMS>
+<generatorID>312B4519-F6D8-4ADB-86FB-34E713BC5943</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="32482C41-4459-D3DF-2167-9FA565B98691" name="TRAZA PROCESS PK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>377E221F-ACEE-DF52-FE8A-6B646A7EFE26</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>0201302A-F602-6545-1D9C-5707A6349650</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

@@ -1,0 +1,17 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<RoleOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.RoleOraclev10g" name="ARQFACT" directorySegmentName="seg_0" id="9FEB326F-B342-E236-9AA5-4BDD3099EB96">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjName>ARQFACT</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:56 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<permissions>
+<Permission class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PermissionsOraclev10g" name="Permissions1" id="7E25EF7D-A160-63E5-70E7-C35DEB6730D4">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:56 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<package>838ACEA8-70A7-710E-CC5C-986BC7C3DB6D</package>
+<privileges>EXECUTE</privileges>
+</Permission>
+</permissions>
+</RoleOraclev10g>

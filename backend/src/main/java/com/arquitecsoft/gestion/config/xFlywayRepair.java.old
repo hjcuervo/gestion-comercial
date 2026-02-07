@@ -1,0 +1,30 @@
+package com.arquitecsoft.gestion.config;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+public class FlywayRepair implements CommandLineRunner {
+
+    private final JdbcTemplate jdbc;
+
+    public FlywayRepair(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
+
+    @Override
+    public void run(String... args) {
+        try {
+            jdbc.execute("DROP TABLE \"flyway_schema_history\"");
+            System.out.println(">>> FLYWAY TABLE DROPPED");
+        } catch (Exception e1) {
+            try {
+                jdbc.execute("DROP TABLE FLYWAY_SCHEMA_HISTORY");
+                System.out.println(">>> FLYWAY TABLE DROPPED (uppercase)");
+            } catch (Exception e2) {
+                System.out.println(">>> No flyway table found: " + e2.getMessage());
+            }
+        }
+    }
+}

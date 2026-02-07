@@ -1,0 +1,281 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="BC2D3618-D0AB-C0FB-67CD-1DB7372BB9EE" name="INT MESAENVWS">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>4E422D86-9712-C029-7957-ECD4C0D60A8E</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="IDCOMPANY" id="DDCFD4D0-548A-4AAC-1587-63A45E7F2CAD">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>6DF75DF6-C3E0-5E57-5D9C-041B2C563DB9</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>10</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<defaultValue>SYS_CONTEXT(&apos;lbac$0_lab&apos;, &apos;lbac$default_row_tag&apos;)</defaultValue>
+<ownDataTypeParameters>,10,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESACODI" id="0A3BB126-2745-4A7F-50E3-E32A2DB724F9">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>779E1071-DB35-C5D0-DD6E-E1A188ECB531</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>10</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,10,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAFECH" id="7E1D6693-C21E-A31D-E3F4-133A31C0C555">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>6E4756B1-D214-B076-72E0-0D0B8EC0A631</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAXMLENV" id="07644702-144C-43B9-7C89-8DBE7DEFD2CF">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>2DDD7696-53FC-6A1F-D333-00228AB05BDB</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAESTADO" id="0E41341A-593E-ABD3-0337-2F885D4B56FC">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>C1DA58EE-E503-A3AC-B9A3-7335D4FC49B0</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,1,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAINTENTOS" id="B253D7B6-5AB7-E284-C78E-6FD369DF5EFB">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>625481D0-71ED-2712-680C-5C7872A92987</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,5,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAWEBSERVICE" id="B1229882-44F1-8713-D7D9-4003BE8C70E1">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>FD5C25F3-7C22-A8D1-D61C-B3021F8A3257</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>1000 BYTE</dataTypeSize>
+<ownDataTypeParameters>1000 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAHTTPERROR" id="112EE1A5-E338-8C90-BCEB-1DA32F946D8D">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>5622090F-8F3D-8C46-0EE5-962DA2F28CA1</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>2000 BYTE</dataTypeSize>
+<ownDataTypeParameters>2000 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESATRACEERROR" id="33DD2389-4EDF-3CB7-7CC0-14284B47D520">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>1E7D555F-F41D-E0A1-0D81-07A4313D410D</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>2000 BYTE</dataTypeSize>
+<ownDataTypeParameters>2000 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESASOAPERROR" id="425831D0-623D-C89A-F5C8-8A67941C4EB0">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>033897BE-6D79-C77A-0DE0-640DC68C21B3</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAISSOAPERROR" id="A5DF9863-7582-4B3E-3193-027B8E65D0F1">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>AC9B45E2-DCDB-288D-A838-BE5ECB70EAE1</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,2,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAISHTTPERROR" id="9D26318D-8625-EF78-3723-BD057AC14142">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>E48980E3-590C-A55C-C3EC-D0F7CE863B8C</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,2,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAXMLPAYLOAD" id="E46E416C-0228-40CB-E849-6870FA989AC7">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>FF2DDF74-FF4A-AFDA-4206-6DB8F828D5E0</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAFECHAINI" id="2690A5F7-E2DE-79AB-A488-2B9B3854280D">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>4C1FBB44-A916-5736-80ED-83D58A2CEC8B</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAFECHAFIN" id="0F1273DA-DD5A-7D19-A237-65F6781D852E">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>A514156A-7F09-1DBB-322F-B4E54314834D</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESAEXTID" id="E7225489-FAEC-4B16-51ED-1DE3BE99B02D">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>58CDA6D0-6B81-883E-0F71-822D3686504C</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>10</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,10,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="MESADEFI" id="B05BEC05-559D-1D48-5C6F-44954CF6F3E2">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>6F7FBE3B-ABA3-19C2-3FDA-A23D522D15F6</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>200 BYTE</dataTypeSize>
+<ownDataTypeParameters>200 BYTE,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+</Entity>

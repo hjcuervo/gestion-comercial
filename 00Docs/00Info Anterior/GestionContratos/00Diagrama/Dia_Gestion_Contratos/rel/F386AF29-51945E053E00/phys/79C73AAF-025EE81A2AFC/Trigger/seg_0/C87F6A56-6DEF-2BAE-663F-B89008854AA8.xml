@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TriggerOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.TriggerOraclev10g" name="TRG_ID_TRAZA_PROCESS" directorySegmentName="seg_0" id="C87F6A56-6DEF-2BAE-663F-B89008854AA8">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>TRG_ID_TRAZA_PROCESS</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<actions>INSERT</actions>
+<body><![CDATA[begin
+  if inserting then
+      if :NEW.ID_TRAZA is null then
+         select SEQ_ID_TRAZA_PROCESS.nextval into :NEW."ID_TRAZA" from dual;
+      end if;
+   end if;
+end TRG_ID_TRAZA_PROCESS;]]></body>
+<triggerTime>BEFORE</triggerTime>
+<owner>3A367D78-C584-B7A5-0169-F84F01461631</owner>
+<table>F5C1E42E-D7BF-C3ED-D087-DD11F0051F70</table>
+</TriggerOraclev10g>

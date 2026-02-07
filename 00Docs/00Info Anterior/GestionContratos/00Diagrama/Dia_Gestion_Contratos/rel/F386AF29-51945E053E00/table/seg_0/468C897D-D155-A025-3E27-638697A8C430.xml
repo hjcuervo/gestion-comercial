@@ -1,0 +1,122 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="468C897D-D155-A025-3E27-638697A8C430" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="SYNC_FACTRO">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>SYNC_FACTRO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="ID_SYNC_FACTRO" id="3AA2E721-E2E0-577A-9A6E-C50BF06975D4">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>SYNC_FACTRO</sourceObjSchema>
+<sourceObjName>ID_SYNC_FACTRO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[PK]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FECHA_REGISTRO" id="7274694D-8D86-1830-9207-538F8410F370">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>SYNC_FACTRO</sourceObjSchema>
+<sourceObjName>FECHA_REGISTRO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FECHA DE REGISTRO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<defaultValue>SYSDATE</defaultValue>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="PAYLOAD" id="931CAB7C-3F1D-CE23-0EDC-64E72AFC589C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>SYNC_FACTRO</sourceObjSchema>
+<sourceObjName>PAYLOAD</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[JSON CON LA INFO A SINCRONIZAR]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="PROCESADO" id="D0C836F3-53BE-5FD4-F255-97D0ACDF0F34">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>SYNC_FACTRO</sourceObjSchema>
+<sourceObjName>PROCESADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ESTADO DE PROCESO DEL PAYLOAD]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20 BYTE</dataTypeSize>
+<defaultValue>&apos;NO&apos;</defaultValue>
+<ownDataTypeParameters>20 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FECHA_PROCESADO" id="41A1BD9A-CBAB-85CD-0537-72401C7C4C32">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>SYNC_FACTRO</sourceObjSchema>
+<sourceObjName>FECHA_PROCESADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FECHA DE PROCESADO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="5A623FFD-26F4-D2E9-BC92-394BC3DF640A" name="SYNC_FACTRO_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>SYNC_FACTRO_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="3AA2E721-E2E0-577A-9A6E-C50BF06975D4"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="E23B4B5A-49E0-4A4A-1216-2C0530E9338A" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="SYNC_FACTRO_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>SYNC_FACTRO_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:35 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="3AA2E721-E2E0-577A-9A6E-C50BF06975D4"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

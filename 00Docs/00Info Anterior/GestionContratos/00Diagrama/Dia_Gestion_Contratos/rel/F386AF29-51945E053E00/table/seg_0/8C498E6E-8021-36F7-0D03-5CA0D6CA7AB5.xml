@@ -1,0 +1,116 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="8C498E6E-8021-36F7-0D03-5CA0D6CA7AB5" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="FACTCONT">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTCONT</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURAS GENERADAS DEL CONTRATO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="CONTRATO_ID_CONTRATO" id="A7A58DE6-9326-1D3F-52EA-59738C9C38AB">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTCONT</sourceObjSchema>
+<sourceObjName>CONTRATO_ID_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>20</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,20,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="EDE15EF4-7272-B5D1-BD85-FBDFB149759B" referredColumn="7BD191F0-4BAB-5D70-4C23-AFC8EE591C57"/>
+</associations>
+</Column>
+<Column name="FAFACTURA_IDFACTURA" id="A9CF279F-394E-265D-D1F3-8B40F5C473F3">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTCONT</sourceObjSchema>
+<sourceObjName>FAFACTURA_IDFACTURA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="3D44340E-D51F-AB2B-1D5E-5CDF8753E4E9" referredColumn="E8E6D82C-9855-5A24-3EE6-FCCE652565AE"/>
+</associations>
+</Column>
+<Column name="AÑO_CONTRATO" id="1F085BC5-B527-D945-AF6F-386E05B4A3C7">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FACTCONT</sourceObjSchema>
+<sourceObjName>AÑO_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>4</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,4,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="A314C100-DD1A-3245-D8E1-5CD466F83769" name="FACTCONT_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTCONT_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A7A58DE6-9326-1D3F-52EA-59738C9C38AB"/>
+<colUsage columnID="A9CF279F-394E-265D-D1F3-8B40F5C473F3"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="FA7412BA-9B3D-C59D-6C04-B7A5F4D391E2" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="FACTCONT_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTCONT_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:33 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A7A58DE6-9326-1D3F-52EA-59738C9C38AB"/>
+<colUsage columnID="A9CF279F-394E-265D-D1F3-8B40F5C473F3"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="C7371707-93A0-E0D0-5B91-A7AB69656A6D" name="FACTCONT_CONTRATO_FK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A7A58DE6-9326-1D3F-52EA-59738C9C38AB"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="00339D00-CBDA-8296-2060-0FF8BFA1FF8B" name="FACTCONT_FAFACTURA_FK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A9CF279F-394E-265D-D1F3-8B40F5C473F3"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

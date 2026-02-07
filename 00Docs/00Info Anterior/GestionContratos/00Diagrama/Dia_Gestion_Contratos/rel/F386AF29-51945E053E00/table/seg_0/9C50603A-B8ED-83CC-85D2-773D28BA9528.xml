@@ -1,0 +1,76 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="9C50603A-B8ED-83CC-85D2-773D28BA9528" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="AGENTE">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>AGENTE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<commentInRDBMS><![CDATA[AGENTE QUE SE GESTIONA EL CLIENTE]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="COD_AGENTE" id="4F094FB1-203E-238C-0AB0-E307E2EB8314">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>AGENTE</sourceObjSchema>
+<sourceObjName>COD_AGENTE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[CODIGO DEL AGENTE DE GESTION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>4</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,4,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="NOMBRE_AGENTE" id="60D6B22C-87CB-BE64-F7CD-83D92FB11DF3">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>AGENTE</sourceObjSchema>
+<sourceObjName>NOMBRE_AGENTE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[NOMBRE DEL AGENTE DE GESTION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>100 BYTE</dataTypeSize>
+<ownDataTypeParameters>100 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="F97204E5-F922-DC6E-A52D-89A53F367074" name="AGENTE_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>AGENTE_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="4F094FB1-203E-238C-0AB0-E307E2EB8314"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="51B4CF0A-C526-7A46-BCB9-6033558B6219" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="AGENTE_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>AGENTE_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:33 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="4F094FB1-203E-238C-0AB0-E307E2EB8314"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

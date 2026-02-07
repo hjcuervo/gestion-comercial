@@ -1,0 +1,37 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<StoredProcedureOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.StoredProcedureOraclev10g" name="FACTRO_SYNC_DATA" directorySegmentName="seg_0" id="1140D953-F04E-1371-5355-9283C1FEA29C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FACTRO_SYNC_DATA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:46 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PROCEDURE ARQFACTSQA.FACTRO_SYNC_DATA 
+(
+  IN_JSON IN OUT CLOB 
+, OUT_CODE IN OUT NUMBER
+, OUT_MSG IN OUT VARCHAR2
+) AS 
+  v_json_parsed JSON_OBJECT_T;
+BEGIN
+  -- Intentar analizar el JSON / VALIDANDO FORMATO JSON
+  BEGIN
+    v_json_parsed := JSON_OBJECT_T.parse(IN_JSON);
+    OUT_MSG := &apos;El JSON es válido&apos;;
+    OUT_CODE := 1;
+  EXCEPTION
+    WHEN OTHERS THEN
+      OUT_MSG := &apos;El JSON no es válido&apos;;
+      OUT_CODE := 0;
+  END;
+  -- Se almacena la info que llega desde factro(json)
+  insert into SYNC_FACTRO(PAYLOAD) values(IN_JSON);
+  OUT_MSG := &apos;Se ha completado el proceso con exito!&apos;;
+  OUT_CODE := 1;
+  EXCEPTION
+    WHEN OTHERS THEN
+      OUT_MSG := &apos;Ha ocurrido un error al intentar insertar en la tabla - &apos; || SQLERRM;
+      OUT_CODE := 0;
+END FACTRO_SYNC_DATA;</source>
+</StoredProcedureOraclev10g>

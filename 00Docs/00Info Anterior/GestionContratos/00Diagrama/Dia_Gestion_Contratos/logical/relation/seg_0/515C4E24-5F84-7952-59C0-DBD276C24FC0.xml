@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Relation class="oracle.dbtools.crest.model.design.logical.Relation" name="IDFACTURA_FEFACTURA_FEPRODUCTO" directorySegmentName="seg_0" id="515C4E24-5F84-7952-59C0-DBD276C24FC0">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>49BC9B01-F869-73D9-0B61-6C432B7307B6</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<sourcePk>21EBE06D-9D5A-499A-128A-F00E8E58CA45</sourcePk>
+<identifying>false</identifying>
+<optionalSource>true</optionalSource>
+<optionalTarget>false</optionalTarget>
+<sourceCardinality>1</sourceCardinality>
+<sourceEntity>EC5E3AAA-2E48-24DF-0240-F93D3524757E</sourceEntity>
+<targetCardinalityString>*</targetCardinalityString>
+<targetEntity>2805CA46-C7BE-2B45-5702-59F449C0B4B7</targetEntity>
+<transferable>true</transferable>
+<deleteRule>NO ACTION</deleteRule>
+</Relation>

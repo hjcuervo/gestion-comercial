@@ -1,0 +1,297 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="EB09CE08-5C66-2EEC-A0E9-EF18D59C6CFF" name="FACLIENTE">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>DF6383B2-6A7D-292F-25E5-CF7699D26304</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="IDCLIENTE" id="44CD5E0E-F08B-A22D-E489-EC9C7C867661">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID REGISTRO (CLIENTE)]]></commentInRDBMS>
+<generatorID>3D38B9A3-D859-9F61-6982-DA9B0B1B14BF</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="DOCUMENTO TIPO" id="E54492F8-1990-79A1-FD7E-1AE180C91048">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[TIPO DE DOCUMENTO]]></commentInRDBMS>
+<generatorID>0E5AEEDC-F2DC-F9C2-67E8-AAB91CDBF502</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="DOCUMENTO NUMERO" id="4CC99C42-69AB-461C-0FCE-EA5B44FD6F32">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>AC560948-3102-8184-C1D8-768D364C6FE3</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>500 BYTE</dataTypeSize>
+<ownDataTypeParameters>500 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="DOCUMENTO DV" id="089EC3A1-20D5-7A4C-78A5-400D44648FA7">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[DV DEL DOCUMENTO]]></commentInRDBMS>
+<generatorID>7D9D1677-8CA3-1A75-E4D2-A6FE478AFAFA</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>800 BYTE</dataTypeSize>
+<ownDataTypeParameters>800 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="REGIMEN FISCAL" id="ABCA6895-D577-6629-329A-31906CD466FB">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL REGIMEN FISCAL]]></commentInRDBMS>
+<generatorID>443B1FC7-9953-AD2D-6A3F-8C377E09B2DB</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="NOMBRE COMERCIAL" id="455E5206-80DE-AB12-8A0A-66555042D44A">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[NOMBRE COMERCIAL DEL CLIENTE
+]]></commentInRDBMS>
+<generatorID>BE4CE88A-45F6-D09E-E01D-68EB44D976E4</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>800 BYTE</dataTypeSize>
+<ownDataTypeParameters>800 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="OBLIGACIONES FISCALES" id="AE11EBB1-B7FC-8EEE-3B6E-66E1F9C6DF1E">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DE LA OBLIGACION FISCAL]]></commentInRDBMS>
+<generatorID>4D25187E-D89E-1455-FADC-41E70C8D75C8</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="CONTACTO TELEFONO" id="50DD9D31-CCF3-7366-C037-0538B85ECA24">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[NUMERO DE TELEFONO DEL CLIENTE
+]]></commentInRDBMS>
+<generatorID>E7635633-EFCA-6F7A-B125-7E464218C616</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>800 BYTE</dataTypeSize>
+<ownDataTypeParameters>800 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="CONTACTO CORREO" id="31B680D5-C9ED-A041-3AAF-7A890FF1B780">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[CORREO DEL CLIENTE]]></commentInRDBMS>
+<generatorID>B4C57C24-AB1C-6582-9D72-E28B2E7B3F45</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>800 BYTE</dataTypeSize>
+<ownDataTypeParameters>800 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="CONTACTO NOTA" id="985F8521-8417-B563-0362-6F8BE387F2E7">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[NOTA DEL CLIENTE]]></commentInRDBMS>
+<generatorID>65774430-5E14-21EF-7101-74B189ECEF74</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>800 BYTE</dataTypeSize>
+<ownDataTypeParameters>800 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="IMPUESTO" id="5B8AA2FB-9286-F21C-A915-D1F8B5B37C38">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL IMPUESTO]]></commentInRDBMS>
+<generatorID>5CAC4536-97D3-2C98-7201-94436AD66C37</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="UBICACION PAIS" id="21D73AAD-2136-D915-EEF2-494A0CE5233E">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL PAIS]]></commentInRDBMS>
+<generatorID>06D7D595-E322-6DA7-CE0D-52627E607CD0</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="UBICACION DEPARTAMENTO" id="BAB51899-4089-522A-0E67-8FA6A1DE0BCD">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL DEPARTAMENTO]]></commentInRDBMS>
+<generatorID>9C7F27B1-002F-55B8-29E8-F7221ADA8CC7</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="UBICACION CIUDAD" id="F8BEDEEB-586F-61E6-C350-CFE0E83226F1">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DE LA CIUDAD]]></commentInRDBMS>
+<generatorID>9F8567F2-9715-CC22-3365-B50425C71B77</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="UBICACION DIRECCION" id="38B0125B-B120-BC70-62F8-AB7853E62029">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[DIRECCION DEL CLIENTE]]></commentInRDBMS>
+<generatorID>64858DCE-682C-15E3-199B-F51C892A3A5E</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>800 BYTE</dataTypeSize>
+<ownDataTypeParameters>800 BYTE,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="UBICACION CODIGOPOSTAL" id="5261CE31-EBBB-1CEF-6A1D-E7BB2188D82A">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[CODIGO POSTAL DEL CLIENTE]]></commentInRDBMS>
+<generatorID>6E950D67-7662-C7C4-8F9D-06A5AED28AB1</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>9</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,9,0</ownDataTypeParameters>
+</Attribute>
+<Attribute name="TIPO PERSONA" id="580032E6-EEB4-2D4A-6F90-A74577700609">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<commentInRDBMS><![CDATA[TIPO DE PERSONA DEL CLIENTE]]></commentInRDBMS>
+<generatorID>06213B88-6434-8A06-5F10-5E48AFC89589</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="43C4DBCC-370C-75D5-5EA9-94903FFFB855" name="FECLIENTE PK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>8FF4FC7E-8018-3B4B-D1FA-EEFD86AB47F6</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>44CD5E0E-F08B-A22D-E489-EC9C7C867661</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

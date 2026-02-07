@@ -1,0 +1,19 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="E66C1AB8-FE78-63F8-37ED-8BAEE18DCAFF" containerWithKeyObject="5481B29F-5D93-F3CD-4A74-B90B61B0EFA2" localFKIndex="7A44BA48-4791-1469-D3F9-D1A8649E4335" name="COND_GESTION_AGENTE_FK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>COND_GESTION_AGENTE_FK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<referredTableLongName>ARQFACTSQA.AGENTE</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>9C50603A-B8ED-83CC-85D2-773D28BA9528</referredTableID>
+<keyObject>F97204E5-F922-DC6E-A52D-89A53F367074</keyObject>
+<referredKeyID>F97204E5-F922-DC6E-A52D-89A53F367074</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>COD_AGENTE</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

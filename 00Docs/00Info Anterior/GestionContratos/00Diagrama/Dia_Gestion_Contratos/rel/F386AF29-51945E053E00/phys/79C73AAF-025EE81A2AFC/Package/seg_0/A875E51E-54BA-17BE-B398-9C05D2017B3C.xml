@@ -1,0 +1,250 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<PackageOracle class="oracle.dbtools.crest.model.design.storage.oracle.PackageOracle" name="PKG_GESTICOMER" directorySegmentName="seg_0" id="A875E51E-54BA-17BE-B398-9C05D2017B3C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PKG_GESTICOMER</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:48 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE ARQFACTSQA.PKG_GESTICOMER IS
+
+	PROCEDURE prProcGestiAgente(inuAgen  in cond_gestion.agente_cod_agente%type,
+                            inuCont   in factcont.contrato_id_contrato%type);
+
+END PKG_GESTICOMER;</source>
+<body class="oracle.dbtools.crest.model.design.storage.oracle.PackageBodyOracle" name="PKG_GESTICOMER" id="A875E51E-54BA-17BE-B398-9C05D2017B3C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PKG_GESTICOMER</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:48 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE BODY ARQFACTSQA.PKG_GESTICOMER IS
+
+/*********************************************************
+Nombre: 		prProcGestiAgente
+Descripcion:	procedimiento que se encarga de procesar cada 
+                de las facturas y les calcula el valor de gestion
+				comercial que se le debe a cada agente.
+
+HISTORIAL DE CAMBIOS
+AUTOR			FECHA			DESCRIPCION
+hjcuervo        27/12/2021      Creacion del metodo 
+*********************************************************/
+PROCEDURE prProcGestiAgente(inuAgen  in cond_gestion.agente_cod_agente%type,
+                            inuCont   in factcont.contrato_id_contrato%type) 
+IS
+
+    /*
+	  Seleccion de los agentes comerciales
+	*/
+	cursor cuAgente
+	is
+	select * from agente
+	where cod_agente = decode(inuAgen,-1,cod_agente,inuAgen);
+
+	/* 
+	  Seleccion de los criterios de gestion por cada contrato que tiene en el agente
+	*/
+	cursor cuCriteGesion(nuAgen  in cond_gestion.agente_cod_agente%type,
+						 nuCont  in cond_gestion.contrato_id_contrato%type
+	)
+	is
+	select * from cond_gestion
+	where agente_cod_agente 	= decode(nuAgen,-1,agente_cod_agente,nuAgen)
+	  and contrato_id_contrato 	= decode(nuCont,-1,contrato_id_contrato,nuCont);
+
+
+	/*
+	Seleccion de las facturas que tiene asociado un contrato
+	*/
+	cursor cuFactCont(nuCont   in factcont.contrato_id_contrato%type)
+	is
+	select * from factcont
+	where contrato_id_contrato = nuCont;
+
+
+	/* 
+	  Seleccion del valor bruto de cada factura que esta pendiente por procesar, si la moneda esta 
+	  en dolares se convierte a pesos segun la tasa de cambio que esta en la factura
+	*/
+	cursor cuFactura(nuFact  in fafactura.idfactura%type)
+	is
+	select fac.idfactura, sum(decode(fac.moneda,35,1,149,fac.tasa_cambio,1) * precio_bruto) precio_bruto 
+	from faproducto pro, fafactura fac
+	where pro.idfactura = fac.idfactura
+	  and fac.idfactura = nuFact
+	group by fac.idfactura;
+
+
+	/*
+	 Definicion de variables particulares
+	*/
+	nuValorBaseLiq   number(13,2) := 0;
+	nuValorImpu      number(13,2) := 0;
+	nuValorCloud     number(13,2) := 0;
+	nuValorGestion   number(13,2) := 0;
+	nuValorLegali    number(13,2) := 0;
+	nuValorGestPaga  number(13,2) := 0;
+	vaCadena         varchar2(1000);
+
+BEGIN
+
+	-- Seleccion de los agentes a procesar
+	 for rgAgente in cuAgente loop
+
+	   --Seleccion de los criterios de gestion
+	   for rgCri in cuCriteGesion(rgAgente.cod_agente, inuCont) loop
+
+	     for rgFactCont in cuFactCont(rgCri.contrato_id_contrato) loop
+
+			 --Seleccion del valor de cada factura a procesar
+			 for rgFact in cuFactura(rgFactCont.FAFACTURA_idfactura) loop
+
+				/* calculo año 1 de contrato */
+                if (rgFactCont.año_contrato = 1) THEN
+
+					-- Ajustes a los valores facturados
+					nuValorImpu  := rgFact.precio_bruto * (rgCri.POR_AJU_IMPUESTO_AÑO1/100);
+
+					nuValorCloud := rgCri.VLR_CLOUD_AÑO1;
+
+					-- Valor base Gestion
+				    nuValorBaseLiq := rgFact.precio_bruto - nuValorImpu - rgCri.VLR_CLOUD_AÑO1;
+
+					-- Calculo del valor de la gestion
+				    nuValorGestion := nuValorBaseLiq * (rgCri.POR_BASE_GESTION/100);
+
+					-- Valor legalizacion			
+				    nuValorLegali := nuValorGestion * (rgCri.POR_COSTO_LEGA_AÑO1/100);	
+
+					-- Valor de la gestion a pagar
+					nuValorGestPaga := nuValorGestion - (nuValorLegali * (rgCri.POR_ASUME_LEGALIZACION/100));	
+
+				end if;				
+
+				/* calculo año 2 de contrato */
+                if (rgFactCont.año_contrato = 2) THEN
+
+					-- Ajustes a los valores facturados
+					nuValorImpu  := rgFact.precio_bruto * (rgCri.POR_AJU_IMPUESTO_AÑO2/100);
+
+					nuValorCloud := rgCri.VLR_CLOUD_AÑO2;
+					-- Valor base Gestion
+				    nuValorBaseLiq := rgFact.precio_bruto - nuValorImpu - rgCri.VLR_CLOUD_AÑO2;
+
+					-- Calculo del valor de la gestion
+				    nuValorGestion := nuValorBaseLiq * (rgCri.POR_BASE_GESTION/100);
+
+					-- Valor legalizacion			
+				    nuValorLegali := nuValorGestion * (rgCri.POR_COSTO_LEGA_AÑO2/100);	
+
+					-- Valor de la gestion a pagar
+					nuValorGestPaga := nuValorGestion - (nuValorLegali * (rgCri.POR_ASUME_LEGALIZACION/100));	
+
+				end if;
+
+				/* calculo año 3 de contrato */
+                if (rgFactCont.año_contrato = 3) THEN
+
+					-- Ajustes a los valores facturados
+					nuValorImpu  := rgFact.precio_bruto * (rgCri.POR_AJU_IMPUESTO_AÑO3/100);
+
+					nuValorCloud := rgCri.VLR_CLOUD_AÑO3;
+					-- Valor base Gestion
+				    nuValorBaseLiq := rgFact.precio_bruto - nuValorImpu - rgCri.VLR_CLOUD_AÑO3;
+
+					-- Calculo del valor de la gestion
+				    nuValorGestion := nuValorBaseLiq * (rgCri.POR_BASE_GESTION/100);
+
+					-- Valor legalizacion			
+				    nuValorLegali := nuValorGestion * (rgCri.POR_COSTO_LEGA_AÑO3/100);	
+
+					-- Valor de la gestion a pagar
+					nuValorGestPaga := nuValorGestion - (nuValorLegali * (rgCri.POR_ASUME_LEGALIZACION/100));	
+
+				end if;
+
+				/* calculo año 4 de contrato */
+                if (rgFactCont.año_contrato = 4) THEN
+
+					-- Ajustes a los valores facturados
+					nuValorImpu  := rgFact.precio_bruto * (rgCri.POR_AJU_IMPUESTO_AÑO4/100);
+
+					nuValorCloud := rgCri.VLR_CLOUD_AÑO4;
+					-- Valor base Gestion
+				    nuValorBaseLiq := rgFact.precio_bruto - nuValorImpu - rgCri.VLR_CLOUD_AÑO4;
+
+					-- Calculo del valor de la gestion
+				    nuValorGestion := nuValorBaseLiq * (rgCri.POR_BASE_GESTION/100);
+
+					-- Valor legalizacion			
+				    nuValorLegali := nuValorGestion * (rgCri.POR_COSTO_LEGA_AÑO4/100);	
+
+					-- Valor de la gestion a pagar
+					nuValorGestPaga := nuValorGestion - (nuValorLegali * (rgCri.POR_ASUME_LEGALIZACION/100));	
+
+				end if;
+
+
+				vaCadena := &apos;Año contrato: &apos;||&apos;;&apos;||rgFactCont.año_contrato||&apos;;&apos;
+				            ||&apos;Factura: &apos;||&apos;;&apos;||rgFact.idfactura||&apos;;&apos;
+							||&apos;Precio_bruto: &apos;||&apos;;&apos;||rgFact.precio_bruto||&apos;;&apos;
+				            ||&apos;nuValorImpu: &apos;||&apos;;&apos;||nuValorImpu||&apos;;&apos;
+				            ||&apos;nuValorCloud: &apos;||&apos;;&apos;||nuValorCloud||&apos;;&apos;
+							||&apos;nuValorBaseLiq: &apos;||&apos;;&apos;||nuValorBaseLiq||&apos;;&apos;
+							||&apos;nuValorGestion: &apos;||&apos;;&apos;||nuValorGestion||&apos;;&apos;
+							||&apos;nuValorLegali: &apos;||&apos;;&apos;||nuValorLegali||&apos;;&apos;
+							||&apos;nuValorGestPaga :&apos;||&apos;;&apos;||nuValorGestPaga;
+
+				--DBMS_OUTPUT.PUT_LINE(&apos;Factura = &apos;||rgFactCont.fafactura_idfactura||&apos; Comision : &apos;||nuValorGestion);
+				DBMS_OUTPUT.PUT_LINE(vaCadena);
+				vaCadena := null;
+
+                /* insericion del valor de la gestion a liquidar */
+                insert into calc_gestion   (AGENTE_COD_AGENTE,
+											FACTCONT_CONTRATO_ID_CONTRATO,
+											FACTCONT_FAFACTURA_IDFACTURA,
+											VALOR_AJUSTE_IMPUESTO,
+											VALOR_AJUSTE_CLOUD,
+											VALOR_BASE_GESTION,
+											VALOR_COSTO_LEGALIZACION,
+											VALOR_ASUMIDO_LEGALIZACION,
+											VALOR_GESTION,
+											FECHA_LIQUIDACION,
+											VALOR_GESTION_PAGO,
+											OBSERVACION,
+											VALOR_GESTION_CONT_ANTERIOR) 
+				values					   (rgAgente.cod_agente,
+											rgCri.contrato_id_contrato,
+											rgFact.idfactura,
+											nuValorImpu,
+											nuValorCloud,
+											nuValorBaseLiq,
+											nuValorLegali,
+											(nuValorLegali * (rgCri.POR_ASUME_LEGALIZACION/100)),
+											nuValorGestion,
+											sysdate,
+											nuValorGestPaga,
+											&apos;CALCULO AUTOMATICO DE GESTION&apos;,
+											rgCri.VLR_CUO_SALDO_ANTERIOR);
+				commit;
+
+			 end loop;
+		  end loop;
+	   end loop;      
+
+	 end loop;
+
+EXCEPTION
+WHEN OTHERS THEN
+
+    DBMS_OUTPUT.PUT_LINE(SQLERRM || &apos;-&apos; ||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
+
+END prProcGestiAgente;
+
+END PKG_GESTICOMER;</source>
+</body>
+</PackageOracle>

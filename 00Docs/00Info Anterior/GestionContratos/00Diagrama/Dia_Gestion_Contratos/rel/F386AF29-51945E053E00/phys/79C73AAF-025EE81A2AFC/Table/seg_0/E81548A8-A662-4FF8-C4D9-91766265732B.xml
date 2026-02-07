@@ -1,0 +1,95 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="LV_USERS" directorySegmentName="seg_0" id="E81548A8-A662-4FF8-C4D9-91766265732B">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>03088D39-B35C-0CAE-BE27-9F5FF5E35DB0</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="EMAIL_VERIFIED_AT" id="18A869C9-990A-C8C2-6D1B-6A0EB0569682">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="PASSWORD" id="2025089E-A0A7-2A7A-C3F8-C6BDF2354C6D">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="IS_ADMIN" id="26AAB752-A7A9-7DBB-F96B-F8346F036E77">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<defaultValue>&apos;N&apos;</defaultValue>
+</ColumnProxy>
+<ColumnProxy name="EMAIL" id="505E3522-5CE5-29AB-AC7E-162C792358B0">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="NAME" id="5DCDAA99-C605-0EB6-323F-4CE6DB015F69">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="REMEMBER_TOKEN" id="80DDBCA6-8644-7B5B-7637-BBFB9D2AB779">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="UPDATED_AT" id="EBCF40EF-811D-F863-E848-1E8FBD5110AB">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="CREATED_AT" id="EDE7BEE3-CDAA-A3B9-8669-5DC2BF02DACA">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="ID" id="F9C03961-9A75-A3DA-7C37-BD9952E0A8C8">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<autoIncrementDDL>TRIGGER</autoIncrementDDL>
+</ColumnProxy>
+</columnProxies>
+<indexProxies>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="LV_USERS_ID_PK" id="29397FF8-4E14-07C7-FDAE-D79C44EF59C7">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:34 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+</IndexProxy>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="LV_USERS_EMAIL_UK" id="BAC1CDEE-6286-FA0D-75CD-BD1F00FF744B">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:34 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+</IndexProxy>
+</indexProxies>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="LV_USERS_ID_PK" id="269F9042-0372-3A67-1902-503D8B41C78B">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<existingIndex>29397FF8-4E14-07C7-FDAE-D79C44EF59C7</existingIndex>
+<indexSegment>5634C552-1310-8F84-2070-0ED46D3C5C78</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

@@ -1,0 +1,103 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<PackageOracle class="oracle.dbtools.crest.model.design.storage.oracle.PackageOracle" name="INT_PKMAILAPI" directorySegmentName="seg_0" id="4E5074B3-5341-3F87-E7F1-A7DC8E4993DD">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>INT_PKMAILAPI</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:46 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE         ARQFACTSQA.INT_PKMAILAPI AS
+  /************************************************************************************************
+      Copyright (c) 2021 Arquitecsoft S.A.S.
+      Nombre       : INT_PKMAILAPI
+      Descripcion  : Paquete logica envio de correo
+      Autor        : Hector Dominguez
+      Fecha        : 19/07/2021
+      T2C          : -1
+
+      Historial de Modificaciones
+      -----------------------------------------------------------------------------------------------
+      Fecha         Autor      T2C        Descripcion
+      =====         =====      ======     ===========================================================
+      19/07/2021    hectord    -1         1. Creacion
+      20/07/2021    oscarap    55744      2. Metodo envio correo
+  ***********************************************************************************************/
+
+  /************************************************************************************************
+  Copyright (c) 2021 Arquitecsoft S.A.S.
+
+  Nombre       : PRC_SENDMAIL.prc
+  Descripcion  : Procedimiento que envia correo a traves de servicio web
+  Autor        : Hector Dominguez
+  Fecha        : 19/07/2021
+  T2C          : 55744
+
+  Parametros de Entrada
+  Parametros de Salida
+
+  Historial de Modificaciones
+  ---------------------------------------------------------------------------------------
+  Fecha         Autor      T2C        Descripcion
+  =====         =====      ======     ===================================================
+  19/07/2021    hectord    -1         1. Creacion
+  ***********************************************************************************************/
+  PROCEDURE PRC_SENDMAIL(ISBBOUNDARY  IN VARCHAR2 DEFAULT &apos;----ARQBusinessSuiteFormBoundary7MA4YWxkTrZu0gW&apos;,
+                         ISBFROM      IN VARCHAR2 DEFAULT &apos;bs-notify@arqbs.com&apos;,
+                         ISBTO        IN VARCHAR2,
+                         ISBCC        IN VARCHAR2 DEFAULT NULL,
+                         ISBSUBJECT   IN VARCHAR2,
+                         ISBMESSAGE   IN CLOB,
+                         OSBIDMAILGUN OUT VARCHAR2,
+                         ONUERROR     OUT NUMBER,
+                         OCLRESPUESTA OUT CLOB);
+
+  /************************************************************************************************
+  Copyright (c) 2021 Arquitecsoft S.A.S.
+
+  Nombre       : prc_EnviaCorreo.prc
+  Descripcion  : Procedimiento que envia correo a traves del API del servicio web
+  Autor        : Oscar Parra
+  Fecha        : 20/07/2021
+  T2C          : 55744
+
+  Parametros de Entrada
+  Parametros de Salida
+
+  Historial de Modificaciones
+  ---------------------------------------------------------------------------------------
+  Fecha         Autor      T2C        Descripcion
+  =====         =====      ======     ===================================================
+  20/07/2021    oscarap    55744         1. Creacion
+  ***********************************************************************************************/
+  PROCEDURE prc_EnviaCorreo(isbDestinatario IN geEnviarCorreo.destinatario%TYPE,
+                            isbDestina_CC   IN geEnviarCorreo.destinatario%TYPE,
+                            isbAsunto       IN geEnviarCorreo.asunto%TYPE,
+                            iclmensaje      IN CLOB,
+                            iboolLimpiar    IN BOOLEAN DEFAULT FALSE,
+                            onuerrorid      OUT NUMBER,
+                            osbErrorlog     OUT VARCHAR2);
+
+  /************************************************************************************************
+  Copyright (c) 2022 Arquitecsoft S.A.S.
+
+  Nombre       : prc_ReEnviaCorreos.prc
+  Descripcion  : Procedimiento que reenvia correos a traves del API del servicio web,
+                  basado en logs fallidos de la tabla GEENVIARCORREO (ESTADO_CORREO=&apos;PD&apos;)
+  Autor        : Yair Mondragon
+  Fecha        : 14/03/2022
+  T2C          :
+
+  Parametros de Entrada
+  Parametros de Salida
+
+  Historial de Modificaciones
+  ---------------------------------------------------------------------------------------
+  Fecha         Autor      T2C        Descripcion
+  =====         =====      ======     ===================================================
+  14/03/2022    yairam                1. Creacion
+  ***********************************************************************************************/
+  PROCEDURE prc_ReEnviaCorreos;
+
+END INT_PKMAILAPI;</source>
+</PackageOracle>

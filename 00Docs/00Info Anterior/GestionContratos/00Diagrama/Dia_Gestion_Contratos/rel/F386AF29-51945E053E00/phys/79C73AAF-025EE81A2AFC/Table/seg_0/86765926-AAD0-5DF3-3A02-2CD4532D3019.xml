@@ -1,0 +1,83 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="CONTRATO_FORMA_PAGO" directorySegmentName="seg_0" id="86765926-AAD0-5DF3-3A02-2CD4532D3019">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>03088D39-B35C-0CAE-BE27-9F5FF5E35DB0</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="ID_FACTURA" id="0E608C96-8170-C4B6-0106-E51CF6436800">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="FORMA_PAGO" id="275B54E7-6CF2-E8A0-1E7F-7299EB87A1BA">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="VALOR_FORMA_PAGO" id="4F8EF421-E318-FC02-5B19-5749890C2720">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="ID_CONTRATO" id="67CA68D8-CE8A-0046-DD42-D93D5DFE9168">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="ID_CONTRATO_FORMA_PAGO" id="A407ABA1-8C8E-B898-4ECB-99E3A62AC672">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<defaultValue>NULL</defaultValue>
+</ColumnProxy>
+<ColumnProxy name="FECHA_PAGO_ESTIMADO" id="B1929B07-0D06-0908-1C35-7B7F65883606">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<indexProxies>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="CONTRATO_FORMA_PAGO_PK" id="2B4FBFCA-552A-E4B6-7192-93E06C9BE6F8">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:33 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+</IndexProxy>
+</indexProxies>
+<foreignKeys>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="FK_ID_FACTURA_FAFACTURA" id="170B8D28-71FE-D409-5C5B-E4DA043D3E12">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ForeignKey>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="FK_CONTRATO_FORMA_PAGO_CONTRATO" id="455F2EFF-F7F3-7CF1-1CCC-E5F2BD78A943">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ForeignKey>
+</foreignKeys>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="CONTRATO_FORMA_PAGO_PK" id="609E2219-82DB-CAC6-472A-096D4F170F0A">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<existingIndex>2B4FBFCA-552A-E4B6-7192-93E06C9BE6F8</existingIndex>
+<indexSegment>5634C552-1310-8F84-2070-0ED46D3C5C78</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

@@ -1,0 +1,126 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="B6D892D7-8F14-D7DE-0B98-33B192C99AD0" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="MODI_CONTRATO">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>MODI_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<commentInRDBMS><![CDATA[MODIFICACIONES AL CONTRATO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="TIPO_MODIFICACION" id="3F86257C-0DA8-3CAC-1C3A-4D522E2B01EB">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>MODI_CONTRATO</sourceObjSchema>
+<sourceObjName>TIPO_MODIFICACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[TIPO DE MODIFICACION AL CONTRATO (ADICION, SUSPENSION, REINICIO)]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20 BYTE</dataTypeSize>
+<ownDataTypeParameters>20 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="MODIFICA_TIEMPO" id="CDFC8CAA-EE24-D41B-A2E5-5477456E6430">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>MODI_CONTRATO</sourceObjSchema>
+<sourceObjName>MODIFICA_TIEMPO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[MODIFICA EL TIEMPO DEL CONTRATO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>1 BYTE</dataTypeSize>
+<ownDataTypeParameters>1 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="MODIFICA_VALOR" id="9DEBEB6E-6274-9D52-7469-E977E495596D">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>MODI_CONTRATO</sourceObjSchema>
+<sourceObjName>MODIFICA_VALOR</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[MODIFICA VALOR DEL CONTRATO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>1 BYTE</dataTypeSize>
+<ownDataTypeParameters>1 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FECHA_MODIFICACION" id="452CB3BB-862F-E0B5-0ECA-FAA9FEF7F0A3">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>MODI_CONTRATO</sourceObjSchema>
+<sourceObjName>FECHA_MODIFICACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FECHA EN QUE SE HIZO LA MODIFICACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_MODIFICACION" id="02202373-94C6-E9C0-998E-5A30B22257A1">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>MODI_CONTRATO</sourceObjSchema>
+<sourceObjName>VALOR_MODIFICACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR EN DINERO DE LA MODIFICACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="CONTRATO_ID_CONTRATO" id="5FA77815-6E1E-597A-B931-01327D60CF15">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>MODI_CONTRATO</sourceObjSchema>
+<sourceObjName>CONTRATO_ID_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>20</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,20,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="101B4DE8-41B2-D0EC-14A7-2242A259FC02" referredColumn="7BD191F0-4BAB-5D70-4C23-AFC8EE591C57"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="A7718307-EADB-5ED1-8B1D-EB19FF587B75" name="MODI_CONTRATO_CONTRATO_FK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="5FA77815-6E1E-597A-B931-01327D60CF15"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

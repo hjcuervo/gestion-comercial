@@ -1,0 +1,490 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<PackageOracle class="oracle.dbtools.crest.model.design.storage.oracle.PackageOracle" name="PKG_PROCESS_DATA_FROM_FACTRO" directorySegmentName="seg_0" id="D435C8D9-AB77-91F0-0FB6-60069AA0A779">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PKG_PROCESS_DATA_FROM_FACTRO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:48 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE ARQFACTSQA.PKG_PROCESS_DATA_FROM_FACTRO IS
+    -- DISPARADOR DEL PROCESO
+    PROCEDURE PRC_INIT_SYNC_PROCESS;
+
+    -- PROCEDIMIENTOS AUXILIARES
+    PROCEDURE PRC_CREATE_UPDATE_CLIENT(ICL_CLIENT_DATA IN CLOB,ONU_CODE OUT NUMBER);
+    PROCEDURE PRC_CREATE_INVOICE(ICL_INVOICE_DATA IN CLOB,ONU_CODE OUT NUMBER, iNuIdSyncFactro IN NUMBER, iVaNumeroDocumento IN VARCHAR2);
+    PROCEDURE PRC_CREATE_PRODUCT(ICL_PRODUCT_DATA IN CLOB,ONU_CODE OUT NUMBER);
+
+END;</source>
+<body class="oracle.dbtools.crest.model.design.storage.oracle.PackageBodyOracle" name="PKG_PROCESS_DATA_FROM_FACTRO" id="D435C8D9-AB77-91F0-0FB6-60069AA0A779">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PKG_PROCESS_DATA_FROM_FACTRO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:49 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE BODY ARQFACTSQA.PKG_PROCESS_DATA_FROM_FACTRO IS
+    
+    /*************************************************************/
+	/**********************   PRIVADOS   *************************/
+	/*************************************************************/
+	/*************************************************************/
+
+	-- PROCEDIMIENTO PRIVADO PARA actualizar cliente 
+    PROCEDURE PRIV_PRC_UPDATE_CLIENT(ICL_CLIENT_DATA IN CLOB,
+									 ONU_CODE OUT NUMBER)
+    IS
+
+
+	BEGIN
+		update facliente 
+			set			
+				DOCUMENTO_TIPO 			= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.tipoDocumento.typedocid&apos;), 
+				DOCUMENTO_NUMERO 		= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.ni&apos;),
+				DOCUMENTO_DV 			= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.dv&apos;),
+				REGIMEN_FISCAL 			= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.regimenFiscal.id&apos;),
+				NOMBRE_COMERCIAL 		= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.nombreComercial&apos;),
+				CONTACTO_TELEFONO 		= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.telefono&apos;),
+				CONTACTO_CORREO 		= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.correo&apos;),
+				IMPUESTO 				= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.impuesto.id&apos;),
+				UBICACION_PAIS 			= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.pais.id&apos;),
+				UBICACION_DEPARTAMENTO 	= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.departamento.id&apos;),
+				UBICACION_CIUDAD 		= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.ciudad.id&apos;),
+				UBICACION_DIRECCION 	= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.direccion&apos;),
+				UBICACION_CODIGOPOSTAL 	= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.codigoPostal&apos;),
+				TIPO_PERSONA 			= JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.tipoPersona.id&apos;)
+			where 
+				DOCUMENTO_NUMERO = JSON_VALUE(ICL_CLIENT_DATA, &apos;$.ni&apos;);
+
+		ONU_CODE := 0;
+    EXCEPTION
+        WHEN OTHERS THEN
+			ROLLBACK;
+            ONU_CODE := -1;
+            PRC_CREATE_TRAZA(&apos;PKG_PROCESS_DATA_FROM_FACTRO.PRIV_PRC_UPDATE_CLIENT&apos;,SQLERRM,ICL_CLIENT_DATA);
+
+	END PRIV_PRC_UPDATE_CLIENT;
+
+	-- PROCEDIMIENTO PRIVADO PARA crear cliente 
+    PROCEDURE PRIV_PRC_CREATE_CLIENT(ICL_CLIENT_DATA IN CLOB,
+									 ONU_CODE OUT NUMBER)
+    IS
+
+	BEGIN
+		insert into facliente(--IDCLIENTE, 
+							  DOCUMENTO_TIPO, 
+							  DOCUMENTO_NUMERO, 
+							  DOCUMENTO_DV, 
+							  REGIMEN_FISCAL, 
+							  NOMBRE_COMERCIAL, 
+							  CONTACTO_TELEFONO, 
+							  CONTACTO_CORREO,
+							  IMPUESTO, 
+							  UBICACION_PAIS, 
+							  UBICACION_DEPARTAMENTO, 
+							  UBICACION_CIUDAD, 
+							  UBICACION_DIRECCION, 
+							  UBICACION_CODIGOPOSTAL, 
+							  TIPO_PERSONA)
+		values(--JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.idFeTercero&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.tipoDocumento.typedocid&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.ni&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.dv&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.regimenFiscal.id&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.nombreComercial&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.telefono&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.correo&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.impuesto.id&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.pais.id&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.departamento.id&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.ciudad.id&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.direccion&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.contacto.codigoPostal&apos;),
+			   JSON_VALUE(ICL_CLIENT_DATA, &apos;$.info.tipoPersona.id&apos;)
+		);
+
+		ONU_CODE := 0;
+
+    EXCEPTION
+        WHEN OTHERS THEN
+			ROLLBACK;
+            ONU_CODE := -1;
+            PRC_CREATE_TRAZA(&apos;PKG_PROCESS_DATA_FROM_FACTRO.PRIV_PRC_CREATE_CLIENT&apos;,SQLERRM,ICL_CLIENT_DATA);
+
+	END PRIV_PRC_CREATE_CLIENT;
+
+
+    /*************************************************************/
+	/********************   FIN PRIVADOS   ***********************/
+	/*************************************************************/
+	/*************************************************************/
+
+
+
+    /*************************************************************/
+	/**********************    PUBLICOS    ***********************/
+	/*************************************************************/
+	/*************************************************************/
+
+	-- PROCEDIMIENTO PARA INICIAR EL PROCESO
+    PROCEDURE PRC_INIT_SYNC_PROCESS IS
+
+	-- variables para el control del json
+	v_json JSON_OBJECT_T;
+	v_id_payload NUMBER;
+    v_clob CLOB;
+	v_clob_cliente CLOB;
+	v_clob_factura CLOB;
+	v_clob_productos CLOB;
+    v_idcliente_from_json VARCHAR2(50);
+
+	-- variables de salida(control) PRC
+	nuPrcOutCode NUMBER;
+
+	-- cursor para obtener los json a procesar
+	CURSOR getJsonData IS
+		select PAYLOAD, ID_SYNC_FACTRO
+		from SYNC_FACTRO
+		where PROCESADO = &apos;NO&apos;
+		order by FECHA_REGISTRO asc;
+        
+    CURSOR getIdClienteFromJson(ivaNumeroDocumento varchar2) IS
+        select idcliente 
+            from facliente 
+        where documento_numero = ivaNumeroDocumento;
+
+	BEGIN
+		-- Apertura del cursor
+		OPEN getJsonData;
+
+		-- Recorrido de los registros obtenidos por el cursor
+		LOOP
+			-- Obtención del CLOB de la fila actual
+			FETCH getJsonData INTO v_clob, v_id_payload;
+
+			-- Verifica si se ha alcanzado el final del cursor
+			EXIT WHEN getJsonData%NOTFOUND;
+			-- Parsear el CLOB a un objeto JSON
+			v_json := JSON_OBJECT_T.parse(v_clob);
+
+			-- extraer objetos json respectivos
+			v_clob_cliente   := v_json.get(&apos;cliente&apos;).TO_STRING;
+			v_clob_factura 	 := v_json.get(&apos;info&apos;).TO_STRING;
+			v_clob_productos := v_json.get(&apos;productos&apos;).TO_STRING;
+
+			-- Ahora se ejecuta prc para crear o actualiza cliente
+			PRC_CREATE_UPDATE_CLIENT(v_clob_cliente, nuPrcOutCode);
+			IF(nuPrcOutCode &lt;&gt; 0) THEN
+				DBMS_OUTPUT.put_line(&apos;Ha ocurrido un error al intentar crear o actualizar un cliente&apos;);
+				-- Provocar una excepción y abortar el proceso
+				RAISE_APPLICATION_ERROR(-20002, &apos;Ha ocurrido un error al intentar crear o actualizar un cliente, se aborta el proceso&apos;);
+			END IF;
+            
+            -- Se obtiene el idcliente
+            OPEN getIdClienteFromJson(JSON_VALUE(v_clob_cliente, &apos;$.ni&apos;));
+            FETCH getIdClienteFromJson INTO v_idcliente_from_json;
+            CLOSE getIdClienteFromJson;
+            
+			-- Ahora se ejecuta prc para crear factura
+			PRC_CREATE_INVOICE(v_clob_factura, nuPrcOutCode, v_id_payload, v_idcliente_from_json);
+			IF(nuPrcOutCode = -1) THEN
+				DBMS_OUTPUT.put_line(&apos;Ha ocurrido un error al intentar crear una factura&apos;);
+				-- Provocar una excepción y abortar el proceso
+				RAISE_APPLICATION_ERROR(-20002, &apos;Ha ocurrido un error al intentar crear una factura, se aborta el proceso&apos;);
+            ELSIF (nuPrcOutCode = -2) THEN
+                DBMS_OUTPUT.put_line(&apos;La factura ya existe!&apos;);
+            ELSIF (nuPrcOutCode = 0) THEN
+                -- Ahora se ejecuta prc para crear productos
+                PRC_CREATE_PRODUCT(v_clob_productos, nuPrcOutCode);
+                IF(nuPrcOutCode &lt;&gt; 0) THEN
+                    DBMS_OUTPUT.put_line(&apos;Ha ocurrido un error al intentar crear uno o varios productos&apos;);
+                    -- Provocar una excepción y abortar el proceso
+                    RAISE_APPLICATION_ERROR(-20002, &apos;Ha ocurrido un error al intentar crear uno o varios productos, se aborta el proceso&apos;);
+                END IF;
+    
+                DBMS_OUTPUT.put_line(&apos;Se ha completado el procesamiento del json con id &apos; || v_id_payload || &apos; Correctamente!&apos;);
+                UPDATE SYNC_FACTRO 
+                    SET procesado = &apos;SI&apos;,
+                        FECHA_PROCESADO = SYSDATE
+                WHERE ID_SYNC_FACTRO = v_id_payload;
+    
+                COMMIT;
+			END IF;
+		END LOOP;
+		DBMS_OUTPUT.put_line(&apos;El proceso ha concluido&apos;);
+		-- Cierre del cursor
+		CLOSE getJsonData;
+
+    EXCEPTION
+        WHEN OTHERS THEN
+			ROLLBACK;
+            PRC_CREATE_TRAZA(&apos;PKG_PROCESS_DATA_FROM_FACTRO.PRC_INIT_SYNC_PROCESS&apos;,SQLERRM, v_clob);
+
+	END PRC_INIT_SYNC_PROCESS;
+
+	/*************************************************************/
+	/*************************************************************/
+	/*************************************************************/
+	/*************************************************************/
+
+	-- PROCEDIMIENTO PARA crear o actualizar cliente 
+    PROCEDURE PRC_CREATE_UPDATE_CLIENT(ICL_CLIENT_DATA IN CLOB,
+									   ONU_CODE OUT NUMBER)
+   IS
+		nuPrcValidaCode number := 0;
+
+		-- variable de control de cliente
+		nuExisteCliente number := 0;
+
+		-- cursor para validar si el cliente existe o es nuevo
+		CURSOR cuValidaCliente(ivaNumeroDocumento varchar2) IS
+		SELECT count(IDCLIENTE) AS existe
+		FROM FACLIENTE
+		WHERE DOCUMENTO_NUMERO = ivaNumeroDocumento;
+
+	BEGIN
+
+		-- Verificar si el cliente ya existe en la base de datos
+		OPEN cuValidaCliente(JSON_VALUE(ICL_CLIENT_DATA, &apos;$.ni&apos;));
+		FETCH cuValidaCliente INTO nuExisteCliente;
+		CLOSE cuValidaCliente;
+
+		IF (nuExisteCliente &gt; 0) THEN
+			-- ACTUALIZANDO CLIENTE
+			PRIV_PRC_UPDATE_CLIENT(ICL_CLIENT_DATA, nuPrcValidaCode);
+			IF(nuPrcValidaCode = 0) THEN
+				--DBMS_OUTPUT.PUT_LINE(&apos;Cliente actualizado!&apos;);
+				ONU_CODE := 0;
+			ELSE
+				ONU_CODE := -1;
+				--DBMS_OUTPUT.PUT_LINE(&apos;ocurrió una excepción en el proceso de actualizar cliente&apos;);
+			END IF;
+		ELSE
+			-- CREANDO CLIENTE NUEVO
+			PRIV_PRC_CREATE_CLIENT(ICL_CLIENT_DATA, nuPrcValidaCode);
+			IF(nuPrcValidaCode = 0) THEN
+				--DBMS_OUTPUT.PUT_LINE(&apos;Cliente creado!&apos;);
+				ONU_CODE := 0;
+			ELSE
+				ONU_CODE := -1;
+				--DBMS_OUTPUT.PUT_LINE(&apos;ocurrió una excepción en el proceso de creación cliente&apos;);
+			END IF;
+		END IF;
+		
+    EXCEPTION
+        WHEN OTHERS THEN
+			ROLLBACK;
+			ONU_CODE := -1;
+            PRC_CREATE_TRAZA(&apos;PKG_PROCESS_DATA_FROM_FACTRO.PRC_CREATE_UPDATE_CLIENT&apos;,SQLERRM,ICL_CLIENT_DATA);
+
+	END PRC_CREATE_UPDATE_CLIENT;
+
+	/*************************************************************/
+	/*************************************************************/
+	/*************************************************************/
+	/*************************************************************/
+
+	-- PROCEDIMIENTO PARA crear factura 
+    PROCEDURE PRC_CREATE_INVOICE(ICL_INVOICE_DATA IN CLOB,
+										ONU_CODE OUT NUMBER,
+                                        iNuIdSyncFactro IN NUMBER,
+                                        iVaNumeroDocumento IN VARCHAR2)
+	IS
+	nuExisteFactura number := 0;
+
+	CURSOR validaFactura(iIdfactura number) IS
+		Select count(*) 
+		from fafactura 
+		where idfactura = iIdfactura;
+		
+	CURSOR cuValidaFacturaByUuid(inuUuid varchar2) IS
+		Select count(*) 
+		from fafactura 
+		where uuid = inuUuid;
+
+	BEGIN
+		OPEN validaFactura(JSON_VALUE(ICL_INVOICE_DATA, &apos;$.idFactura&apos;));
+		FETCH validaFactura INTO nuExisteFactura;
+		CLOSE validaFactura;
+
+		IF (nuExisteFactura &gt; 0) THEN
+            UPDATE SYNC_FACTRO 
+				SET procesado = &apos;ALLREADY_EXISTS&apos;,
+					FECHA_PROCESADO = SYSDATE
+			WHERE ID_SYNC_FACTRO = iNuIdSyncFactro;
+
+			COMMIT;
+            ONU_CODE := -2;
+			--RAISE_APPLICATION_ERROR(-20003, &apos;La factura &apos; || JSON_VALUE(ICL_INVOICE_DATA, &apos;$.idFactura&apos;) || &apos; ya existe. Abortando el proceso.&apos;);
+		ELSE
+			insert into fafactura(IDFACTURA,
+								  TIPO_DOCUMENTO,
+								  FACTURA_NUMERACION_ACTUAL,
+								  FACTURA_PREFIJO,
+								  FECHA_EXPEDICION,
+								  FECHA_VENCIMIENTO,
+								  ORDEN_COMPRA_ID,
+								  ORDEN_COMPRA_FECHA,
+								  FORMA_PAGO,
+								  MEDIO_PAGO,
+								  MONEDA,
+								  TASA_CAMBIO,
+								  DOCUMENTO_REFERENCIA_PREFIJO,
+								  DOCUMENTO_REFERENCIA_NUMERO_FACTURA,
+								  DOCUMENTO_REFERENCIA_FECHA_EXPEDICION,
+								  DOCUMENTO_REFERENCIA_UUID,
+								  IDCLIENTE,
+								  UUID,
+								  NOTA)
+			values (JSON_VALUE(ICL_INVOICE_DATA, &apos;$.idFactura&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.tipoDocumento&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.facturaNumeracionActual&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.prefijo&apos;),
+					TO_DATE(JSON_VALUE(ICL_INVOICE_DATA, &apos;$.fechaExpedicion&apos;), &apos;YYYY-MM-DD&apos;),
+					TO_DATE(JSON_VALUE(ICL_INVOICE_DATA, &apos;$.fechaVencimiento&apos;),&apos;YYYY-MM-DD&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.ordenCompra.id&apos;),
+                    CASE 
+                    WHEN JSON_VALUE(ICL_INVOICE_DATA, &apos;$.ordenCompra.fechaEmision&apos;) IS NOT NULL 
+                        THEN TO_DATE(JSON_VALUE(ICL_INVOICE_DATA, &apos;$.ordenCompra.fechaEmision&apos;), &apos;YYYY-MM-DD&apos;) 
+                        ELSE NULL 
+                    END,
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.formaPago.id&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.medioPago.id&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.moneda.id&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.tasaCambio&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.documentoReferenciaPrefijo&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.documentoReferenciaNumeroFactura&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.documentoReferenciaFechaExpedicion&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.documentoReferenciaUUID&apos;),
+					iVaNumeroDocumento,--,
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.uuid&apos;),
+					JSON_VALUE(ICL_INVOICE_DATA, &apos;$.nota&apos;));
+			
+			IF JSON_VALUE(ICL_INVOICE_DATA, &apos;$.facturaReferencia.uuid&apos;) IS NOT NULL THEN
+            
+				OPEN cuValidaFacturaByUuid(JSON_VALUE(ICL_INVOICE_DATA, &apos;$.facturaReferencia.uuid&apos;));
+				FETCH cuValidaFacturaByUuid INTO nuExisteFactura;
+				CLOSE cuValidaFacturaByUuid;
+				
+				IF nuExisteFactura &gt; 0 THEN
+				
+					UPDATE FAFACTURA SET 
+						nota = JSON_VALUE(ICL_INVOICE_DATA, &apos;$.idFactura&apos;)
+					WHERE uuid = JSON_VALUE(ICL_INVOICE_DATA, &apos;$.facturaReferencia.uuid&apos;);
+                    
+                    --DBMS_OUTPUT.put_line(&apos;Factura Actualizada!&apos;);
+					
+				END IF;
+			END IF;
+
+			--DBMS_OUTPUT.put_line(&apos;Factura Creada!&apos;);
+			ONU_CODE := 0;
+		END IF;
+
+    EXCEPTION
+            WHEN OTHERS THEN
+                ROLLBACK;
+                ONU_CODE := -1;
+        
+                PRC_CREATE_TRAZA(
+                    &apos;PKG_PROCESS_DATA_FROM_FACTRO.PRC_CREATE_INVOICE&apos;,
+                    &apos;Error: &apos; || SQLERRM ||
+                    &apos; | Código: &apos; || SQLCODE ||
+                    &apos; | Línea: &apos; || DBMS_UTILITY.FORMAT_ERROR_BACKTRACE ||
+                    &apos; | CallStack: &apos; || DBMS_UTILITY.FORMAT_CALL_STACK,
+                    ICL_INVOICE_DATA
+                );
+
+	END PRC_CREATE_INVOICE;
+
+	/*************************************************************/
+	/*************************************************************/
+	/*************************************************************/
+	/*************************************************************/
+
+	-- PROCEDIMIENTO PARA crear producto 
+    PROCEDURE PRC_CREATE_PRODUCT(ICL_PRODUCT_DATA IN CLOB,
+										ONU_CODE OUT NUMBER) 
+	IS
+		-- control de existencia de producto
+		--nuExisteProducto number := 0;
+
+		/*CURSOR validaProducto(iIdProducto number) IS
+		Select count(*) 
+		from faproducto 
+		where idproducto = iIdProducto;*/
+
+	BEGIN
+		FOR rec IN (SELECT jt.*, ROWNUM AS idx
+                      FROM JSON_TABLE(ICL_PRODUCT_DATA, &apos;$[*]&apos;
+                             COLUMNS (idProducto          NUMBER PATH &apos;$.id&apos;,
+									  cantidadBase        NUMBER PATH &apos;$.cantidad&apos;,
+									  cantidadSolicitada  NUMBER PATH &apos;$.cantidad&apos;,
+									  descripcion         VARCHAR2(4000) PATH &apos;$.descripcion&apos;,
+									  impuestoId          NUMBER PATH &apos;$.impuesto.id&apos;,
+									  conceptoId          NUMBER PATH &apos;$.concepto.id&apos;,
+									  porcentajeImpuesto  NUMBER PATH &apos;$.porcentajeImpuesto.porcentaje&apos;,
+									  precio              VARCHAR2(200) PATH &apos;$.precio&apos;,
+									  valorSinImpuesto    VARCHAR2(200) PATH &apos;$.valorSinImpuesto&apos;,
+									  valorTotal          VARCHAR2(200) PATH &apos;$.valorTotal&apos;,
+									  unidadMedida    	  NUMBER PATH &apos;$.concepto.unidadMedidaDescripcion.id&apos;,
+									  valorImpuesto       VARCHAR2(200) PATH &apos;$.valorImpuesto&apos;,
+									  idFactura           NUMBER PATH &apos;$.idFactura&apos;
+                             )
+                           ) jt)
+        LOOP
+            -- Reemplazar punto decimal por coma en el precio
+            rec.precio := REPLACE(rec.precio, &apos;.&apos;, &apos;,&apos;);
+            rec.valorSinImpuesto := REPLACE(rec.valorSinImpuesto, &apos;.&apos;, &apos;,&apos;);
+            rec.valorTotal := REPLACE(rec.valorTotal, &apos;.&apos;, &apos;,&apos;);
+            rec.valorImpuesto := REPLACE(rec.valorImpuesto, &apos;.&apos;, &apos;,&apos;);
+            
+            -- Se crea nuevo producto
+            insert into faproducto(
+                       --IDPRODUCTO,
+                       CANTIDAD_BASE,
+                       CANTIDAD_SOLICITADA,
+                       DESCIPCION,
+                       IMPUESTO_ID,
+                       ITEM_ID,
+                       PORCENTAJE_IMPUESTO,
+                       PRECIO_BASE,
+                       PRECIO_BRUTO,
+                       PRECIO_NETO,
+                       UNIDAD_MEDIDA,
+                       VALOR_IMPUESTO,
+                       IDFACTURA)
+            values (
+                    --rec.idProducto,
+                    rec.cantidadBase,
+                    rec.cantidadSolicitada,
+                    rec.descripcion,
+                    rec.impuestoId,
+                    rec.conceptoId,
+                    rec.porcentajeImpuesto,
+                    rec.precio,
+                    rec.valorSinImpuesto,
+                    rec.valorTotal,
+                    rec.unidadMedida,
+                    rec.valorImpuesto,
+                    rec.idFactura);
+            --DBMS_OUTPUT.PUT_LINE(&apos;Producto &apos;||rec.idx || &apos; Creado con exito&apos;);
+			--END IF;
+
+			--nuExisteProducto := 0;
+        END LOOP;
+
+		ONU_CODE := 0;
+    EXCEPTION
+        WHEN OTHERS THEN
+			ROLLBACK;
+            ONU_CODE := -1;
+            PRC_CREATE_TRAZA(&apos;PKG_PROCESS_DATA_FROM_FACTRO.PRC_CREATE_PRODUCT&apos;,SQLERRM,ICL_PRODUCT_DATA);
+
+	END PRC_CREATE_PRODUCT;
+
+END;</source>
+</body>
+</PackageOracle>

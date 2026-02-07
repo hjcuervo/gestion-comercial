@@ -1,0 +1,24 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<StoredProcedureOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.StoredProcedureOraclev10g" name="PRC_CREATE_TRAZA" directorySegmentName="seg_0" id="17F2FA69-CFF3-0C5A-EEEE-88000595373D">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PRC_CREATE_TRAZA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:46 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PROCEDURE ARQFACTSQA.PRC_CREATE_TRAZA(iVaPrcPkgName in varchar2,
+							   iVaPrcPkgErrMsg in varchar2,
+							   iClPayload in clob)
+    IS
+		
+	BEGIN
+		insert into TRAZA_PROCESS(PKG_PRC_NAME, ERR_MSG, PROCESS_PAYLOAD)
+		values (iVaPrcPkgName, iVaPrcPkgErrMsg, iClPayload);
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE(&apos;Ha ocurrido una excepcion al intentar crear traza... &apos; || SQLERRM);
+
+	END PRC_CREATE_TRAZA;</source>
+</StoredProcedureOraclev10g>

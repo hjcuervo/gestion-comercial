@@ -1,0 +1,131 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="2C473F73-2729-9FF0-D96D-50936D41D5E6" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="LV_FAILED_JOBS">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>LV_FAILED_JOBS</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="ID" id="80025E54-85BA-C9E8-1E64-C3CD94D2B085">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>LV_FAILED_JOBS</sourceObjSchema>
+<sourceObjName>ID</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>19</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,19,0</ownDataTypeParameters>
+<autoIncrementColumn>true</autoIncrementColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<autoIncrementSequenceName>lv_failed_jobs_id_seq</autoIncrementSequenceName>
+<autoIncrementTriggerName>LV_FAILED_JOBS_ID_TRG</autoIncrementTriggerName>
+</Column>
+<Column name="CONNECTION" id="269A6BA8-CF16-3861-DB25-041FF3D7366E">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>LV_FAILED_JOBS</sourceObjSchema>
+<sourceObjName>CONNECTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="QUEUE" id="BCF2AF81-DB36-C6D0-830D-96D8DC15010C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>LV_FAILED_JOBS</sourceObjSchema>
+<sourceObjName>QUEUE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="PAYLOAD" id="19B9CC73-32D3-F19F-6BC4-E8453C82F1AC">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>LV_FAILED_JOBS</sourceObjSchema>
+<sourceObjName>PAYLOAD</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="EXCEPTION" id="683084C0-894D-A985-E56B-7759F2F9A5C6">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>LV_FAILED_JOBS</sourceObjSchema>
+<sourceObjName>EXCEPTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FAILED_AT" id="C9589B00-FA03-98E5-CCF6-12ABA7A314C6">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>LV_FAILED_JOBS</sourceObjSchema>
+<sourceObjName>FAILED_AT</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT015</logicalDatatype>
+<dataTypePrecision>6</dataTypePrecision>
+<ownDataTypeParameters>,6,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="46D8E150-4A06-70F0-CD12-22AC41ACC7C2" name="LV_FAILED_JOBS_ID_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>LV_FAILED_JOBS_ID_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="80025E54-85BA-C9E8-1E64-C3CD94D2B085"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="B553FF21-880F-7F15-9CB2-7050E6709C16" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="LV_FAILED_JOBS_ID_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>LV_FAILED_JOBS_ID_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:34 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="80025E54-85BA-C9E8-1E64-C3CD94D2B085"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

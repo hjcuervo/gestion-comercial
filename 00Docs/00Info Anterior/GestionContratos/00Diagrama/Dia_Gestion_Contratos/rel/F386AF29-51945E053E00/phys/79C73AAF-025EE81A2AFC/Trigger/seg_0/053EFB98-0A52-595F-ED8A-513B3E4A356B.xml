@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TriggerOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.TriggerOraclev10g" name="TRG_ID_FAHISTORICO_FACTURADO" directorySegmentName="seg_0" id="053EFB98-0A52-595F-ED8A-513B3E4A356B">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>TRG_ID_FAHISTORICO_FACTURADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<actions>INSERT</actions>
+<body><![CDATA[begin
+  if inserting then
+      if :NEW.ID is null then
+         select SEQ_IDFAHISTORICO.nextval into :NEW."ID" from dual;
+      end if;
+   end if;
+end TRG_ID_FAHISTORICO_FACTURADO;]]></body>
+<triggerTime>BEFORE</triggerTime>
+<owner>3A367D78-C584-B7A5-0169-F84F01461631</owner>
+<table>F5706F81-D7CA-1F81-095D-E04DDF817814</table>
+</TriggerOraclev10g>

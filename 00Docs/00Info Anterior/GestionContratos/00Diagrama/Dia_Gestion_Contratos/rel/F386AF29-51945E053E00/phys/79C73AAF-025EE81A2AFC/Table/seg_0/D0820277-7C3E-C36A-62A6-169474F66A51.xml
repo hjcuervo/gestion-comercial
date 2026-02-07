@@ -1,0 +1,127 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="FAPRODUCTO" directorySegmentName="seg_0" id="D0820277-7C3E-C36A-62A6-169474F66A51">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>03088D39-B35C-0CAE-BE27-9F5FF5E35DB0</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="AGG" id="11F09F9C-7F1F-903C-62B1-02EC401273CD">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="UNIDAD_MEDIDA" id="128AE86B-657D-835E-E71F-60CA5999CF66">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="PRECIO_BRUTO" id="19C8B6CF-3196-8192-BE88-BF0D9A8F5FE7">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="PORCENTAJE_IMPUESTO" id="2741B38D-23E1-C79A-2BE6-719AB26A7C97">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="STANDAR_ITEM" id="3032BCBA-59D9-1BAB-F9BE-29F51067DBCF">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="PRECIO_BASE" id="500FC6CF-7D46-040D-2403-A1FF371CDE50">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="ID" id="53EC802B-ACE4-8F35-3174-B68B9C85CE1B">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="PRECIO_NETO" id="5D519648-D9F6-4AB6-F213-6837CD34FA86">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DESCIPCION" id="7CFDD5B3-75A4-B702-07A0-7605E1BEC78B">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="CANTIDAD_SOLICITADA" id="8E1DE2D3-D4D4-EB4B-ED63-E0B9E41091FA">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="IDFACTURA" id="A03BFCD6-EE6B-BA39-27D2-B64EFDB81451">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="IMPUESTO_ID" id="A563FD7D-89F5-9DF7-0DB6-59683DC4062A">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="VALOR_IMPUESTO" id="A5C2CA37-2920-167C-64C7-3B2D0486B302">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="ITEM_ID" id="E4474948-3CF6-1DBA-618C-BD90CC5F884F">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="CANTIDAD_BASE" id="F0C68F17-70C6-45B5-A626-45D1C7511071">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="IDPRODUCTO" id="F283CC71-A9BA-72CE-087D-082E76480C3A">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<indexProxies>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="FEPRODUCTOS_PK" id="553E4FB6-E60E-B451-88BF-2DB762D7EECF">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:34 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<schemaObject>7087EA03-AAD8-D724-96A3-79B62811CFF8</schemaObject>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+</IndexProxy>
+</indexProxies>
+<foreignKeys>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="IDFACTURA_FEFACTURA_FEPRODUCTO" id="419D4F69-7B7E-3AFD-BC0A-92E6236EF055">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+</ForeignKey>
+</foreignKeys>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="FEPRODUCTOS_PK" id="7833D24E-CD4C-7C7B-833F-DCDFB9D118BD">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<segment>5634C552-1310-8F84-2070-0ED46D3C5C78</segment>
+<tableSpace>AE06436A-A529-E079-DBB0-B42914C9CCDD</tableSpace>
+<existingIndex>553E4FB6-E60E-B451-88BF-2DB762D7EECF</existingIndex>
+<indexSegment>5634C552-1310-8F84-2070-0ED46D3C5C78</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

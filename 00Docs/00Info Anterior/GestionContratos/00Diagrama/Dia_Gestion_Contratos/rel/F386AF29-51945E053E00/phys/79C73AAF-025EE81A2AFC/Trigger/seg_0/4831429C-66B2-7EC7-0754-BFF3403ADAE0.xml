@@ -1,0 +1,27 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TriggerOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.TriggerOraclev10g" name="TRG_VALIDA_IDCONTRATO" directorySegmentName="seg_0" id="4831429C-66B2-7EC7-0754-BFF3403ADAE0">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>TRG_VALIDA_IDCONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<actions>UPDATE</actions>
+<body><![CDATA[BEGIN
+    -- Verificar si el campo nota ha cambiado de nulo a un valor distinto de nulo
+    IF :NEW.nota IS NOT NULL AND :OLD.nota IS NULL THEN
+        -- Actualizar el campo idcontrato a nulo
+        :NEW.idcontrato := NULL;
+        
+         -- Actualizar el campo ID_FACTURA a nulo en la otra tabla
+        UPDATE contrato_forma_pago
+        SET ID_FACTURA = NULL
+        WHERE ID_FACTURA = :NEW.idfactura;
+        
+    END IF;
+END;]]></body>
+<triggerTime>BEFORE</triggerTime>
+<columns>52BABC54-0AC1-6B45-DB9D-3C2614CE0B53</columns>
+<owner>3A367D78-C584-B7A5-0169-F84F01461631</owner>
+<table>B7CDCBF5-5795-1F6C-0C52-2C47FCE6E96B</table>
+</TriggerOraclev10g>

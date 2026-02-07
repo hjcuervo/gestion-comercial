@@ -1,0 +1,423 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<PackageOracle class="oracle.dbtools.crest.model.design.storage.oracle.PackageOracle" name="INT_PKRESTAPI" directorySegmentName="seg_0" id="F51B5FF8-4649-08B3-C67E-BBE7EE68B8BE">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>INT_PKRESTAPI</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:47 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE ARQFACTSQA.INT_PKRESTAPI
+/******************************************************************************************
+  Copyright (c) 2017
+
+  Nombre       : int_pkSoapApi
+  Descripcion  : Paquete de interfaz con SAP(PI),tiene como funcion principal el
+                 consumo de Servicios Web desdes la base datos
+  Autor        : Hectord - ArquitecSoft
+  Fecha        : 21/06/2017
+
+  Historial de Modificaciones
+  ----------------------------------------------------------------------------------------
+  Fecha         Autor          Descripcion
+  =====         =====          ===========================================================
+******************************************************************************************/
+AS
+  sbStatusHttp  VARCHAR2(200);
+  sbErrorHttp   VARCHAR2(200);
+  sbMensaje     Int_Mesaenvws.mesahttperror%TYPE;
+  sbTraceError  Int_Mesaenvws.mesatraceerror%TYPE;
+  boolHttpError BOOLEAN;
+  boolSoapError BOOLEAN;
+  sbSoapRequest CLOB;
+  sbRequestBy   VARCHAR2(200);
+  sbHost        VARCHAR2(200);
+  boolTransferChunked BOOLEAN:=true;
+
+  PROCEDURE proSetProtocol(isbProtocol IN VARCHAR2);
+
+  PROCEDURE proSetProxyAuth(isbUsuario  IN VARCHAR2,
+                            isbPassword IN VARCHAR2);
+
+
+
+  FUNCTION fsbClearChar(isbXml IN CLOB) RETURN CLOB;
+
+ FUNCTION fsbRestCall( sbPayload     IN CLOB,
+                        sbEndPoint    IN VARCHAR2,
+                        sbMetodo      IN VARCHAR2 DEFAULT &apos;POST&apos;,
+                        sbContentType IN VARCHAR2 DEFAULT &apos;application/json; charset=UTF-8&apos;) RETURN CLOB;
+
+
+END INT_PKRESTAPI;</source>
+<body class="oracle.dbtools.crest.model.design.storage.oracle.PackageBodyOracle" name="INT_PKRESTAPI" id="F51B5FF8-4649-08B3-C67E-BBE7EE68B8BE">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>INT_PKRESTAPI</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:47 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE BODY ARQFACTSQA.INT_PKRESTAPI
+/******************************************************************************************
+  Copyright (c) 2020
+
+  Nombre       : INT_PKRESTAPI
+  Descripcion  : Paquete de integracion,tiene como funcion principal el
+                 consumo de Servicios Web REST desdes la base datos
+  Autor        : Hectord - ArquitecSoft
+  Fecha        : 20/10/2020
+
+  Historial de Modificaciones
+  ----------------------------------------------------------------------------------------
+  Fecha         Autor          Descripcion
+  =====         =====          ===========================================================
+******************************************************************************************/
+AS
+  sbUsuario        VARCHAR2(100);
+  sbPassword       VARCHAR2(100);
+  sbPasswordWallet VARCHAR2(100);
+  sbProtocol       VARCHAR2(10) := &apos;http&apos;;
+
+  PROCEDURE proSetProtocol(isbProtocol IN VARCHAR2)
+  /******************************************************************************************
+    Copyright (c) 2017
+
+    Nombre       : proSetProtocol
+    Descripcion  : Setea el tipo de protocolo para enviar las las pticiones
+    Autor        : Hectord - ArquitecSoft
+    Fecha        : 18/08/2017
+
+    Historial de Modificaciones
+    ----------------------------------------------------------------------------------------
+    Fecha         Autor          Descripcion
+    =====         =====          ===========================================================
+  ******************************************************************************************/
+  AS
+  BEGIN
+    sbProtocol := isbProtocol;
+  END;
+
+  PROCEDURE proSetProxyAuth(isbUsuario  IN VARCHAR2,
+                            isbPassword IN VARCHAR2)
+  /******************************************************************************************
+    Copyright (c) 2017
+
+    Nombre       : proSetProxyAuth
+    Descripcion  : Setea las credenciales necesairas para usar BASIC AUTHENTICATION
+    Autor        : Hectord - ArquitecSoft
+    Fecha        : 18/08/2017
+
+    Historial de Modificaciones
+    ----------------------------------------------------------------------------------------
+    Fecha         Autor          Descripcion
+    =====         =====          ===========================================================
+  ******************************************************************************************/
+  AS
+  BEGIN
+    sbUsuario  := isbUsuario;
+    sbPassword := isbPassword;
+  END;
+
+  FUNCTION fsbClearChar(isbXml IN CLOB)
+  /******************************************************************************************
+    Copyright (c) 2017
+
+    Nombre       : fsbClearChar
+    Descripcion  : Realiza la limpieza de los caracteres especiales
+    Autor        : Hectord - ArquitecSoft
+    Fecha        : 18/08/2017
+
+    Historial de Modificaciones
+    ----------------------------------------------------------------------------------------
+    Fecha         Autor          Descripcion
+    =====         =====          ===========================================================
+  ******************************************************************************************/
+  RETURN CLOB
+  IS
+
+    sbXmlOut     CLOB := &apos;&apos;;
+    nuContLimpia NUMBER := 1;
+
+  BEGIN
+
+    WHILE nuContLimpia &lt;= DBMS_LOB.getlength(isbXml) LOOP
+      sbXmlOut := sbXmlOut||CONVERT(DBMS_LOB.SUBSTR(isbXml, 15000, nuContLimpia),&apos;UTF8&apos;);
+      nuContLimpia := nuContLimpia + 15000;
+    END LOOP;
+
+    RETURN(sbXmlOut);
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN(isbXml);
+  END;
+
+
+ FUNCTION fsbRestCall( sbPayload     IN CLOB,
+                        sbEndPoint    IN VARCHAR2,
+                        sbMetodo      IN VARCHAR2 DEFAULT &apos;POST&apos;,
+                        sbContentType IN VARCHAR2 DEFAULT &apos;application/json; charset=UTF-8&apos;)
+  /******************************************************************************************
+    Copyright (c) 2020
+
+    Nombre       : fsbRestCall
+    Descripcion  : Realiza consumo del servicio web REST
+
+    Autor        : Hectord - ArquitecSoft
+    Fecha        : 20/10/2020
+
+    Historial de Modificaciones
+    ----------------------------------------------------------------------------------------
+    Fecha         Autor          Descripcion
+    =====         =====          ===========================================================
+  ******************************************************************************************/
+  RETURN CLOB IS
+
+    /*
+    * Atributos necesarios para la seguridad
+    */
+    sbPathWallet varchar2(4000);
+
+    /*
+    * Atributos para guardar el contenido a setear durante la contruccion de
+    * la cacebera http
+    **/
+    sbAcceptEncondig varchar2(4000);
+    sbUserAgent      varchar2(4000);
+
+    /*
+    * Variable que almace paquete de envio y recepcion SOAP
+    */
+    sbResponse          CLOB;
+    sbResponseSegmented CLOB;
+    sbPayloadNormalize  CLOB;
+    l_blob         BLOB;
+    l_raw_payload RAW(32767);
+
+
+    /*
+    * Atributos para manejo de http request
+    */
+    http_req  utl_http.req;
+    http_resp utl_http.resp;
+
+    /*
+    * Atributos para control de segmetaci?n de paquetes http
+    */
+    nuIndex  NUMBER;
+    nuLength NUMBER;
+
+    /*
+    * Atributos para el manejo de erroes.
+    */
+    sbMens VARCHAR2(1000);
+
+  BEGIN
+
+    /*
+    * Inicializaco variables de control de errores.
+    */
+    sbMensaje        := &apos;OK&apos;;
+    sbTraceError     := &apos;Sin Traza Disponible&apos;;
+    boolSoapError    := FALSE;
+    boolHttpError    := FALSE;
+    sbErrorHttp      := &apos;&apos;;
+    sbPasswordWallet := null;
+
+
+
+    /*
+    * limpio la peticion de caracteres
+    */
+    sbPayloadNormalize := fsbClearChar(sbPayload);
+
+    /*
+    * Setea el tamano de la peticion, para posteriormente fijar el Content Lengtn
+    * Necesario en la creaci?n del paquete HTTp
+    */
+    nuLength := nvl(length(sbPayload), 0);
+    nuIndex  := 1;
+
+    utl_http.set_transfer_timeout(1800);
+    /*
+    * Inicio la Petici?n HTTP
+    */
+    DBMS_OUTPUT.PUT_LINE(sbMetodo);
+    http_req := utl_http.begin_request(sbEndPoint, sbMetodo, &apos;HTTP/1.1&apos;);
+
+    /*
+    * Contruyo  el paquete http de envio, necesario y definido para el consumo
+    * del servicio web
+    */
+    utl_http.set_header(http_req, &apos;Content-Type&apos;, sbContentType);
+
+    utl_http.set_header(http_req, &apos;Content-Length&apos;, nuLength);
+    
+    utl_http.set_header(http_req, &apos;Accept-Charset&apos;, &apos;UTF-8&apos;);
+
+
+    --IF boolTransferChunked THEN
+    --    utl_http.set_header(http_req, &apos;Transfer-Encoding&apos;,&apos;chunked&apos;); ----*****----
+    --END IF;
+
+
+    /*
+    * Realizo segmentaci?n del la petici?n que se enviar?, con el fin de evitar
+    * problemas al momento de enviar grandes volumenes de informaci?n.
+    */
+
+    /*
+    * Escribo el paquete soap en el POSTDATA de la cabecera http solo es un POST
+    */
+
+    IF UPPER(sbMetodo)=&apos;POST&apos; THEN
+        WHILE nuIndex &lt;= nuLength LOOP
+
+          /*
+          * Escribo el paquete SOAP en el POSTDATA de la cabecera http. usando convert para
+          * encodear al characterset que corresponde
+          */
+          sbPayloadNormalize := REPLACE(sbPayloadNormalize, CHR(10), &apos;&apos;);  -- Elimina saltos de línea
+            sbPayloadNormalize := REPLACE(sbPayloadNormalize, CHR(13) || CHR(10), &apos;&apos;); -- \r\n
+            sbPayloadNormalize := REPLACE(sbPayloadNormalize, CHR(13), &apos;&apos;);  -- Elimina retornos de carro
+          sbPayloadNormalize := REPLACE(sbPayloadNormalize, CHR(10) || CHR(13), &apos;&apos;); -- \r\n
+          utl_http.write_raw(http_req, UTL_RAW.CAST_TO_RAW(substr(sbPayloadNormalize,nuIndex,15000)));
+
+          nuIndex := nuIndex + 15000;
+
+        END LOOP;
+    END IF;
+    
+    
+
+    /*
+    * Obtengo la respuesta del servidor http
+    */
+    http_resp := utl_http.get_response(http_req);
+
+    /*
+    * Se obtiene el status de la respuesta http
+    */
+    sbStatusHttp := http_resp.status_code;
+
+    BEGIN
+
+      LOOP
+        utl_http.read_text(http_resp,sbResponseSegmented,32767);---***---
+        --utl_http.read_line(http_resp, sbSoapResponseSegmented, TRUE);
+        sbResponse := sbResponse || sbResponseSegmented;
+      END LOOP;
+
+    EXCEPTION
+      WHEN utl_http.end_of_body THEN
+        /*
+        * Termino la conexion http
+        */
+        utl_http.end_response(http_resp);
+    END;
+
+   /*
+    * Se incluye control para status http diferente de 200
+    */
+    IF sbStatusHttp &lt;&gt; &apos;200&apos; THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Fallo la conexion http status: &apos; || sbStatusHttp;
+      sbTraceError  := &apos;Sin traza disponible&apos;;
+      sbErrorHttp   := sbMensaje;
+    END IF;
+
+    RETURN sbResponse;
+
+  EXCEPTION
+
+    WHEN UTL_HTTP.init_failed THEN
+
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Fallo Inicializado el paquete UTL_HTTP &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.request_failed THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Fallo realizando peticion HTTP &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.bad_argument THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Se encontro malos argumentos al invocar el paquete UTL_HTTP &apos; ||SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.bad_url THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;La URL no es correcta &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.protocol_error THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Error de protocolo http &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.unknown_scheme THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;La url esta malformada &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.header_not_found THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Cabecera no encontrada &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.illegal_call THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;La llamada al api no se puede realizar en esta etapa del proceso &apos; ||SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.http_server_error THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Error Interno del servidor&apos; || SQLERRM;
+      sbTraceError  := &apos;Trace: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.http_client_error THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Fallo Inicializado el paquete UTL_HTTP &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.too_many_requests THEN
+      utl_http.end_response(http_resp);
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Existen varias peticiones HTTP activas &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.partial_multibyte_char THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;La operacion solicitada no pudo leerse completamente, car?cter multibyte encontrado &apos; ||SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN UTL_HTTP.transfer_timeout THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Se sobrepaso el tiempo limite de conexion &apos; ||SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+    WHEN OTHERS THEN
+      boolHttpError := TRUE;
+      sbMensaje     := &apos;Fallo Desconocido &apos; || SQLERRM;
+      sbTraceError  := &apos;Traza: &apos; || DBMS_UTILITY.format_error_backtrace;
+      sbErrorHttp   := sbMensaje;
+      RETURN sbMensaje;
+  END fsbRestCall;
+END INT_PKRESTAPI;</source>
+</body>
+</PackageOracle>

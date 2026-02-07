@@ -1,0 +1,19 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="925638DC-9BE4-1875-F970-8065315DB824" containerWithKeyObject="FBEF24DC-7942-7B64-3551-243986B7ECB5" localFKIndex="9EBC5E03-0353-04E1-266B-A20D87FBEA95" name="AGENTE_FK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>AGENTE_FK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<referredTableLongName>ARQFACTSQA.AGENTE</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>9C50603A-B8ED-83CC-85D2-773D28BA9528</referredTableID>
+<keyObject>F97204E5-F922-DC6E-A52D-89A53F367074</keyObject>
+<referredKeyID>F97204E5-F922-DC6E-A52D-89A53F367074</referredKeyID>
+<mandatory>false</mandatory>
+<refColNames>COD_AGENTE</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

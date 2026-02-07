@@ -1,0 +1,298 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="BEAD8053-AEFA-004A-D04B-65B31EEA9027" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="CALC_GESTION">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>CALC_GESTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<commentInRDBMS><![CDATA[CALCULOS DE LA GESTION POR FACTURA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="AGENTE_COD_AGENTE" id="EBB52C9D-7518-1F3B-2D57-9CD842326230">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>AGENTE_COD_AGENTE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>4</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,4,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="E8AC8FD6-5AD5-5FD2-EAB9-D3E32EFBE877" referredColumn="4F094FB1-203E-238C-0AB0-E307E2EB8314"/>
+</associations>
+</Column>
+<Column name="FACTCONT_CONTRATO_ID_CONTRATO" id="96094D9E-3E7C-6226-0CBF-D027B2A7583D">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>FACTCONT_CONTRATO_ID_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>20</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,20,0</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="92889816-6F3C-72D6-6D2C-A5522B33FE5A" referredColumn="7BD191F0-4BAB-5D70-4C23-AFC8EE591C57"/>
+</associations>
+</Column>
+<Column name="FACTCONT_FAFACTURA_IDFACTURA" id="2098FB19-CE19-D696-E0C1-39D6052EA55E">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>FACTCONT_FAFACTURA_IDFACTURA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="265863A6-D07B-EA0E-5DD4-0ACE1E7CFFB5" referredColumn="E8E6D82C-9855-5A24-3EE6-FCCE652565AE"/>
+</associations>
+</Column>
+<Column name="VALOR_AJUSTE_IMPUESTO" id="A3A32FC9-EB4F-2418-641C-B09EA5824E4D">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_AJUSTE_IMPUESTO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR DEL AJUSTE POR IMPUESTOS]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_AJUSTE_CLOUD" id="6D42329C-0C44-3C6E-F78F-37607BEE97F6">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_AJUSTE_CLOUD</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR AJUSTE DEL SERVICIO CLOUD]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_BASE_GESTION" id="C33937F2-FA95-0E7B-5A85-573A23E92335">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_BASE_GESTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR BASE PARA EL CALCULO DE LA GESTION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_COSTO_LEGALIZACION" id="95461D9D-5019-B8B1-A685-A52310FA433F">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_COSTO_LEGALIZACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR DEL COSTO DE LEGALIZACION DE LA GESTION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_ASUMIDO_LEGALIZACION" id="0416B41A-5E64-82B4-C2C0-BAC08E1A70D6">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_ASUMIDO_LEGALIZACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR ASUMIDO DE LA LEGALIZACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_GESTION" id="45CC26B6-C0AF-D935-56A3-482757136C35">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_GESTION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR DE LA GESTION SIN LEGALIZACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FECHA_LIQUIDACION" id="642C2B29-A24C-AF30-7DE1-046369CEDE60">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>FECHA_LIQUIDACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FECHA LIQUIDACION DE LA COMISION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_GESTION_PAGO" id="3D9DDCA8-0FD0-D81C-983A-886196F92FA7">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_GESTION_PAGO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR DE LA GESTION CON LEGALIZACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="OBSERVACION" id="665578B5-FE1E-2BF3-1162-3312DC6E8A42">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>OBSERVACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[OBSERVACION]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>1000 BYTE</dataTypeSize>
+<ownDataTypeParameters>1000 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_GESTION_CONT_ANTERIOR" id="13BFE5F6-A1C2-BE9A-8805-0DEDB017C637">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CALC_GESTION</sourceObjSchema>
+<sourceObjName>VALOR_GESTION_CONT_ANTERIOR</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR COMISIONES CONTRATOS ANTERIORES]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>13</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,13,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="AC4C2790-DB27-D176-3A66-736FA448DE4B" name="CALC_GESTION_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>CALC_GESTION_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="EBB52C9D-7518-1F3B-2D57-9CD842326230"/>
+<colUsage columnID="96094D9E-3E7C-6226-0CBF-D027B2A7583D"/>
+<colUsage columnID="2098FB19-CE19-D696-E0C1-39D6052EA55E"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="AEDE8848-F343-E820-0CAD-9AE4A56A49D6" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="CALC_GESTION_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>CALC_GESTION_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:33 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="EBB52C9D-7518-1F3B-2D57-9CD842326230"/>
+<colUsage columnID="96094D9E-3E7C-6226-0CBF-D027B2A7583D"/>
+<colUsage columnID="2098FB19-CE19-D696-E0C1-39D6052EA55E"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="9CE18B85-9759-C2B8-5D77-2EFE86362E6E" name="CALC_GESTION_AGENTE_FK">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="EBB52C9D-7518-1F3B-2D57-9CD842326230"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="88697F95-42D2-CA3F-CDE2-95FD8F001E9D" name="CALC_GESTION_FK1">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="2098FB19-CE19-D696-E0C1-39D6052EA55E"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="10F5EC40-038D-745C-C157-524DE1BF8BA5" name="CALC_GESTION_FK2">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="96094D9E-3E7C-6226-0CBF-D027B2A7583D"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

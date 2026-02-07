@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="Dia_Gestion_Contratos" id="BBE8B15B-5DBD-C90F-8FDA-382353E4FC03" version="3.5">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:05:18 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>BBE8B15B-5DBD-C90F-8FDA-382353E4FC03</designId>
+</OSDM_Design>

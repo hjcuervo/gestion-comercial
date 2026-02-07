@@ -1,0 +1,528 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<PackageOracle class="oracle.dbtools.crest.model.design.storage.oracle.PackageOracle" name="PKG_FACTURACION" directorySegmentName="seg_0" id="838ACEA8-70A7-710E-CC5C-986BC7C3DB6D">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PKG_FACTURACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:47 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE ARQFACTSQA.PKG_FACTURACION IS
+    
+    PROCEDURE prcGetCustomerFromTable;
+    
+    PROCEDURE prcGetCustomerFromJson;
+    
+    PROCEDURE prcGetInfoFacturaFromJson;
+    
+    PROCEDURE execProceduresWorksFact;
+    
+    PROCEDURE prcGetInvoicesAffect;
+
+END;</source>
+<body class="oracle.dbtools.crest.model.design.storage.oracle.PackageBodyOracle" name="PKG_FACTURACION" id="838ACEA8-70A7-710E-CC5C-986BC7C3DB6D">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PKG_FACTURACION</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:48 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PACKAGE BODY ARQFACTSQA.PKG_FACTURACION IS
+/*********************************************************
+Nombre: 		prcGetCustomerFromTable
+Descripcion:	procedimiento que se encarga de obtener los datos del cliente 
+                desde el esquema de facturacion electronica en la tabla feterceros
+                y guardarlos en la tabla faclientes del esquema de facturacion de
+                Arquitecsoft
+
+HISTORIAL DE CAMBIOS
+AUTOR			FECHA			DESCRIPCION
+jhongj          22/12/2021      Creacion del metodo 
+*********************************************************/
+    PROCEDURE prcGetCustomerFromTable IS
+    -- variable de validacion si existe ya el cliente en el esquema destino
+    existcustomer NUMBER;
+    -- cursor que busca los clientes del esquema de origen
+    CURSOR customers IS
+    SELECT
+        id_fetercero,
+        companyid,
+        tiponi_id,
+        ni,
+        dv,
+        nombre_comercial,
+        pais,
+        departamento,
+        ciudad,
+        telefono,
+        email,
+        contacto,
+        direccion,
+        tipo_persona,
+        regimen_fiscal,
+        tributo,
+        responsabilidad_fiscal,
+        created_at,
+        updated_at,
+        codigo_postal
+    FROM
+        arqfact.fetercero
+    WHERE
+        companyid in (7,9);
+
+BEGIN
+    --Inicio
+    -- dbms_output.put_line(&apos;proceso que busca los clientes del &apos;);
+    -- ciclo de obtencion de clientes
+    FOR rgcustomer IN customers LOOP
+        -- dbms_output.put_line(&apos;tipo: &apos; || rgcustomer.tiponi_id);
+        -- dbms_output.put_line(&apos;numero: &apos; || rgcustomer.ni);
+        
+        -- Validacion del ciente en el esquema detino
+        SELECT
+            COUNT(*)
+        INTO existcustomer
+        FROM
+            ARQFACTSQA.FACLIENTE
+        WHERE
+            documento_tipo = rgcustomer.tiponi_id
+            AND documento_numero = rgcustomer.ni||&apos;&apos;;
+            
+        IF existcustomer &gt; 0 THEN
+        -- Si existe el cliente en el destino este no se guardara.
+        dbms_output.put_line(&apos;Cliente existe&apos;);
+       
+        ELSE
+         -- En caso contrario se guardara en la base de datos del esquema destino
+            -- dbms_output.put_line(&apos;Cliente no existe, insertando...&apos;);
+            INSERT INTO ARQFACTSQA.FACLIENTE (
+                idcliente,
+                documento_tipo,
+                documento_numero,
+                documento_dv,
+                regimen_fiscal,
+                nombre_comercial,
+                contacto_telefono,
+                contacto_correo,
+                contacto_nota,
+                impuesto,
+                ubicacion_pais,
+                ubicacion_departamento,
+                ubicacion_ciudad,
+                ubicacion_direccion,
+                tipo_persona,
+                ubicacion_codigopostal
+            ) VALUES (
+                rgcustomer.id_fetercero,
+                rgcustomer.tiponi_id,
+                rgcustomer.ni,
+                rgcustomer.dv,
+                rgcustomer.regimen_fiscal,
+                rgcustomer.nombre_comercial,
+                rgcustomer.telefono,
+                rgcustomer.email,
+                rgcustomer.contacto,
+                rgcustomer.tributo,
+                rgcustomer.pais,
+                rgcustomer.departamento,
+                rgcustomer.ciudad,
+                rgcustomer.direccion,
+                rgcustomer.tipo_persona,
+                rgcustomer.codigo_postal
+            );
+            commit;
+            -- dbms_output.put_line(&apos;Cliente insertado exitosamente&apos;);
+        END IF;
+
+    END LOOP;
+
+END prcGetCustomerFromTable;
+
+
+
+
+/*********************************************************
+Nombre: 		prcGetCustomerFromJson
+Descripcion:	procedimiento que se encarga de obtener los datos del cliente 
+                desde el esquema de facturacion electronica en la tabla fefactura
+                se obtienen del json de la factura original(columna json_original)
+                para posteriormente ser guardados en la tabla faclientes del esquema 
+                de facturacion de Arquitecsoft.
+
+HISTORIAL DE CAMBIOS
+AUTOR			FECHA			DESCRIPCION
+jhongj          22/12/2021      Creacion del metodo 
+*********************************************************/
+PROCEDURE prcGetCustomerFromJson IS
+    --Variable de validacion de clientes
+    existcustomer                    NUMBER NULL;
+    --Variables de la tabla destino
+    documentoNumero                  ARQFACTSQA.FACLIENTE.documento_numero%type NULL;
+    documentoTipo                    ARQFACTSQA.FACLIENTE.documento_tipo%type NULL;
+    documentoDv                      ARQFACTSQA.FACLIENTE.DOCUMENTO_DV%type ;
+    regimenFiscal                    ARQFACTSQA.FACLIENTE.REGIMEN_FISCAL%type ;
+    nombreComercial                  ARQFACTSQA.FACLIENTE.NOMBRE_COMERCIAL%type ;
+    contactoTelefono                 ARQFACTSQA.FACLIENTE.CONTACTO_TELEFONO%type ;
+    contactoCorreo                   ARQFACTSQA.FACLIENTE.CONTACTO_CORREO%type ;
+    contactoNota                     ARQFACTSQA.FACLIENTE.CONTACTO_NOTA%type ;
+    impuesto                         ARQFACTSQA.FACLIENTE.IMPUESTO%type;
+    ubicacionPais                    ARQFACTSQA.FACLIENTE.UBICACION_PAIS%type;
+    ubicacionDepartamento            ARQFACTSQA.FACLIENTE.UBICACION_DEPARTAMENTO%type;
+    ubicacionCiudad                  ARQFACTSQA.FACLIENTE.UBICACION_CIUDAD%type;
+    ubicacionDireccion               ARQFACTSQA.FACLIENTE.UBICACION_DIRECCION%type;
+    ubicacionCodigopostal            ARQFACTSQA.FACLIENTE.UBICACION_CODIGOPOSTAL%type;
+    tipoPersona                      ARQFACTSQA.FACLIENTE.TIPO_PERSONA%type;
+    
+    
+    ex  EXCEPTION;
+    --Cursor de facturas
+    CURSOR invoicedatajson IS
+    SELECT
+        *
+    FROM
+        arqfact.fefactura
+    WHERE
+        company_id in (2,7,9,15,17)
+        AND estado = 11
+        AND company_id in (2,7,9,15,17)
+        AND json_original IS NOT NULL;    
+    --Cursor de datos del cliente en la factura
+    CURSOR invoicegettypedocanddocument (
+        datajson CLOB
+    ) IS
+    SELECT
+        JSON_VALUE(datajson, &apos;$.cliente.documento.tipo.typedocid&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.documento.numero&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.documento.dv&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.documento.regimenFiscal.id&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.nombreComercial&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.contacto.telefono&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.contacto.correo&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.contacto.nota&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.impuesto.id&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.ubicacion.pais.id&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.ubicacion.departamento.id&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.ubicacion.ciudad.id&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.ubicacion.direccion&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.tipoPersona.id&apos;)
+    FROM
+        dual;
+BEGIN
+    -- dbms_output.put_line(&apos;proceso que busca los clientes del &apos;);
+    --inicia ciclo que recorre todos los clientes dentro de las facturas
+    FOR data IN invoicedatajson LOOP
+        -- dbms_output.put_line(&apos;ID: &apos; || data.id);
+        -- insertamos los datos del json en las variables de la tabla destino
+        OPEN invoicegettypedocanddocument(data.json_original);
+        FETCH invoicegettypedocanddocument INTO
+             documentoTipo,
+             documentoNumero,
+             documentoDv,
+             regimenFiscal,
+             nombreComercial,
+             contactoTelefono,
+             contactoCorreo,
+             contactoNota,
+             impuesto,
+             ubicacionPais,
+             ubicacionDepartamento,
+             ubicacionCiudad,
+             ubicacionDireccion,
+             tipoPersona;
+        --Verificamos que el cliente no exista en la tabla facliente (Destino)
+        select count(*) into existCustomer from ARQFACTSQA.FACLIENTE where documento_tipo = documentoTipo and documento_numero = REPLACE(documentoNumero,&apos; &apos;,&apos;&apos;);
+        if existCustomer &gt; 0 THEN
+            dbms_output.put_line(&apos;Cliente existe&apos;);
+        else
+           
+            -- dbms_output.put_line(&apos;tipo: &apos; || documentoTipo);
+            -- dbms_output.put_line(&apos;numero: &apos; || documentoNumero);   
+            --En caso de no existir se guardar
+            insert into ARQFACTSQA.FACLIENTE (DOCUMENTO_TIPO, DOCUMENTO_NUMERO, DOCUMENTO_DV,
+                REGIMEN_FISCAL, NOMBRE_COMERCIAL,  CONTACTO_TELEFONO,
+                CONTACTO_CORREO, CONTACTO_NOTA, IMPUESTO, UBICACION_PAIS, UBICACION_DEPARTAMENTO,
+                UBICACION_CIUDAD,UBICACION_DIRECCION, UBICACION_CODIGOPOSTAL, TIPO_PERSONA
+                ) 
+            values (documentoTipo, documentoNumero, documentoDv,
+                regimenFiscal, nombreComercial, contactoTelefono, 
+                contactoCorreo, contactoNota,impuesto,   ubicacionPais, ubicacionDepartamento,
+                ubicacionCiudad, ubicacionDireccion, ubicacionCodigopostal, 
+                tipoPersona);
+            -- dbms_output.put_line(&apos;Cliente no existe, insertando...&apos;);
+            commit;
+            IF SQL%ROWCOUNT = 0 THEN 
+                
+                dbms_output.put_line(&apos;NO INSERTO EN ARQFACTSQA.FACLIENTE&apos;);
+                --RAISE ex;
+            END IF;
+    
+        END IF;
+        CLOSE invoicegettypedocanddocument;
+    END LOOP;
+    EXCEPTION
+        WHEN OTHERS THEN
+    
+        dbms_output.put_line(SQLERRM || &apos;-&apos; ||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
+    
+    
+END prcGetCustomerFromJson;
+
+/*********************************************************
+Nombre: 		prcGetInfoFacturaFromJson
+Descripcion:	procedimiento que se encarga de obtener los datos de la factura
+                desde el esquema de facturacion electronica en la tabla fefactura
+                los datos son traidos directamente del json original de la factura
+                (columna json_original) y guardarlos en la tabla fafactura y faproductos
+                del esquema de facturacion de Arquitecsoft
+
+HISTORIAL DE CAMBIOS
+AUTOR			FECHA			DESCRIPCION
+jhongj          22/12/2021      Creacion del metodo 
+*********************************************************/
+PROCEDURE prcGetInfoFacturaFromJson 
+    IS
+    invoiceExist                                        NUMBER NULL;
+    --Informacion general de la factura
+    documentcustomer                                    ARQFACTSQA.FACLIENTE.documento_numero%type;
+    typedocumentcustomer                                ARQFACTSQA.FACLIENTE.documento_tipo%type;
+    tipoDocumento                                       ARQFACTSQA.FAFACTURA.tipo_documento%type := 1;
+    facturaNumeracionActual                             ARQFACTSQA.FAFACTURA.factura_numeracion_actual%type := &apos;000&apos;;
+    factura_prefijo                                     ARQFACTSQA.FAFACTURA.factura_prefijo%type;
+    fecha_expedicion                                    ARQFACTSQA.FAFACTURA.fecha_expedicion%type;
+    fecha_vencimiento                                   ARQFACTSQA.FAFACTURA.fecha_vencimiento%type;
+    orden_compra_id                                     ARQFACTSQA.FAFACTURA.orden_compra_id%type;
+    orden_compra_fecha                                  ARQFACTSQA.FAFACTURA.orden_compra_fecha%type;
+    forma_pago                                          ARQFACTSQA.FAFACTURA.forma_pago%type;
+    medio_pago                                          ARQFACTSQA.FAFACTURA.medio_pago%type;
+    moneda                                              ARQFACTSQA.FAFACTURA.moneda%type;
+    valor_letras                                        ARQFACTSQA.FAFACTURA.valor_letras%type;
+    tasa_cambio                                         ARQFACTSQA.FAFACTURA.tasa_cambio%type;
+    documento_referencia_prefijo                        ARQFACTSQA.FAFACTURA.medio_pago%type null;
+    documento_referencia_numero_factura                 ARQFACTSQA.FAFACTURA.documento_referencia_numero_factura%type null;
+    documento_referencia_fecha_expedicion               ARQFACTSQA.FAFACTURA.documento_referencia_fecha_expedicion%type null;
+    documento_referencia_uuid                           ARQFACTSQA.FAFACTURA.documento_referencia_uuid%type null;
+    idcliente                                           ARQFACTSQA.FAFACTURA.idcliente%type;
+    --Detalle de la factura
+    
+    itemCantidadBase              ARQFACTSQA.FAPRODUCTO.CANTIDAD_BASE%type;
+    itemCantidadSolicitada        ARQFACTSQA.FAPRODUCTO.CANTIDAD_SOLICITADA%type;
+    itemDescripcion               ARQFACTSQA.FAPRODUCTO.DESCIPCION%type;
+    itemImpuestoId                ARQFACTSQA.FAPRODUCTO.IMPUESTO_ID%type;
+    itemItemId                    ARQFACTSQA.FAPRODUCTO.ITEM_ID%type;
+    itemPorcentajeImpuesto        ARQFACTSQA.FAPRODUCTO.PORCENTAJE_IMPUESTO%type;
+    itemPrecioBase                ARQFACTSQA.FAPRODUCTO.PRECIO_BASE%type;
+    itemPrecioBruto               ARQFACTSQA.FAPRODUCTO.PRECIO_BRUTO%type;
+    itemPrecioNeto                ARQFACTSQA.FAPRODUCTO.PRECIO_NETO%type;
+    itemStandarItem               ARQFACTSQA.FAPRODUCTO.STANDAR_ITEM%type;
+    itemUnidadMedida              ARQFACTSQA.FAPRODUCTO.UNIDAD_MEDIDA%type;
+    itemValorImpuesto             ARQFACTSQA.FAPRODUCTO.VALOR_IMPUESTO%type;
+    itemIdfactura                 ARQFACTSQA.FAPRODUCTO.IDFACTURA%type;
+    
+    --cursor de datos de la factura
+    CURSOR invoiceDataJson IS
+    SELECT
+        *
+    FROM
+        arqfact.fefactura
+    WHERE
+        company_id in (2,7,9,15,17)
+        AND estado = 11
+        AND json_original IS NOT NULL;
+        
+        
+    CURSOR invoiceDataJsonGetFact (
+        datajson CLOB
+    ) IS
+    SELECT
+        JSON_VALUE(datajson, &apos;$.factura.infoFacturaEmpresa.tipoDocumento&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.infoFacturaEmpresa.numeracionActual&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.infoFacturaEmpresa.prefijo&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.fechaExpedicion&apos; RETURNING DATE),
+        JSON_VALUE(datajson, &apos;$.factura.fechaVencimiento&apos; RETURNING DATE),
+        JSON_VALUE(datajson, &apos;$.factura.ordenCompra.id&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.ordenCompraFecha&apos; RETURNING DATE),
+        JSON_VALUE(datajson, &apos;$.factura.formaPago.id&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.medioPago.id&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.moneda.id&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.valorLetras&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.tasaCambio&apos;),
+        JSON_VALUE(datajson, &apos;$.factura.prefijo&apos;),
+        JSON_VALUE(datajson, &apos;$.documentoReferencia.fechaExpedicion&apos; RETURNING DATE),
+        JSON_VALUE(datajson, &apos;$.documentoReferencia.numeroFactura&apos;),
+        JSON_VALUE(datajson, &apos;$.documentoReferencia.uuid&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.documento.tipo.typedocid&apos;),
+        JSON_VALUE(datajson, &apos;$.cliente.documento.numero&apos;)
+    FROM
+        dual;
+    
+    CURSOR invoiceItemsDataJson (datajson CLOB) 
+    IS SELECT items.*
+            FROM 
+            JSON_TABLE (datajson, &apos;$.productos[*]&apos;
+            COLUMNS (
+                     cantidadBase                    NUMBER         PATH &apos;$.cantidadBase&apos;,
+                     cantidadSolicitada              NUMBER         PATH &apos;$.cantidadSolicitada&apos;,
+                     descripcion                     VARCHAR2(4000) PATH &apos;$.descripcion&apos;,
+                     impuesto                        NUMBER         PATH &apos;$.impuesto.id&apos;,
+                     item                            NUMBER         PATH &apos;$.item.id&apos;,
+                     porcentajeImpuesto              NUMBER         PATH &apos;$.porcentajeImpuesto&apos;,
+                     precioBase                      NUMBER         PATH &apos;$.precioBase&apos;,
+                     precioBruto                     NUMBER         PATH &apos;$.precioBruto&apos;,
+                     precioNeto                      NUMBER         PATH &apos;$.precioNeto&apos;,
+                     standarItem                     NUMBER         PATH &apos;$.standarItem.id&apos;,
+                     unidadMedida                    NUMBER         PATH &apos;$.unidadMedida.id&apos;,
+                     valorImpuesto                   NUMBER         PATH &apos;$.valorImpuesto&apos;))
+    AS items;
+    
+    EX EXCEPTION;
+BEGIN
+    -- dbms_output.put_line(&apos;PROCESO QUE BUSCA FACTURAS &apos;);
+    FOR data IN invoiceDataJson LOOP
+        -- dbms_output.put_line(&apos;ID Factura: &apos; || data.id);
+        SELECT COUNT(*) INTO invoiceExist FROM ARQFACTSQA.FAFACTURA WHERE UUID = data.uuid;
+        IF invoiceExist = 0 THEN
+            -- dbms_output.put_line(&apos;es nueva factura...&apos;);
+            OPEN invoiceDataJsonGetFact(data.json_original);      
+            FETCH invoiceDataJsonGetFact INTO
+                tipoDocumento,
+                facturaNumeracionActual,
+                factura_prefijo,
+                fecha_expedicion,
+                fecha_vencimiento,
+                orden_compra_id,
+                orden_compra_fecha,
+                forma_pago,
+                medio_pago,
+                moneda,
+                valor_letras,
+                tasa_cambio,
+                documento_referencia_prefijo,
+                documento_referencia_fecha_expedicion,
+                documento_referencia_numero_factura,
+                documento_referencia_uuid,
+                typedocumentcustomer,
+                documentcustomer;
+                -- dbms_output.put_line(&apos;Insertando datos de la factura: &apos;||factura_prefijo||facturaNumeracionActual);
+                --DBMS_OUTPUT.PUT_LINE(&apos;factura_prefijo ,&apos;||factura_prefijo);
+                --DBMS_OUTPUT.PUT_LINE(&apos;fecha_expedicion ,&apos;||fecha_expedicion);
+                --DBMS_OUTPUT.PUT_LINE(&apos;fecha_vencimiento ,&apos;||fecha_vencimiento);
+                --DBMS_OUTPUT.PUT_LINE(&apos;orden_compra_id ,&apos;||orden_compra_id);
+                --DBMS_OUTPUT.PUT_LINE(&apos;orden_compra_fecha ,&apos;||orden_compra_fecha);
+                --DBMS_OUTPUT.PUT_LINE(&apos;forma_pago ,&apos;||forma_pago);
+                --DBMS_OUTPUT.PUT_LINE(&apos;medio_pago ,&apos;||medio_pago);
+                --DBMS_OUTPUT.PUT_LINE(&apos;moneda ,&apos;||moneda);
+                --DBMS_OUTPUT.PUT_LINE(&apos;valor_letras ,&apos;||valor_letras);
+                --DBMS_OUTPUT.PUT_LINE(&apos;tasa_cambio ,&apos;||tasa_cambio);
+                --DBMS_OUTPUT.PUT_LINE(&apos;documento_referencia_prefijo ,&apos;||documento_referencia_prefijo);
+                --DBMS_OUTPUT.PUT_LINE(&apos;documento_referencia_fecha_expedicion ,&apos;||documento_referencia_fecha_expedicion);
+                --DBMS_OUTPUT.PUT_LINE(&apos;documento_referencia_numero_factura ,&apos;||documento_referencia_numero_factura);
+                --DBMS_OUTPUT.PUT_LINE(&apos;documento_referencia_uuid ,&apos;||documento_referencia_uuid);
+                --DBMS_OUTPUT.PUT_LINE(&apos;typedocumentcustomer ,&apos;||typedocumentcustomer);
+                --DBMS_OUTPUT.PUT_LINE(&apos;documentcustomer ,&apos;||documentcustomer);
+                
+                SELECT MAX(IDCLIENTE) INTO idcliente FROM ARQFACTSQA.FACLIENTE WHERE DOCUMENTO_TIPO = typedocumentcustomer AND DOCUMENTO_NUMERO = REPLACE(documentcustomer,&apos; &apos;,&apos;&apos;) ;
+                INSERT INTO ARQFACTSQA.FAFACTURA (
+                    idfactura,
+                    TIPO_DOCUMENTO, FACTURA_NUMERACION_ACTUAL, 
+                    FACTURA_PREFIJO, FECHA_EXPEDICION, FECHA_VENCIMIENTO, 
+                    ORDEN_COMPRA_ID, ORDEN_COMPRA_FECHA, FORMA_PAGO, 
+                    MEDIO_PAGO, MONEDA, VALOR_LETRAS, TASA_CAMBIO, 
+                    DOCUMENTO_REFERENCIA_PREFIJO, DOCUMENTO_REFERENCIA_FECHA_EXPEDICION,
+                    DOCUMENTO_REFERENCIA_NUMERO_FACTURA,  DOCUMENTO_REFERENCIA_UUID, 
+                    UUID, IDCLIENTE ) 
+                VALUES(
+                    data.id,
+                    tipoDocumento, facturaNumeracionActual,
+                    factura_prefijo, fecha_expedicion, fecha_vencimiento,
+                    orden_compra_id, orden_compra_fecha, forma_pago,
+                    medio_pago, moneda, valor_letras, tasa_cambio,
+                    documento_referencia_prefijo, documento_referencia_fecha_expedicion,
+                    documento_referencia_numero_factura, documento_referencia_uuid,
+                    data.UUID, idcliente
+                );
+                select MAX(idfactura) into itemIdfactura from ARQFACTSQA.FAFACTURA where uuid = data.UUID;
+                --FOR dataItems IN invoiceItemsDataJson(data.json_original) LOOP 
+                -- dbms_output.put_line(&apos;Buscando productos de las facturas&apos;);
+                
+                FOR item IN invoiceItemsDataJson(data.json_original) LOOP
+                    if item.descripcion is null then
+                        dbms_output.put_line(&apos;item nulo&apos;);
+                    end if;
+                    
+                    INSERT INTO ARQFACTSQA.FAPRODUCTO 
+                    (CANTIDAD_BASE, CANTIDAD_SOLICITADA, DESCIPCION, 
+                    IMPUESTO_ID, ITEM_ID, PORCENTAJE_IMPUESTO, PRECIO_BASE, PRECIO_BRUTO, 
+                    PRECIO_NETO, STANDAR_ITEM, UNIDAD_MEDIDA, VALOR_IMPUESTO, IDFACTURA)
+                    VALUES 
+                    (
+                    item.cantidadBase,
+                    item.cantidadSolicitada,
+                    item.descripcion,
+                    item.impuesto,
+                    item.item,
+                    item.porcentajeImpuesto,
+                    item.precioBase,
+                    item.precioBruto,
+                    item.precioNeto,
+                    item.standarItem,
+                    item.unidadMedida,
+                    item.valorImpuesto,
+                    itemIdfactura
+                    );
+                    
+                --close invoiceItemsDataJson;
+                END LOOP;
+                commit;
+                IF SQL%ROWCOUNT = 0 THEN 
+                    dbms_output.put_line(&apos;NO INSERTO EN ARQFACTSQA.FACLIENTE&apos;);
+                --RAISE ex;
+               
+            END IF;
+            -- dbms_output.put_line(&apos;no inserta factura&apos;);
+            CLOSE invoiceDataJsonGetFact;
+        END IF;
+
+    END LOOP;
+    -- dbms_output.put_line(&apos;PROCESO FINALIZADO&apos;);
+    EXCEPTION
+        WHEN OTHERS THEN
+        rollback;
+        -- dbms_output.put_line(SQLERRM || &apos;-&apos; ||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
+    
+        
+END prcGetInfoFacturaFromJson;
+
+PROCEDURE prcGetInvoicesAffect
+IS
+documentReference ARQFACTSQA.fafactura%rowtype;
+CURSOR documentsWihtReferences IS SELECT * FROM FAFACTURA WHERE DOCUMENTO_REFERENCIA_UUID IS NOT NULL AND TIPO_DOCUMENTO = 2;
+
+BEGIN
+ FOR rgDocumentsWihtReferences IN documentsWihtReferences LOOP
+ 
+ select * into documentReference from fafactura where uuid = rgDocumentsWihtReferences.documento_referencia_uuid;
+ UPDATE fafactura SET NOTA = rgDocumentsWihtReferences.idfactura where idfactura = documentReference.idfactura;
+ commit;
+    
+ END LOOP;
+ EXCEPTION 
+    WHEN OTHERS THEN
+        rollback;
+        -- dbms_output.put_line(SQLERRM || &apos;Invoice Affect&apos; || &apos;-&apos; ||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);  
+
+END prcGetInvoicesAffect;
+
+
+PROCEDURE execProceduresWorksFact
+IS
+BEGIN
+    pkg_facturacion.prcgetcustomerfromtable;
+    pkg_facturacion.prcgetcustomerfromjson;
+    pkg_facturacion.prcgetinfofacturafromjson;
+    pkg_facturacion.prcGetInvoicesAffect;
+END execProceduresWorksFact;
+
+END;</source>
+</body>
+</PackageOracle>

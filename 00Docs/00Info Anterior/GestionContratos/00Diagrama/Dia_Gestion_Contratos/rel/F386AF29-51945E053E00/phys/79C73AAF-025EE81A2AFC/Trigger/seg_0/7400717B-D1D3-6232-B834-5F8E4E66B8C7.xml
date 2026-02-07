@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TriggerOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.TriggerOraclev10g" name="TRG_ID_SYNC_FACTRO" directorySegmentName="seg_0" id="7400717B-D1D3-6232-B834-5F8E4E66B8C7">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>TRG_ID_SYNC_FACTRO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<actions>INSERT</actions>
+<body><![CDATA[begin
+  if inserting then
+      if :NEW.ID_SYNC_FACTRO is null then
+         select SEQ_ID_SYNC_FACTRO.nextval into :NEW."ID_SYNC_FACTRO" from dual;
+      end if;
+   end if;
+end TRG_ID_SYNC_FACTRO;]]></body>
+<triggerTime>BEFORE</triggerTime>
+<owner>3A367D78-C584-B7A5-0169-F84F01461631</owner>
+<table>468C897D-D155-A025-3E27-638697A8C430</table>
+</TriggerOraclev10g>

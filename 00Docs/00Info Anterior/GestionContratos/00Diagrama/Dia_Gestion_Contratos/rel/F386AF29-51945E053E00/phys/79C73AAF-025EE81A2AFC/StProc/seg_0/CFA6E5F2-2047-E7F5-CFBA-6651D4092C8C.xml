@@ -1,0 +1,170 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<StoredProcedureOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.StoredProcedureOraclev10g" name="PRC_GUARDAR_HISTORICO_FACTURADO" directorySegmentName="seg_0" id="CFA6E5F2-2047-E7F5-CFBA-6651D4092C8C">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>PRC_GUARDAR_HISTORICO_FACTURADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:46 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<owner><![CDATA[3A367D78-C584-B7A5-0169-F84F01461631]]></owner>
+<source>CREATE OR REPLACE PROCEDURE ARQFACTSQA.PRC_GUARDAR_HISTORICO_FACTURADO AS 
+/***********************************************************************************
+Nombre: 		PRC_GUARDAR_HISTORICO_FACTURADO
+Descripcion:	procedimiento que se encarga de obtener los datos de las facturas
+                del año presente y almacenarlo en una tabla(FAHISTORICO_FACTURADO),
+                esto ocurre cada 31 de Diciembre donde un Job hace uso de 
+                este procedimiento
+Autor:          Andres Palacios - andresrp@arqs.co
+Fecha:          06/07/2022 - Arquitecsoft
+___________________________________________________________________________________
+HISTORIAL DE CAMBIOS
+AUTOR			FECHA			DESCRIPCION
+Andres Palacios 06/07/2022      Creacion del procedimiento
+************************************************************************************/
+BEGIN
+    
+  insert into fahistorico_facturado
+  (IDFACTURA,
+   FACT_ENE,
+   FACT_FEB,
+   FACT_MAR,
+   FACT_ABR,
+   FACT_MAY,
+   FACT_JUN,
+   FACT_JUL,
+   FACT_AGO,
+   FACT_SEP,
+   FACT_OCT,
+   FACT_NOV,
+   FACT_DIC,
+   NOMBRE_COMERCIAL,
+   DESC_MONEDA,
+   FECHA_EXP,
+   FECHA_VENC,
+   VALOR_TOTAL,
+   TOTAL_IMPUESTOS,
+   TOTAL_FACTURAS)
+  select *
+    from (select 
+        fact.idfactura,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/01/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/01/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_ene,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/02/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt; trunc(to_date(&apos;01/03/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_feb,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/03/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/03/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_mar,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/04/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;30/04/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_abr,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/05/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/05/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_may,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/06/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;30/06/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_jun,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/07/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/07/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_jul,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/08/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/08/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_ago,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/09/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;30/09/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_sep,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/10/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/10/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_oct,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/11/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;30/11/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_nov,
+        nvl((   select
+            nvl((select sum(precio_neto) from faproducto where idfactura = factu.idfactura GROUP BY idfactura),0) valor_total
+            from fafactura factu
+            where
+            fact.idfactura = factu.idfactura
+            and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/12/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+            and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/12/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        ),0) fact_dic,
+        facli.nombre_comercial,
+        tipomoneda.codigo desc_moneda,
+        fact.fecha_expedicion fecha_exp,
+        fact.fecha_vencimiento fecha_venc,
+        nvl((select sum(precio_neto) from faproducto where idfactura = fact.idfactura GROUP BY idfactura),0) valor_total,
+        nvl((select sum(valor_impuesto) from faproducto where idfactura = fact.idfactura GROUP BY idfactura),0) total_impuestos,
+        nvl((select count(idfactura) from faproducto where idfactura = fact.idfactura group by idfactura),0) Total_Facturas
+        from
+        fafactura fact,
+        facliente facli,
+        contrato cont,
+        ARQFACT.fetipomoneda tipomoneda
+        where
+        fact.idcliente(+) = facli.idcliente
+        and cont.id_contrato(+) = fact.idcontrato
+        and tipomoneda.id(+) = fact.moneda
+        AND fact.factura_prefijo NOT LIKE &apos;%N%&apos; --aa
+        AND fact.nota IS NULL
+        and fact.fecha_expedicion is not null
+        and fact.fecha_vencimiento is not null
+        and trunc(fact.fecha_expedicion) &gt;= trunc(to_date(&apos;01/01/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;))
+        and trunc(fact.fecha_expedicion) &lt;= trunc(to_date(&apos;31/12/&apos; || to_char(sysdate, &apos;YYYY&apos;),&apos;DD/MM/YYYY&apos;)));        
+    commit;
+END PRC_GUARDAR_HISTORICO_FACTURADO;</source>
+</StoredProcedureOraclev10g>

@@ -1,0 +1,380 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="F5706F81-D7CA-1F81-095D-E04DDF817814" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="FAHISTORICO_FACTURADO">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FAHISTORICO_FACTURADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="ID" id="8BD6C110-6DDB-959D-92DF-45012F8AE988">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>ID</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL REGISTRO AUTOINCREMENTABLE CON SECUENCIA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<defaultValue>NULL</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="IDFACTURA" id="15A9C4C5-64FE-8898-0BF2-D4AA4B192B26">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>IDFACTURA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DE LA FACTURA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_ENE" id="5FC2F2D4-ED8D-E037-417A-AD34C309CB58">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_ENE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN ENERO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_FEB" id="EEDC83B5-5659-37FA-51C5-392241BF6425">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_FEB</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN FEBRERO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_MAR" id="CF2E14A6-27EA-A321-2934-DCCC9FC46C44">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_MAR</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN MARZO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_ABR" id="66741020-9FF8-852B-F91C-47BAA38076DD">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_ABR</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN ABRIL]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_MAY" id="B9D391D2-DB40-14A9-D1DC-58568F120CF7">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_MAY</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN MAYO
+]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_JUN" id="93F88809-8F57-74FF-44B3-5EB123314FD8">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_JUN</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN JUNIO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_JUL" id="DE74B60E-4CB6-5929-E6D0-FAB112E55F03">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_JUL</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN JULIO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_AGO" id="A8DB2F28-CA6C-FEB2-FC09-063EBD554E38">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_AGO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN AGOSTO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_SEP" id="216FA522-20D8-B598-97D3-D164BEBBF002">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_SEP</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN SEPTIEMBRE]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_OCT" id="118C7173-7200-1F77-12F7-D99CAC9F2E25">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_OCT</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN OCTUBRE
+]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_NOV" id="06EC0AA3-EECC-9BED-B111-85522085BBFD">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_NOV</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN NOVIEMBRE]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FACT_DIC" id="A56971CE-BB90-FD6B-752B-A0D78D9D1804">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FACT_DIC</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FACTURADO EN DICIEMBRE]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="NOMBRE_COMERCIAL" id="36624499-F1CB-6395-0C70-002C7232BDFD">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>NOMBRE_COMERCIAL</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[NOMBRE DE LA EMPRESA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>1000 BYTE</dataTypeSize>
+<ownDataTypeParameters>1000 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DESC_MONEDA" id="8908ACF7-E8B7-0D1C-DC4E-D0B857EC3164">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>DESC_MONEDA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[DESCRIPCION DE LA MONEDA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>80 BYTE</dataTypeSize>
+<ownDataTypeParameters>80 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FECHA_EXP" id="949B13A0-7C5E-BD03-649D-9CC06199AAF7">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FECHA_EXP</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FECHA DE EXPEDICION DE FACTURA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FECHA_VENC" id="13E3AAE9-B247-DF06-A4E0-CC7D221F7077">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>FECHA_VENC</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[FECHA DE VENCIMIENTO FACTURA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_TOTAL" id="347976CD-D3D5-5747-85C3-D2452FC02243">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>VALOR_TOTAL</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR TOTAL FACTURADO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="TOTAL_IMPUESTOS" id="F3E9D884-86A4-79FA-81C3-43780D869F4B">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>TOTAL_IMPUESTOS</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR TOTAL DE IMPUESTOS]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="TOTAL_FACTURAS" id="5F81FA12-B119-3A4C-1C21-A159DAA74D12">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>TOTAL_FACTURAS</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[CANTIDAD DE PRODUCTOS LIGADOS A LA FACTURA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="ANIO_FACTURADO" id="D86E7848-45EB-2999-BF4D-DC5EA8CEE0D1">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>FAHISTORICO_FACTURADO</sourceObjSchema>
+<sourceObjName>ANIO_FACTURADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[AÑO EN QUE FUE FACTURADO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<defaultValue>TO_NUMBER(TO_CHAR(SYSDATE,&apos;YYYY&apos;))</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="C3FC9FD2-73E4-5117-FA83-EDE4CE4FB1FA" name="FAHISTORICO_FACTURADO_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FAHISTORICO_FACTURADO_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="8BD6C110-6DDB-959D-92DF-45012F8AE988"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="2FA7AFDB-BE98-E4C1-96B5-ABB61EEFB462" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="FAHISTORICO_FACTURADO_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>FAHISTORICO_FACTURADO_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:34 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="8BD6C110-6DDB-959D-92DF-45012F8AE988"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

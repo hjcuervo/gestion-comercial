@@ -1,0 +1,19 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="130702C1-76A2-CB5F-889E-27C6CDD766E2" containerWithKeyObject="B7CDCBF5-5795-1F6C-0C52-2C47FCE6E96B" localFKIndex="8DA56995-9BF1-F61F-A980-0E03544A171F" name="IDCLIENTE_FEFACTURA_FECLIENTE">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>IDCLIENTE_FEFACTURA_FECLIENTE</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<referredTableLongName>ARQFACTSQA.FACLIENTE</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>DF6383B2-6A7D-292F-25E5-CF7699D26304</referredTableID>
+<keyObject>8FF4FC7E-8018-3B4B-D1FA-EEFD86AB47F6</keyObject>
+<referredKeyID>8FF4FC7E-8018-3B4B-D1FA-EEFD86AB47F6</referredKeyID>
+<mandatory>false</mandatory>
+<refColNames>IDCLIENTE</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Relation class="oracle.dbtools.crest.model.design.logical.Relation" name="FK_FAFACTURA_FACTURA_ARCHIVOS" directorySegmentName="seg_0" id="58A5F595-48FC-32AF-4B00-5E339DFC603D">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:37:37 UTC</createdTime>
+<generatorID>2E628D93-567B-E1F1-F2A7-C090E6AEACAF</generatorID>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<engineerTo>
+<item key="F386AF29-46F4-AF6C-B975-51945E053E00" value="true"/>
+</engineerTo>
+<sourcePk>21EBE06D-9D5A-499A-128A-F00E8E58CA45</sourcePk>
+<identifying>false</identifying>
+<optionalSource>true</optionalSource>
+<optionalTarget>true</optionalTarget>
+<sourceCardinality>1</sourceCardinality>
+<sourceEntity>EC5E3AAA-2E48-24DF-0240-F93D3524757E</sourceEntity>
+<targetCardinalityString>*</targetCardinalityString>
+<targetEntity>406B7201-127C-16A0-0A8C-60D37A388F68</targetEntity>
+<transferable>true</transferable>
+<deleteRule>NO ACTION</deleteRule>
+</Relation>

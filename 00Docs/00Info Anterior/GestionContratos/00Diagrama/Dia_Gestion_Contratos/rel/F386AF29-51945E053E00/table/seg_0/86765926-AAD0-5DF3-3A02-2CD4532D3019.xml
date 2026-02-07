@@ -1,0 +1,160 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="86765926-AAD0-5DF3-3A02-2CD4532D3019" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="CONTRATO_FORMA_PAGO">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>CONTRATO_FORMA_PAGO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:28 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="ID_CONTRATO_FORMA_PAGO" id="A407ABA1-8C8E-B898-4ECB-99E3A62AC672">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CONTRATO_FORMA_PAGO</sourceObjSchema>
+<sourceObjName>ID_CONTRATO_FORMA_PAGO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[IDENTIFICADOR DEL REGISTRO DE LA FORMA PAGO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<defaultValue>NULL</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="FORMA_PAGO" id="275B54E7-6CF2-E8A0-1E7F-7299EB87A1BA">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CONTRATO_FORMA_PAGO</sourceObjSchema>
+<sourceObjName>FORMA_PAGO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[DESCRIPCION DE LA FORMA PAGO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>2000 BYTE</dataTypeSize>
+<ownDataTypeParameters>2000 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="VALOR_FORMA_PAGO" id="4F8EF421-E318-FC02-5B19-5749890C2720">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CONTRATO_FORMA_PAGO</sourceObjSchema>
+<sourceObjName>VALOR_FORMA_PAGO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[VALOR DE LA FORMA DE PAGO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="ID_CONTRATO" id="67CA68D8-CE8A-0046-DD42-D93D5DFE9168">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CONTRATO_FORMA_PAGO</sourceObjSchema>
+<sourceObjName>ID_CONTRATO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DEL CONTRATO AL QUE HACE REFERENCIA]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>20</dataTypePrecision>
+<dataTypeScale>0</dataTypeScale>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="5A97A9E2-B1DA-4E25-66B0-07273980D042" referredColumn="7BD191F0-4BAB-5D70-4C23-AFC8EE591C57"/>
+</associations>
+</Column>
+<Column name="ID_FACTURA" id="0E608C96-8170-C4B6-0106-E51CF6436800">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CONTRATO_FORMA_PAGO</sourceObjSchema>
+<sourceObjName>ID_FACTURA</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[ID DE LA FACTURA A LA QUE SE LE HA CRUZADO]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="278BAEB0-E220-F9C3-D0B6-357E2E0D8F5E" referredColumn="E8E6D82C-9855-5A24-3EE6-FCCE652565AE"/>
+</associations>
+</Column>
+<Column name="FECHA_PAGO_ESTIMADO" id="B1929B07-0D06-0908-1C35-7B7F65883606">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>CONTRATO_FORMA_PAGO</sourceObjSchema>
+<sourceObjName>FECHA_PAGO_ESTIMADO</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:30 UTC</createdTime>
+<commentInRDBMS><![CDATA[fecha estimada del pago de la forma de pago]]></commentInRDBMS>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="609E2219-82DB-CAC6-472A-096D4F170F0A" name="CONTRATO_FORMA_PAGO_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>CONTRATO_FORMA_PAGO_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:37 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A407ABA1-8C8E-B898-4ECB-99E3A62AC672"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="2B4FBFCA-552A-E4B6-7192-93E06C9BE6F8" schemaObject="7087EA03-AAD8-D724-96A3-79B62811CFF8" name="CONTRATO_FORMA_PAGO_PK">
+<sourceConnName>Gestion Contratos</sourceConnName>
+<sourceObjSchema>ARQFACTSQA</sourceObjSchema>
+<sourceObjName>CONTRATO_FORMA_PAGO_PK</sourceObjName>
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:33 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A407ABA1-8C8E-B898-4ECB-99E3A62AC672"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="455F2EFF-F7F3-7CF1-1CCC-E5F2BD78A943" name="FK_CONTRATO_FORMA_PAGO_CONTRATO">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="67CA68D8-CE8A-0046-DD42-D93D5DFE9168"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="170B8D28-71FE-D409-5C5B-E4DA043D3E12" name="FK_ID_FACTURA_FAFACTURA">
+<createdBy>HéctorJavierCuervoRa</createdBy>
+<createdTime>2026-01-27 19:14:41 UTC</createdTime>
+<ownerDesignName>Dia_Gestion_Contratos</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="0E608C96-8170-C4B6-0106-E51CF6436800"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
