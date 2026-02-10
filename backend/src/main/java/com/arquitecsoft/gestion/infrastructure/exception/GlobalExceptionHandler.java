@@ -1,5 +1,7 @@
 package com.arquitecsoft.gestion.infrastructure.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -13,8 +15,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+        log.error("BusinessException: {} - {}", ex.getCode(), ex.getMessage());
+        
         HttpStatus status = switch (ex.getCode()) {
             case "NOT_FOUND" -> HttpStatus.NOT_FOUND;
             case "INVALID_CREDENTIALS", "UNAUTHORIZED" -> HttpStatus.UNAUTHORIZED;
@@ -30,6 +36,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        log.error("ValidationException: {}", ex.getMessage());
+        
         BindingResult result = ex.getBindingResult();
         
         List<ErrorResponse.FieldError> fieldErrors = result.getFieldErrors().stream()
@@ -47,7 +55,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        // Log the exception here
+        // Imprimir el stack trace completo
+        log.error("Exception no manejada: ", ex);
+        ex.printStackTrace();
+        
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("INTERNAL_ERROR", "Error interno del servidor"));
