@@ -1,290 +1,258 @@
-# Plataforma de Gestión Comercial - Arquitecsoft
+# Sistema de Gestión Comercial (CRM)
 
-## 📋 Descripción
+Sistema integral para la gestión del proceso comercial de ArquitecSoft, incluyendo seguimiento de oportunidades, empresas, contactos y actividades.
 
-Plataforma interna de Arquitecsoft para la gestión del ciclo de vida de oportunidades comerciales, desde la prospección hasta el cierre. Sistema de **pipelines dinámicos** donde las oportunidades avanzan por etapas configurables, con registro de actividades, compromisos y documentos asociados.
+## 🚀 Tecnologías
 
----
+| Capa | Tecnología |
+|------|------------|
+| **Backend** | Java 21, Spring Boot 3.3 |
+| **Seguridad** | Spring Security, JWT |
+| **Base de Datos** | Oracle 23c |
+| **ORM** | JPA/Hibernate |
+| **Build** | Maven |
+| **Frontend** | Vue 3, Vite, Material Design 3 *(pendiente)* |
 
-## 🎯 Alcance v0.1
+## 📋 Módulos
 
-### Incluye
-- **Empresas**: Prospectos, clientes y aliados
-- **Personas**: Contactos con relaciones multi-empresa
-- **Oportunidades comerciales**: Objeto central del proceso
-- **Pipelines dinámicos**: Configurables sin código
-- **Actividades y compromisos**: Registro de interacciones
-- **Documentos**: Metadatos (archivos en OCI Object Storage)
-- **KPIs base**: Oportunidades por etapa, tasas de conversión
-- **Módulo de usuarios**: Autenticación JWT + RBAC
+### Backend API (Completado ✅)
 
-### Excluye (v0.1)
-- Pipeline de contratación
-- Gestión contractual
-- EMI y facturación
+| Módulo | Endpoints | Descripción |
+|--------|-----------|-------------|
+| **Auth** | 2 | Login JWT, usuario actual |
+| **Empresas** | 4 | CRUD empresas/clientes |
+| **Personas** | 5 | CRUD contactos + asociación empresa |
+| **Pipelines** | 8 | Pipelines y etapas configurables |
+| **Oportunidades** | 6 | CRUD + mover etapa + cerrar |
+| **Actividades** | 4 | Registro de interacciones |
+| **Compromisos** | 7 | Tareas y seguimientos |
+| **Documentos** | 6 | Metadata de archivos |
+| **Total** | **42** | |
 
----
+### Frontend (Pendiente 🚧)
 
-## 🛠️ Stack Tecnológico
+- Login y autenticación
+- Dashboard con métricas
+- Gestión de empresas y contactos
+- Pipeline Kanban (drag & drop)
+- Detalle de oportunidades
 
-### Backend
-| Tecnología | Versión |
-|------------|---------|
-| Java | 21 |
-| Spring Boot | 3.3.0 |
-| Spring Security + JWT | - |
-| Spring Data JPA | - |
-| Oracle Database | 23c |
-| Flyway | - |
-
-### Frontend
-| Tecnología | Versión |
-|------------|---------|
-| Vue | 3.x |
-| Vite | - |
-| Vue Router | - |
-| Pinia | - |
-
-### Infraestructura
-- Oracle Cloud Infrastructure (OCI)
-- OCI Object Storage (documentos)
-- Docker / Docker Compose
-
----
-
-## 🎨 Estándar Visual: Material Design 3
-
-Este proyecto implementa **Material Design 3 (Material You)** como estándar visual obligatorio para todas las aplicaciones SPA internas de Arquitecsoft.
-
-### Principios MD3
-
-#### 1. Design Tokens
-Sistema de tokens de diseño que definen:
-- **Colores**: Paletas tonales (Primary, Secondary, Tertiary, Error, Neutral)
-- **Tipografía**: Type scale (Display, Headline, Title, Body, Label)
-- **Formas**: Border radius (none, extra-small, small, medium, large, extra-large, full)
-- **Elevación**: 6 niveles con shadows y surface tints
-- **Espaciado**: Múltiplos de 4dp
-
-#### 2. Componentes UI Kit
-Componentes obligatorios del sistema:
-- **Buttons**: Filled, Tonal, Outlined, Text, Elevated
-- **Text Fields**: Filled (default), Outlined
-- **Cards**: Elevated, Filled, Outlined
-- **Chips**: Filter, Input, Assist, Suggestion
-- **Dialogs**: Basic, Full-screen
-- **Data Tables**: Con sorting, selection, pagination
-- **Navigation**: Rail (desktop), Drawer (mobile)
-
-#### 3. App Shell
-```
-┌─────────────────────────────────────────────────┐
-│  Top App Bar (64dp)                             │
-├────────┬────────────────────────────────────────┤
-│  Nav   │                                        │
-│  Rail  │         Content Area                   │
-│ (80dp) │                                        │
-│        │                                        │
-└────────┴────────────────────────────────────────┘
-```
-
-#### 4. Responsive Breakpoints
-| Breakpoint | Rango | Navegación | Columnas |
-|------------|-------|------------|----------|
-| Compact | 0-599dp | Drawer | 4 |
-| Medium | 600-839dp | Rail 80dp | 8 |
-| Expanded | 840dp+ | Rail 80dp | 12 |
-
-#### 5. Light/Dark Mode
-- Soporte obligatorio para ambos modos
-- Tokens de color adaptados automáticamente
-- Contraste mínimo WCAG AA (4.5:1 texto, 3:1 componentes)
-
-#### 6. Accesibilidad
-- Focus visible en todos los elementos interactivos
-- Touch targets mínimo 48x48dp
-- Labels ARIA obligatorios
-- Navegación completa por teclado
-
-### Documentación MD3
-| Documento | Descripción |
-|-----------|-------------|
-| `A-01-Estandar-Visual-MD3.md` | Patrones visuales y layouts |
-| `A-02-Design-Tokens-MD3.md` | Especificación de tokens |
-| `A-03-UI-Kit-MD3.md` | Catálogo de componentes |
-| `A-04-Estructura-Tecnica-Frontend.md` | Arquitectura frontend |
-| `A-05-Checklist-Validacion-MD3.md` | Checklist de validación |
-
-### Prohibiciones
-- ❌ Bootstrap, Vuetify, Ant Design, PrimeVue
-- ❌ Colores hardcoded (usar tokens)
-- ❌ Tamaños en px sin tokens
-- ❌ Componentes custom que dupliquen MD3
-- ❌ Librerías externas de modales/toasts
-
----
-
-## 📁 Estructura del Proyecto
+## 🏗️ Estructura del Proyecto
 
 ```
 gestion-comercial/
 ├── backend/
 │   ├── src/main/java/com/arquitecsoft/gestion/
 │   │   ├── domain/
-│   │   │   ├── auth/          # Autenticación
-│   │   │   ├── usuario/       # Usuarios del sistema
-│   │   │   ├── empresa/       # Empresas
-│   │   │   ├── persona/       # Personas de contacto
-│   │   │   ├── oportunidad/   # Oportunidades
-│   │   │   ├── pipeline/      # Pipelines y etapas
-│   │   │   ├── actividad/     # Actividades
-│   │   │   └── documento/     # Documentos
+│   │   │   ├── actividad/
+│   │   │   ├── auth/
+│   │   │   ├── documento/
+│   │   │   ├── empresa/
+│   │   │   ├── oportunidad/
+│   │   │   ├── persona/
+│   │   │   ├── pipeline/
+│   │   │   └── usuario/
 │   │   └── infrastructure/
-│   │       ├── security/      # JWT, filtros
-│   │       └── exception/     # Manejo de errores
-│   └── src/main/resources/
-│       └── application.yml
-├── frontend/                   # (Pendiente)
-├── docs/                       # Documentación
-└── docker-compose.yml
+│   │       ├── dto/
+│   │       ├── exception/
+│   │       └── security/
+│   ├── src/main/resources/
+│   │   └── application.yml
+│   └── pom.xml
+├── frontend/                    # Pendiente
+├── docs/
+│   ├── A-01-Guia-Tokens-MD3.md
+│   ├── A-02-UI-Kit-Componentes.md
+│   ├── B-01-Modelo-Conceptual.md
+│   ├── B-02-Modelo-Fisico-DDL.md
+│   ├── B-03-Contrato-API-OpenAPI.md
+│   └── B-04-Matriz-Reglas-Negocio.md
+└── README.md
 ```
 
----
+## ⚡ Quick Start
 
-## 🚀 Inicio Rápido
+### Prerrequisitos
 
-### Requisitos
-- Java 21
+- Java 21+
 - Maven 3.9+
-- Oracle Database (o acceso a instancia remota)
+- Oracle 23c (o conexión a instancia existente)
 
-### Backend
+### Configuración
 
-```bash
-cd backend
+1. **Clonar repositorio:**
+   ```bash
+   git clone https://github.com/hjcuervo/gestion-comercial.git
+   cd gestion-comercial/backend
+   ```
 
-# Configurar variables (o editar application.yml)
-export DB_URL=jdbc:oracle:thin:@host:port/service
-export DB_USERNAME=usuario
-export DB_PASSWORD=password
-export JWT_SECRET=clave-secreta-minimo-64-caracteres
+2. **Configurar base de datos** en `src/main/resources/application.yml`:
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:oracle:thin:@//localhost:1521/FREEPDB1
+       username: ARQGCDEV
+       password: tu_password
+   ```
 
-# Compilar
-./mvnw clean package -DskipTests
+3. **Compilar:**
+   ```bash
+   ./mvnw clean package -DskipTests
+   ```
 
-# Ejecutar
-java -jar target/gestion-comercial-0.1.0.jar
-```
+4. **Ejecutar:**
+   ```bash
+   java -jar target/gestion-comercial-0.1.0.jar
+   ```
 
-### Verificar funcionamiento
+5. **Probar:**
+   ```bash
+   # Login
+   curl -X POST http://localhost:8080/api/v1/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"username":"admin","password":"admin123"}'
+   
+   # Usar el token en requests
+   curl -H "Authorization: Bearer <TOKEN>" \
+     http://localhost:8080/api/v1/empresas
+   ```
 
-```bash
-# Login
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}'
-
-# Endpoint protegido (usar token del login)
-curl -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:8080/api/v1/auth/me
-```
-
----
-
-## 📊 Modelo de Datos
-
-### Entidades Principales
-| Entidad | Descripción |
-|---------|-------------|
-| `GC_USUARIO` | Usuarios del sistema |
-| `GC_EMPRESA` | Empresas (prospectos/clientes/aliados) |
-| `GC_PERSONA` | Personas de contacto |
-| `GC_PIPELINE` | Pipelines configurables |
-| `GC_ETAPA` | Etapas de pipeline |
-| `GC_OPORTUNIDAD` | Oportunidades comerciales |
-| `GC_ACTIVIDAD` | Actividades registradas |
-| `GC_COMPROMISO` | Compromisos derivados |
-| `GC_DOCUMENTO` | Metadatos de documentos |
-
-### Relaciones N:M
-- `GC_PERSONA_EMPRESA`: Persona ↔ Empresa
-- `GC_OPORTUNIDAD_RESPONSABLE`: Oportunidad ↔ Usuario/Persona
-- `GC_OPORTUNIDAD_CONTACTO`: Oportunidad ↔ PersonaEmpresa
-- `GC_ACTIVIDAD_PARTICIPANTE`: Actividad ↔ Usuario/Persona
-- `GC_COMPROMISO_RESPONSABLE`: Compromiso ↔ Usuario/Persona
-
----
-
-## 🔐 API REST
-
-Base URL: `/api/v1`
+## 📡 API Endpoints
 
 ### Autenticación
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/auth/login` | Iniciar sesión |
-| GET | `/auth/me` | Usuario actual |
-
-### Recursos (en desarrollo)
-- `/empresas` - CRUD de empresas
-- `/personas` - CRUD de personas
-- `/pipelines` - Configuración de pipelines
-- `/oportunidades` - Gestión de oportunidades
-- `/actividades` - Registro de actividades
-- `/compromisos` - Gestión de compromisos
-- `/documentos` - Gestión de documentos
-- `/catalogos` - Catálogos del sistema
-
-### Formato de Errores
-```json
-{
-  "code": "VALIDATION_ERROR",
-  "message": "Error de validación",
-  "fieldErrors": [
-    {"field": "nombre", "message": "El campo es requerido"}
-  ],
-  "timestamp": "2026-02-07T12:00:00"
-}
+```
+POST /api/v1/auth/login          # Obtener JWT
+GET  /api/v1/auth/me             # Usuario actual
 ```
 
----
+### Empresas
+```
+GET    /api/v1/empresas          # Listar (filtros: q, tipo, estado)
+GET    /api/v1/empresas/{id}     # Obtener por ID
+POST   /api/v1/empresas          # Crear
+PUT    /api/v1/empresas/{id}     # Actualizar
+```
 
-## 📝 Reglas de Negocio
+### Personas
+```
+GET    /api/v1/personas          # Listar (filtros: q, empresa_id)
+GET    /api/v1/personas/{id}     # Obtener con empresas
+POST   /api/v1/personas          # Crear
+PUT    /api/v1/personas/{id}     # Actualizar
+POST   /api/v1/personas/{id}/empresas  # Asociar a empresa
+```
 
-| Código | Regla |
-|--------|-------|
-| RB-01 | Una oportunidad pertenece a un único pipeline y etapa |
-| RB-02 | Pipelines y etapas son configurables sin límite |
-| RB-03 | Movimientos entre etapas registran auditoría |
-| RB-04 | Cierre PERDIDA/NO_CONCRETADA requiere motivo |
-| RB-05 | Modo guía por defecto (permite saltar etapas) |
-| RB-06 | Toda acción relevante queda auditada |
+### Pipelines y Etapas
+```
+GET    /api/v1/pipelines         # Listar
+GET    /api/v1/pipelines/activos # Solo activos
+GET    /api/v1/pipelines/{id}    # Con etapas
+POST   /api/v1/pipelines         # Crear
+PUT    /api/v1/pipelines/{id}    # Actualizar
 
----
+GET    /api/v1/pipelines/{id}/etapas           # Listar etapas
+POST   /api/v1/pipelines/{id}/etapas           # Crear etapa
+PUT    /api/v1/pipelines/{id}/etapas/{etapaId} # Actualizar etapa
+```
 
-## 👥 Roles
+### Oportunidades
+```
+GET    /api/v1/oportunidades     # Listar (filtros: empresa_id, pipeline_id, etapa_id, estado)
+GET    /api/v1/oportunidades/{id}             # Obtener
+POST   /api/v1/oportunidades                  # Crear
+PUT    /api/v1/oportunidades/{id}             # Actualizar
+POST   /api/v1/oportunidades/{id}/mover-etapa # Cambiar etapa
+POST   /api/v1/oportunidades/{id}/cerrar      # Cerrar (GANADA/PERDIDA/NO_CONCRETADA)
+```
 
-| Rol | Descripción |
-|-----|-------------|
-| `ADMIN` | Administrador del sistema |
-| `COMERCIAL` | Usuario comercial |
-| `LECTURA_KPI` | Solo lectura de reportes |
+### Actividades
+```
+GET    /api/v1/actividades                    # Listar
+GET    /api/v1/actividades/{id}               # Obtener
+GET    /api/v1/actividades/oportunidad/{id}   # Por oportunidad
+POST   /api/v1/actividades                    # Crear
+```
 
----
+### Compromisos
+```
+GET    /api/v1/compromisos                    # Listar
+GET    /api/v1/compromisos/{id}               # Obtener
+GET    /api/v1/compromisos/oportunidad/{id}   # Por oportunidad
+GET    /api/v1/compromisos/pendientes         # Solo pendientes
+POST   /api/v1/compromisos                    # Crear
+PUT    /api/v1/compromisos/{id}               # Actualizar
+POST   /api/v1/compromisos/{id}/completar     # Marcar completado
+```
 
-## 📚 Documentación Adicional
+### Documentos
+```
+GET    /api/v1/documentos                     # Listar
+GET    /api/v1/documentos/{id}                # Obtener
+GET    /api/v1/documentos/oportunidad/{id}    # Por oportunidad
+GET    /api/v1/documentos/actividad/{id}      # Por actividad
+POST   /api/v1/documentos                     # Crear metadata
+DELETE /api/v1/documentos/{id}                # Eliminar
+```
 
-- `docs/B-01-Modelo-Logico-Datos.md` - Modelo lógico
-- `docs/B-02-Modelo-Fisico-DDL.md` - Scripts DDL Oracle
-- `docs/B-03-Contrato-API-OpenAPI.md` - Especificación OpenAPI
-- `docs/B-04-Matriz-Reglas-Negocio.md` - Matriz de validaciones
+## 🗃️ Modelo de Datos
 
----
+### Entidades Principales
+
+```
+GC_EMPRESA          # Empresas/Clientes
+GC_PERSONA          # Contactos
+GC_PERSONA_EMPRESA  # Relación N:M persona-empresa
+GC_PIPELINE         # Pipelines configurables
+GC_ETAPA            # Etapas de cada pipeline
+GC_OPORTUNIDAD      # Oportunidades comerciales
+GC_ACTIVIDAD        # Actividades realizadas
+GC_COMPROMISO       # Tareas y compromisos
+GC_DOCUMENTO        # Metadata de archivos
+GC_CATALOGO         # Catálogos (tipos, motivos)
+GC_USUARIO          # Usuarios del sistema
+```
+
+### Estados de Oportunidad
+
+| Estado | Descripción |
+|--------|-------------|
+| `ABIERTA` | Nueva oportunidad |
+| `SEGUIMIENTO` | En proceso activo |
+| `GANADA` | Cerrada exitosamente |
+| `PERDIDA` | Perdida ante competencia |
+| `NO_CONCRETADA` | No se concretó el negocio |
+
+## 🎨 Material Design 3
+
+El frontend debe implementar MD3 siguiendo los documentos:
+- `docs/A-01-Guia-Tokens-MD3.md` - Tokens de diseño
+- `docs/A-02-UI-Kit-Componentes.md` - Componentes UI
+
+**Colores principales:**
+- Primary: `#1A73E8` (Azul corporativo)
+- Secondary: `#34A853` (Verde éxito)
+- Error: `#EA4335`
+
+## 📝 Documentación
+
+| Documento | Descripción |
+|-----------|-------------|
+| `B-01-Modelo-Conceptual.md` | Modelo entidad-relación |
+| `B-02-Modelo-Fisico-DDL.md` | Scripts DDL Oracle |
+| `B-03-Contrato-API-OpenAPI.md` | Especificación OpenAPI |
+| `B-04-Matriz-Reglas-Negocio.md` | Reglas de validación |
+
+## 🔒 Seguridad
+
+- Autenticación JWT con expiración de 8 horas
+- Endpoints protegidos (excepto `/api/v1/auth/**`)
+- Passwords hasheados con BCrypt
+- CORS configurado para desarrollo local
+
+## 👥 Equipo
+
+- **ArquitecSoft** - Desarrollo
 
 ## 📄 Licencia
 
-Uso interno - Propiedad de Arquitecsoft - Confidencial
-
----
-
-*Última actualización: Febrero 2026*
+Propietario - ArquitecSoft © 2026
