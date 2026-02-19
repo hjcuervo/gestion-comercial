@@ -1,0 +1,135 @@
+/* ============================================
+   AURORA DARK - Design System
+   Sistema de Gestión Comercial
+   ============================================ */
+
+:root {
+  /* ========== Core Colors ========== */
+  
+  /* Background Layers */
+  --aurora-bg-deep: #050510;
+  --aurora-bg-base: #0c0c1e;
+  --aurora-bg-elevated: #12122a;
+  --aurora-bg-surface: #1a1a36;
+  --aurora-bg-overlay: rgba(255, 255, 255, 0.03);
+  
+  /* Accent Colors */
+  --aurora-primary: #7c3aed;
+  --aurora-primary-light: #a78bfa;
+  --aurora-primary-dark: #5b21b6;
+  
+  --aurora-secondary: #2dd4bf;
+  --aurora-secondary-light: #5eead4;
+  --aurora-secondary-dark: #14b8a6;
+  
+  --aurora-accent-pink: #f472b6;
+  --aurora-accent-blue: #38bdf8;
+  --aurora-accent-orange: #fb923c;
+  
+  /* Semantic Colors */
+  --aurora-success: #22c55e;
+  --aurora-success-bg: rgba(34, 197, 94, 0.15);
+  --aurora-warning: #eab308;
+  --aurora-warning-bg: rgba(234, 179, 8, 0.15);
+  --aurora-error: #ef4444;
+  --aurora-error-bg: rgba(239, 68, 68, 0.15);
+  --aurora-info: #3b82f6;
+  --aurora-info-bg: rgba(59, 130, 246, 0.15);
+  
+  /* Text Colors */
+  --aurora-text-primary: #ffffff;
+  --aurora-text-secondary: rgba(255, 255, 255, 0.7);
+  --aurora-text-tertiary: rgba(255, 255, 255, 0.5);
+  --aurora-text-muted: rgba(255, 255, 255, 0.3);
+  
+  /* Border Colors */
+  --aurora-border: rgba(255, 255, 255, 0.08);
+  --aurora-border-light: rgba(255, 255, 255, 0.12);
+  --aurora-border-focus: var(--aurora-primary);
+  
+  /* Gradients */
+  --aurora-gradient-primary: linear-gradient(135deg, #7c3aed 0%, #2dd4bf 100%);
+  --aurora-gradient-glow: linear-gradient(135deg, rgba(124, 58, 237, 0.4) 0%, rgba(45, 212, 191, 0.4) 100%);
+  --aurora-gradient-card: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(45, 212, 191, 0.05) 100%);
+  --aurora-gradient-subtle: linear-gradient(180deg, rgba(124, 58, 237, 0.05) 0%, transparent 100%);
+  
+  /* Aurora Background Effect */
+  --aurora-effect: 
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(45, 212, 191, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 40% 80%, rgba(244, 114, 182, 0.08) 0%, transparent 50%);
+  
+  /* ========== Typography ========== */
+  --aurora-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --aurora-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Font Sizes */
+  --aurora-text-xs: 0.75rem;     /* 12px */
+  --aurora-text-sm: 0.875rem;    /* 14px */
+  --aurora-text-base: 1rem;      /* 16px */
+  --aurora-text-lg: 1.125rem;    /* 18px */
+  --aurora-text-xl: 1.25rem;     /* 20px */
+  --aurora-text-2xl: 1.5rem;     /* 24px */
+  --aurora-text-3xl: 1.875rem;   /* 30px */
+  --aurora-text-4xl: 2.25rem;    /* 36px */
+  --aurora-text-5xl: 3rem;       /* 48px */
+  
+  /* Font Weights */
+  --aurora-font-normal: 400;
+  --aurora-font-medium: 500;
+  --aurora-font-semibold: 600;
+  --aurora-font-bold: 700;
+  
+  /* Line Heights */
+  --aurora-leading-tight: 1.25;
+  --aurora-leading-normal: 1.5;
+  --aurora-leading-relaxed: 1.75;
+  
+  /* ========== Spacing ========== */
+  --aurora-space-1: 0.25rem;   /* 4px */
+  --aurora-space-2: 0.5rem;    /* 8px */
+  --aurora-space-3: 0.75rem;   /* 12px */
+  --aurora-space-4: 1rem;      /* 16px */
+  --aurora-space-5: 1.25rem;   /* 20px */
+  --aurora-space-6: 1.5rem;    /* 24px */
+  --aurora-space-8: 2rem;      /* 32px */
+  --aurora-space-10: 2.5rem;   /* 40px */
+  --aurora-space-12: 3rem;     /* 48px */
+  --aurora-space-16: 4rem;     /* 64px */
+  
+  /* ========== Border Radius ========== */
+  --aurora-radius-sm: 6px;
+  --aurora-radius-md: 10px;
+  --aurora-radius-lg: 14px;
+  --aurora-radius-xl: 20px;
+  --aurora-radius-2xl: 28px;
+  --aurora-radius-full: 9999px;
+  
+  /* ========== Shadows ========== */
+  --aurora-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --aurora-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --aurora-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --aurora-shadow-glow-primary: 0 0 40px rgba(124, 58, 237, 0.3);
+  --aurora-shadow-glow-secondary: 0 0 40px rgba(45, 212, 191, 0.3);
+  
+  /* ========== Transitions ========== */
+  --aurora-transition-fast: 150ms ease;
+  --aurora-transition-base: 250ms ease;
+  --aurora-transition-slow: 400ms ease;
+  --aurora-transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* ========== Z-Index ========== */
+  --aurora-z-dropdown: 100;
+  --aurora-z-sticky: 200;
+  --aurora-z-fixed: 300;
+  --aurora-z-modal-backdrop: 400;
+  --aurora-z-modal: 500;
+  --aurora-z-popover: 600;
+  --aurora-z-tooltip: 700;
+  
+  /* ========== Layout ========== */
+  --aurora-nav-width: 72px;
+  --aurora-nav-expanded: 260px;
+  --aurora-header-height: 64px;
+  --aurora-content-max-width: 1400px;
+}

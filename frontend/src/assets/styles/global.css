@@ -1,0 +1,230 @@
+/* ============================================
+   AURORA DARK - Global Styles
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* ========== Reset ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--aurora-font-family);
+  font-size: var(--aurora-text-base);
+  font-weight: var(--aurora-font-normal);
+  line-height: var(--aurora-leading-normal);
+  color: var(--aurora-text-primary);
+  background-color: var(--aurora-bg-base);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Aurora Background Effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--aurora-effect);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+/* ========== Material Icons ========== */
+.material-icons-round,
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+}
+
+/* ========== Typography ========== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--aurora-font-semibold);
+  line-height: var(--aurora-leading-tight);
+  color: var(--aurora-text-primary);
+}
+
+h1 { font-size: var(--aurora-text-4xl); }
+h2 { font-size: var(--aurora-text-3xl); }
+h3 { font-size: var(--aurora-text-2xl); }
+h4 { font-size: var(--aurora-text-xl); }
+h5 { font-size: var(--aurora-text-lg); }
+h6 { font-size: var(--aurora-text-base); }
+
+p {
+  color: var(--aurora-text-secondary);
+}
+
+a {
+  color: var(--aurora-primary-light);
+  text-decoration: none;
+  transition: color var(--aurora-transition-fast);
+}
+
+a:hover {
+  color: var(--aurora-secondary);
+}
+
+/* ========== Selection ========== */
+::selection {
+  background: var(--aurora-primary);
+  color: white;
+}
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--aurora-bg-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--aurora-border-light);
+  border-radius: var(--aurora-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--aurora-text-muted);
+}
+
+/* ========== Focus States ========== */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--aurora-primary);
+  outline-offset: 2px;
+}
+
+/* ========== Utility Classes ========== */
+
+/* Text Colors */
+.text-primary { color: var(--aurora-text-primary); }
+.text-secondary { color: var(--aurora-text-secondary); }
+.text-tertiary { color: var(--aurora-text-tertiary); }
+.text-muted { color: var(--aurora-text-muted); }
+.text-accent { color: var(--aurora-primary-light); }
+.text-success { color: var(--aurora-success); }
+.text-warning { color: var(--aurora-warning); }
+.text-error { color: var(--aurora-error); }
+
+/* Flexbox */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.flex-1 { flex: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+/* Grid */
+.grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Gaps */
+.gap-1 { gap: var(--aurora-space-1); }
+.gap-2 { gap: var(--aurora-space-2); }
+.gap-3 { gap: var(--aurora-space-3); }
+.gap-4 { gap: var(--aurora-space-4); }
+.gap-6 { gap: var(--aurora-space-6); }
+.gap-8 { gap: var(--aurora-space-8); }
+
+/* Transitions */
+.transition { transition: all var(--aurora-transition-base); }
+.transition-fast { transition: all var(--aurora-transition-fast); }
+
+/* Cursor */
+.cursor-pointer { cursor: pointer; }
+
+/* ========== Animations ========== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.5);
+  }
+}
+
+.animate-fadeIn { animation: fadeIn var(--aurora-transition-base) ease-out; }
+.animate-slideUp { animation: slideUp var(--aurora-transition-base) ease-out; }
+.animate-slideIn { animation: slideIn var(--aurora-transition-base) ease-out; }
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
