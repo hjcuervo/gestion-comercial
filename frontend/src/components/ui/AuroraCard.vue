@@ -4,7 +4,7 @@
       <slot name="header">
         <div class="aurora-card__header-content">
           <div v-if="icon" class="aurora-card__icon">
-            <span class="material-icons-round">{{ icon }}</span>
+            <span class="material-icons">{{ icon }}</span>
           </div>
           <div class="aurora-card__titles">
             <h3 v-if="title" class="aurora-card__title">{{ title }}</h3>
@@ -117,7 +117,7 @@ defineProps({
   border-radius: var(--aurora-radius-md);
 }
 
-.aurora-card__icon .material-icons-round {
+.aurora-card__icon .material-icons {
   font-size: 22px;
   color: var(--aurora-primary-light);
 }

@@ -15,11 +15,11 @@
     @click="$emit('click', $event)"
   >
     <span v-if="loading" class="aurora-btn__loader"></span>
-    <span v-else-if="icon" class="material-icons-round aurora-btn__icon">{{ icon }}</span>
+    <span v-else-if="icon" class="material-icons aurora-btn__icon">{{ icon }}</span>
     <span v-if="!iconOnly && $slots.default" class="aurora-btn__label">
       <slot />
     </span>
-    <span v-if="trailingIcon && !iconOnly" class="material-icons-round aurora-btn__icon aurora-btn__icon--trailing">
+    <span v-if="trailingIcon && !iconOnly" class="material-icons aurora-btn__icon aurora-btn__icon--trailing">
       {{ trailingIcon }}
     </span>
   </button>

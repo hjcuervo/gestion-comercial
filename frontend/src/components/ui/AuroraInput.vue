@@ -6,7 +6,7 @@
     </label>
     
     <div class="aurora-input__wrapper">
-      <span v-if="icon" class="material-icons-round aurora-input__icon">{{ icon }}</span>
+      <span v-if="icon" class="material-icons aurora-input__icon">{{ icon }}</span>
       
       <input
         :id="id"
@@ -28,7 +28,7 @@
         class="aurora-input__clear"
         @click="$emit('update:modelValue', '')"
       >
-        <span class="material-icons-round">close</span>
+        <span class="material-icons">close</span>
       </button>
       
       <button 
@@ -37,7 +37,7 @@
         class="aurora-input__trailing"
         @click="$emit('trailing-click')"
       >
-        <span class="material-icons-round">{{ trailingIcon }}</span>
+        <span class="material-icons">{{ trailingIcon }}</span>
       </button>
     </div>
     
@@ -177,8 +177,8 @@ const inputRef = ref(null);
   color: var(--aurora-text-primary);
 }
 
-.aurora-input__clear .material-icons-round,
-.aurora-input__trailing .material-icons-round {
+.aurora-input__clear .material-icons,
+.aurora-input__trailing .material-icons {
   font-size: 18px;
 }
 

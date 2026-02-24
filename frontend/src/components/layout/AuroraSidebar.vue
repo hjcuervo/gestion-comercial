@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="aurora-sidebar__logo">
       <div class="aurora-sidebar__logo-icon">
-        <span class="material-icons-round">auto_graph</span>
+        <span class="material-icons">auto_graph</span>
       </div>
       <transition name="fade">
         <span v-if="expanded" class="aurora-sidebar__logo-text">GestCom</span>
@@ -12,7 +12,7 @@
     
     <!-- Toggle Button -->
     <button class="aurora-sidebar__toggle" @click="$emit('toggle')">
-      <span class="material-icons-round">{{ expanded ? 'chevron_left' : 'chevron_right' }}</span>
+      <span class="material-icons">{{ expanded ? 'chevron_left' : 'chevron_right' }}</span>
     </button>
     
     <!-- Navigation -->
@@ -24,7 +24,7 @@
           :to="item.path"
           :class="['aurora-sidebar__item', { 'aurora-sidebar__item--active': isActive(item.path) }]"
         >
-          <span class="material-icons-round aurora-sidebar__item-icon">{{ item.icon }}</span>
+          <span class="material-icons aurora-sidebar__item-icon">{{ item.icon }}</span>
           <transition name="fade">
             <span v-if="expanded" class="aurora-sidebar__item-label">{{ item.label }}</span>
           </transition>
@@ -41,7 +41,7 @@
           :to="item.path"
           :class="['aurora-sidebar__item', { 'aurora-sidebar__item--active': isActive(item.path) }]"
         >
-          <span class="material-icons-round aurora-sidebar__item-icon">{{ item.icon }}</span>
+          <span class="material-icons aurora-sidebar__item-icon">{{ item.icon }}</span>
           <transition name="fade">
             <span v-if="expanded" class="aurora-sidebar__item-label">{{ item.label }}</span>
           </transition>
@@ -65,7 +65,7 @@
       </div>
       
       <button class="aurora-sidebar__logout" @click="$emit('logout')">
-        <span class="material-icons-round">logout</span>
+        <span class="material-icons">logout</span>
         <transition name="fade">
           <span v-if="expanded">Salir</span>
         </transition>
@@ -162,7 +162,7 @@ const userInitials = computed(() => {
   flex-shrink: 0;
 }
 
-.aurora-sidebar__logo-icon .material-icons-round {
+.aurora-sidebar__logo-icon .material-icons {
   font-size: 22px;
   color: white;
 }
@@ -202,7 +202,7 @@ const userInitials = computed(() => {
   color: white;
 }
 
-.aurora-sidebar__toggle .material-icons-round {
+.aurora-sidebar__toggle .material-icons {
   font-size: 16px;
 }
 
@@ -367,7 +367,7 @@ const userInitials = computed(() => {
   color: var(--aurora-error);
 }
 
-.aurora-sidebar__logout .material-icons-round {
+.aurora-sidebar__logout .material-icons {
   font-size: 22px;
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div :class="['aurora-stat', { 'aurora-stat--trend-up': trendUp, 'aurora-stat--trend-down': trendDown }]">
     <div class="aurora-stat__icon" :style="{ background: iconGradient }">
-      <span class="material-icons-round">{{ icon }}</span>
+      <span class="material-icons">{{ icon }}</span>
     </div>
     
     <div class="aurora-stat__content">
@@ -10,7 +10,7 @@
     </div>
     
     <div v-if="trend" class="aurora-stat__trend">
-      <span class="material-icons-round aurora-stat__trend-icon">
+      <span class="material-icons aurora-stat__trend-icon">
         {{ trendUp ? 'trending_up' : 'trending_down' }}
       </span>
       <span class="aurora-stat__trend-value">{{ trend }}</span>
@@ -104,7 +104,7 @@ const formattedValue = computed(() => {
   flex-shrink: 0;
 }
 
-.aurora-stat__icon .material-icons-round {
+.aurora-stat__icon .material-icons {
   font-size: 26px;
   color: var(--aurora-primary-light);
 }

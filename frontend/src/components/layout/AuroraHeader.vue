@@ -3,7 +3,7 @@
     <div class="aurora-header__left">
       <div class="aurora-header__breadcrumb">
         <router-link to="/" class="aurora-header__breadcrumb-item">
-          <span class="material-icons-round">home</span>
+          <span class="material-icons">home</span>
         </router-link>
         <span v-if="breadcrumbs.length" class="aurora-header__breadcrumb-separator">/</span>
         <template v-for="(crumb, index) in breadcrumbs" :key="crumb.path">
@@ -24,7 +24,7 @@
     <div class="aurora-header__right">
       <!-- Search -->
       <div class="aurora-header__search">
-        <span class="material-icons-round">search</span>
+        <span class="material-icons">search</span>
         <input type="text" placeholder="Buscar..." v-model="searchQuery" @input="$emit('search', searchQuery)" />
         <kbd>⌘K</kbd>
       </div>
@@ -32,7 +32,7 @@
       <!-- Actions -->
       <div class="aurora-header__actions">
         <button class="aurora-header__action" @click="$emit('notification-click')">
-          <span class="material-icons-round">notifications</span>
+          <span class="material-icons">notifications</span>
           <span v-if="notificationCount" class="aurora-header__badge">{{ notificationCount }}</span>
         </button>
         
@@ -105,7 +105,7 @@ const searchQuery = ref('');
   color: var(--aurora-primary-light);
 }
 
-.aurora-header__breadcrumb-item .material-icons-round {
+.aurora-header__breadcrumb-item .material-icons {
   font-size: 16px;
 }
 
@@ -146,7 +146,7 @@ const searchQuery = ref('');
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
-.aurora-header__search .material-icons-round {
+.aurora-header__search .material-icons {
   font-size: 20px;
   color: var(--aurora-text-tertiary);
 }
@@ -202,7 +202,7 @@ const searchQuery = ref('');
   color: var(--aurora-text-primary);
 }
 
-.aurora-header__action .material-icons-round {
+.aurora-header__action .material-icons {
   font-size: 22px;
 }
 

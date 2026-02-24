@@ -1,226 +1,159 @@
 <template>
-  <AuroraLayout>
+  <Layout>
     <div class="dashboard">
-      <!-- Welcome Section -->
+      <!-- Welcome -->
       <section class="dashboard__welcome animate-slideUp">
         <div class="dashboard__welcome-content">
           <h2 class="dashboard__welcome-title">
-            Bienvenido de nuevo, <span>{{ firstName }}</span>
+            Bienvenido, <span class="gradient-text">{{ firstName }}</span>
           </h2>
           <p class="dashboard__welcome-text">
-            Aquí tienes un resumen de tu actividad comercial de hoy
+            Aquí tienes un resumen de tu actividad comercial
           </p>
         </div>
-        <div class="dashboard__welcome-actions">
-          <AuroraButton variant="primary" icon="add">
-            Nueva Oportunidad
-          </AuroraButton>
-        </div>
+        <Button variant="primary" icon="plus">
+          Nueva Oportunidad
+        </Button>
       </section>
 
-      <!-- Stats Grid -->
+      <!-- Stats -->
       <section class="dashboard__stats">
-        <AuroraStatCard
-          v-for="(stat, index) in stats"
+        <StatCard
+          v-for="(stat, i) in stats"
           :key="stat.label"
-          :icon="stat.icon"
-          :value="stat.value"
-          :label="stat.label"
-          :trend="stat.trend"
-          :trend-up="stat.trendUp"
-          :trend-down="stat.trendDown"
-          :format="stat.format"
-          :color="stat.color"
+          v-bind="stat"
           class="animate-slideUp"
-          :style="{ animationDelay: `${index * 100}ms` }"
+          :style="{ animationDelay: `${(i + 1) * 80}ms` }"
         />
       </section>
 
-      <!-- Main Content -->
+      <!-- Content Grid -->
       <section class="dashboard__content">
-        <!-- Recent Opportunities -->
-        <AuroraCard 
+        <!-- Opportunities -->
+        <Card 
           title="Oportunidades Recientes" 
           subtitle="Últimas actualizaciones"
-          icon="trending_up"
-          class="dashboard__opportunities animate-slideUp"
+          icon="trending-up"
+          class="dashboard__card animate-slideUp"
           style="animation-delay: 400ms"
         >
           <template #actions>
-            <AuroraButton variant="ghost" size="sm" trailing-icon="arrow_forward">
+            <Button variant="ghost" size="sm" trailing-icon="arrow-right">
               Ver todas
-            </AuroraButton>
+            </Button>
           </template>
           
-          <div class="opportunity-list">
-            <div 
-              v-for="opp in recentOpportunities" 
-              :key="opp.id" 
-              class="opportunity-item"
-            >
-              <div class="opportunity-item__info">
-                <span class="opportunity-item__name">{{ opp.nombre }}</span>
-                <span class="opportunity-item__company">{{ opp.empresa }}</span>
+          <div class="opp-list">
+            <div v-for="opp in opportunities" :key="opp.id" class="opp-item">
+              <div class="opp-item__info">
+                <span class="opp-item__name">{{ opp.nombre }}</span>
+                <span class="opp-item__company">{{ opp.empresa }}</span>
               </div>
-              <div class="opportunity-item__meta">
-                <span class="opportunity-item__value">{{ formatCurrency(opp.valor) }}</span>
-                <span :class="['opportunity-item__stage', `opportunity-item__stage--${opp.etapa.toLowerCase()}`]">
+              <div class="opp-item__meta">
+                <span class="opp-item__value">{{ formatCurrency(opp.valor) }}</span>
+                <span :class="['opp-item__stage', `opp-item__stage--${opp.etapaClass}`]">
                   {{ opp.etapa }}
                 </span>
               </div>
             </div>
           </div>
-        </AuroraCard>
+        </Card>
 
-        <!-- Upcoming Commitments -->
-        <AuroraCard 
+        <!-- Commitments -->
+        <Card 
           title="Próximos Compromisos" 
           subtitle="Tareas pendientes"
-          icon="event"
-          class="dashboard__commitments animate-slideUp"
+          icon="calendar"
+          class="dashboard__card animate-slideUp"
           style="animation-delay: 500ms"
         >
-          <div class="commitment-list">
-            <div 
-              v-for="commitment in upcomingCommitments" 
-              :key="commitment.id" 
-              class="commitment-item"
-            >
-              <div :class="['commitment-item__priority', `commitment-item__priority--${commitment.prioridad.toLowerCase()}`]"></div>
-              <div class="commitment-item__content">
-                <span class="commitment-item__title">{{ commitment.descripcion }}</span>
-                <span class="commitment-item__date">
-                  <span class="material-icons-round">schedule</span>
-                  {{ formatDate(commitment.fecha) }}
+          <div class="commit-list">
+            <div v-for="item in commitments" :key="item.id" class="commit-item">
+              <div :class="['commit-item__bar', `commit-item__bar--${item.prioridad}`]"></div>
+              <div class="commit-item__content">
+                <span class="commit-item__title">{{ item.descripcion }}</span>
+                <span class="commit-item__date">
+                  <Icon name="clock" :size="14" />
+                  {{ formatDate(item.fecha) }}
                 </span>
               </div>
-              <AuroraButton variant="ghost" size="sm" icon="check_circle" icon-only />
+              <Button variant="ghost" size="sm" icon="check" icon-only />
             </div>
           </div>
-        </AuroraCard>
+        </Card>
       </section>
 
       <!-- Quick Actions -->
-      <section class="dashboard__quick-actions animate-slideUp" style="animation-delay: 600ms">
+      <section class="dashboard__actions animate-slideUp" style="animation-delay: 600ms">
         <h3 class="dashboard__section-title">Acciones Rápidas</h3>
-        <div class="quick-actions-grid">
+        <div class="actions-grid">
           <button 
             v-for="action in quickActions" 
             :key="action.label"
-            class="quick-action"
-            @click="handleQuickAction(action)"
+            class="action-card"
+            @click="$router.push(action.route)"
           >
-            <span class="material-icons-round quick-action__icon">{{ action.icon }}</span>
-            <span class="quick-action__label">{{ action.label }}</span>
+            <div class="action-card__icon">
+              <Icon :name="action.icon" :size="28" />
+            </div>
+            <span class="action-card__label">{{ action.label }}</span>
           </button>
         </div>
       </section>
     </div>
-  </AuroraLayout>
+  </Layout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
-import AuroraLayout from '@/components/layout/AuroraLayout.vue';
-import AuroraCard from '@/components/ui/AuroraCard.vue';
-import AuroraStatCard from '@/components/ui/AuroraStatCard.vue';
-import AuroraButton from '@/components/ui/AuroraButton.vue';
+import Layout from '@/components/layout/Layout.vue';
+import Card from '@/components/ui/Card.vue';
+import StatCard from '@/components/ui/StatCard.vue';
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 
-const router = useRouter();
 const authStore = useAuthStore();
 
-const firstName = computed(() => {
-  const name = authStore.userName || 'Usuario';
-  return name.split(' ')[0];
-});
+const firstName = computed(() => (authStore.userName || 'Usuario').split(' ')[0]);
 
 const stats = ref([
-  { 
-    icon: 'account_balance_wallet', 
-    value: 450000000, 
-    label: 'Valor en Pipeline', 
-    trend: '+12.5%',
-    trendUp: true,
-    format: 'currency',
-    color: 'primary'
-  },
-  { 
-    icon: 'handshake', 
-    value: 24, 
-    label: 'Oportunidades Activas', 
-    trend: '+3',
-    trendUp: true,
-    format: 'number',
-    color: 'secondary'
-  },
-  { 
-    icon: 'business', 
-    value: 128, 
-    label: 'Empresas Registradas', 
-    format: 'number',
-    color: 'success'
-  },
-  { 
-    icon: 'emoji_events', 
-    value: 87, 
-    label: 'Tasa de Conversión', 
-    trend: '+2.3%',
-    trendUp: true,
-    format: 'percent',
-    color: 'warning'
-  },
+  { icon: 'wallet', value: 450000000, label: 'Valor en Pipeline', trend: '+12.5%', trendUp: true, format: 'currency', color: 'primary' },
+  { icon: 'handshake', value: 24, label: 'Oportunidades Activas', trend: '+3', trendUp: true, format: 'number', color: 'secondary' },
+  { icon: 'business', value: 128, label: 'Empresas Registradas', format: 'number', color: 'success' },
+  { icon: 'trophy', value: 87, label: 'Tasa de Conversión', trend: '+2.3%', trendUp: true, format: 'percent', color: 'warning' },
 ]);
 
-const recentOpportunities = ref([
-  { id: 1, nombre: 'Implementación ERP', empresa: 'Acme Corporation', valor: 150000000, etapa: 'Negociación' },
-  { id: 2, nombre: 'Migración Cloud AWS', empresa: 'Tech Solutions', valor: 85000000, etapa: 'Propuesta' },
-  { id: 3, nombre: 'App Móvil E-commerce', empresa: 'Retail Plus', valor: 45000000, etapa: 'Calificación' },
-  { id: 4, nombre: 'Consultoría Digital', empresa: 'Financial Group', valor: 32000000, etapa: 'Descubrimiento' },
+const opportunities = ref([
+  { id: 1, nombre: 'Implementación ERP', empresa: 'Acme Corporation', valor: 150000000, etapa: 'Negociación', etapaClass: 'negotiation' },
+  { id: 2, nombre: 'Migración Cloud AWS', empresa: 'Tech Solutions', valor: 85000000, etapa: 'Propuesta', etapaClass: 'proposal' },
+  { id: 3, nombre: 'App Móvil E-commerce', empresa: 'Retail Plus', valor: 45000000, etapa: 'Calificación', etapaClass: 'qualification' },
+  { id: 4, nombre: 'Consultoría Digital', empresa: 'Financial Group', valor: 32000000, etapa: 'Descubrimiento', etapaClass: 'discovery' },
 ]);
 
-const upcomingCommitments = ref([
-  { id: 1, descripcion: 'Enviar propuesta técnica a Acme Corp', fecha: '2026-02-19', prioridad: 'alta' },
-  { id: 2, descripcion: 'Reunión de seguimiento con Tech Solutions', fecha: '2026-02-20', prioridad: 'media' },
-  { id: 3, descripcion: 'Demo de producto para Retail Plus', fecha: '2026-02-21', prioridad: 'alta' },
-  { id: 4, descripcion: 'Llamada de cierre con Financial Group', fecha: '2026-02-22', prioridad: 'baja' },
+const commitments = ref([
+  { id: 1, descripcion: 'Enviar propuesta técnica a Acme Corp', fecha: '2026-02-25', prioridad: 'alta' },
+  { id: 2, descripcion: 'Reunión de seguimiento con Tech Solutions', fecha: '2026-02-26', prioridad: 'media' },
+  { id: 3, descripcion: 'Demo de producto para Retail Plus', fecha: '2026-02-27', prioridad: 'alta' },
+  { id: 4, descripcion: 'Llamada de cierre con Financial Group', fecha: '2026-02-28', prioridad: 'baja' },
 ]);
 
 const quickActions = [
-  { icon: 'add_business', label: 'Nueva Empresa', route: '/empresas/nueva' },
-  { icon: 'person_add', label: 'Nuevo Contacto', route: '/personas/nuevo' },
-  { icon: 'note_add', label: 'Nueva Actividad', route: '/actividades/nueva' },
-  { icon: 'assessment', label: 'Ver Reportes', route: '/reportes' },
+  { icon: 'building-add', label: 'Nueva Empresa', route: '/empresas/nueva' },
+  { icon: 'person-add', label: 'Nuevo Contacto', route: '/personas/nuevo' },
+  { icon: 'note-add', label: 'Nueva Actividad', route: '/actividades/nueva' },
+  { icon: 'bar-chart', label: 'Ver Reportes', route: '/reportes' },
 ];
 
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat('es-CO', { 
-    style: 'currency', 
-    currency: 'COP',
-    notation: 'compact',
-    maximumFractionDigits: 0
-  }).format(value);
-};
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('es-CO', { 
-    weekday: 'short',
-    day: 'numeric', 
-    month: 'short' 
-  });
-};
-
-const handleQuickAction = (action) => {
-  router.push(action.route);
-};
+const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', notation: 'compact', maximumFractionDigits: 0 }).format(val);
+const formatDate = (date) => new Date(date).toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
 </script>
 
 <style scoped>
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--aurora-space-6);
+  gap: var(--space-6);
 }
 
 /* Welcome */
@@ -228,237 +161,228 @@ const handleQuickAction = (action) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--aurora-space-6);
-  background: var(--aurora-gradient-card);
-  border: 1px solid var(--aurora-border);
-  border-radius: var(--aurora-radius-xl);
+  padding: var(--space-6);
+  background: var(--gradient-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(20px);
 }
 
 .dashboard__welcome-title {
-  font-size: var(--aurora-text-2xl);
-  font-weight: var(--aurora-font-semibold);
-  color: var(--aurora-text-primary);
-  margin-bottom: var(--aurora-space-2);
-}
-
-.dashboard__welcome-title span {
-  background: var(--aurora-gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--space-1);
 }
 
 .dashboard__welcome-text {
-  font-size: var(--aurora-text-sm);
-  color: var(--aurora-text-tertiary);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
 }
 
 /* Stats */
 .dashboard__stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--aurora-space-4);
+  gap: var(--space-4);
 }
 
 @media (max-width: 1200px) {
-  .dashboard__stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .dashboard__stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .dashboard__stats {
-    grid-template-columns: 1fr;
-  }
+  .dashboard__stats { grid-template-columns: 1fr; }
 }
 
 /* Content */
 .dashboard__content {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
-  gap: var(--aurora-space-4);
+  gap: var(--space-4);
 }
 
 @media (max-width: 1024px) {
-  .dashboard__content {
-    grid-template-columns: 1fr;
-  }
+  .dashboard__content { grid-template-columns: 1fr; }
 }
 
 /* Opportunity List */
-.opportunity-list {
+.opp-list {
   display: flex;
   flex-direction: column;
 }
 
-.opportunity-item {
+.opp-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--aurora-space-4) 0;
-  border-bottom: 1px solid var(--aurora-border);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--duration-fast);
 }
 
-.opportunity-item:last-child {
-  border-bottom: none;
+.opp-item:last-child { border-bottom: none; }
+
+.opp-item:hover {
+  background: var(--glass-bg);
+  margin: 0 calc(var(--space-4) * -1);
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  border-radius: var(--radius-md);
 }
 
-.opportunity-item__info {
+.opp-item__info {
   display: flex;
   flex-direction: column;
-  gap: var(--aurora-space-1);
+  gap: 2px;
 }
 
-.opportunity-item__name {
-  font-size: var(--aurora-text-sm);
-  font-weight: var(--aurora-font-medium);
-  color: var(--aurora-text-primary);
+.opp-item__name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
 }
 
-.opportunity-item__company {
-  font-size: var(--aurora-text-xs);
-  color: var(--aurora-text-tertiary);
+.opp-item__company {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
-.opportunity-item__meta {
+.opp-item__meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--aurora-space-1);
+  gap: var(--space-1);
 }
 
-.opportunity-item__value {
-  font-size: var(--aurora-text-sm);
-  font-weight: var(--aurora-font-semibold);
-  color: var(--aurora-secondary);
+.opp-item__value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--primary);
 }
 
-.opportunity-item__stage {
-  font-size: var(--aurora-text-xs);
-  padding: 2px 8px;
-  border-radius: var(--aurora-radius-full);
-  background: var(--aurora-bg-overlay);
-  color: var(--aurora-text-secondary);
+.opp-item__stage {
+  font-size: var(--text-xs);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
 }
 
-.opportunity-item__stage--negociación {
-  background: var(--aurora-success-bg);
-  color: var(--aurora-success);
-}
-
-.opportunity-item__stage--propuesta {
-  background: var(--aurora-info-bg);
-  color: var(--aurora-info);
-}
+.opp-item__stage--negotiation { background: var(--success-soft); color: var(--success); }
+.opp-item__stage--proposal { background: var(--primary-soft); color: var(--primary); }
+.opp-item__stage--qualification { background: var(--warning-soft); color: var(--warning); }
+.opp-item__stage--discovery { background: var(--secondary-soft); color: var(--secondary); }
 
 /* Commitment List */
-.commitment-list {
+.commit-list {
   display: flex;
   flex-direction: column;
-  gap: var(--aurora-space-3);
+  gap: var(--space-3);
 }
 
-.commitment-item {
+.commit-item {
   display: flex;
   align-items: center;
-  gap: var(--aurora-space-3);
-  padding: var(--aurora-space-3);
-  background: var(--aurora-bg-overlay);
-  border-radius: var(--aurora-radius-lg);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--glass-bg);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-fast);
 }
 
-.commitment-item__priority {
+.commit-item:hover {
+  background: var(--glass-hover);
+}
+
+.commit-item__bar {
   width: 4px;
-  height: 36px;
+  height: 40px;
   border-radius: 2px;
   flex-shrink: 0;
 }
 
-.commitment-item__priority--alta { background: var(--aurora-error); }
-.commitment-item__priority--media { background: var(--aurora-warning); }
-.commitment-item__priority--baja { background: var(--aurora-text-muted); }
+.commit-item__bar--alta { background: var(--error); }
+.commit-item__bar--media { background: var(--warning); }
+.commit-item__bar--baja { background: var(--text-muted); }
 
-.commitment-item__content {
+.commit-item__content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--aurora-space-1);
+  gap: 2px;
   min-width: 0;
 }
 
-.commitment-item__title {
-  font-size: var(--aurora-text-sm);
-  color: var(--aurora-text-primary);
+.commit-item__title {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.commitment-item__date {
+.commit-item__date {
   display: flex;
   align-items: center;
-  gap: var(--aurora-space-1);
-  font-size: var(--aurora-text-xs);
-  color: var(--aurora-text-tertiary);
-}
-
-.commitment-item__date .material-icons-round {
-  font-size: 14px;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
 /* Quick Actions */
 .dashboard__section-title {
-  font-size: var(--aurora-text-sm);
-  font-weight: var(--aurora-font-semibold);
-  color: var(--aurora-text-secondary);
-  margin-bottom: var(--aurora-space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-4);
 }
 
-.quick-actions-grid {
+.actions-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--aurora-space-3);
+  gap: var(--space-3);
 }
 
 @media (max-width: 768px) {
-  .quick-actions-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .actions-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-.quick-action {
+.action-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--aurora-space-2);
-  padding: var(--aurora-space-5);
-  background: var(--aurora-bg-overlay);
-  border: 1px solid var(--aurora-border);
-  border-radius: var(--aurora-radius-xl);
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: all var(--aurora-transition-fast);
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
-.quick-action:hover {
-  background: var(--aurora-gradient-glow);
-  border-color: var(--aurora-primary);
-  transform: translateY(-2px);
+.action-card:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow-sm);
 }
 
-.quick-action__icon {
-  font-size: 28px;
-  color: var(--aurora-primary-light);
+.action-card__icon {
+  color: var(--primary);
 }
 
-.quick-action__label {
-  font-size: var(--aurora-text-sm);
-  font-weight: var(--aurora-font-medium);
-  color: var(--aurora-text-secondary);
+.action-card:hover .action-card__icon {
+  color: var(--text-primary);
 }
 
-.quick-action:hover .quick-action__label {
-  color: var(--aurora-text-primary);
+.action-card__label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.action-card:hover .action-card__label {
+  color: var(--text-primary);
 }
 </style>
