@@ -1,11 +1,9 @@
 <template>
   <nav class="nav-rail">
-    <div class="nav-rail__header">
-      <button class="nav-rail__menu-btn" @click="$emit('toggle-drawer')">
-        <span class="material-icons">menu</span>
-      </button>
+    <div class="nav-rail__logo">
+      <span class="logo-text gradient-text">GC</span>
     </div>
-    
+
     <div class="nav-rail__items">
       <router-link
         v-for="item in items"
@@ -15,16 +13,16 @@
         :class="{ 'nav-rail__item--active': isActive(item.path) }"
       >
         <div class="nav-rail__item-icon">
-          <span class="material-icons">{{ item.icon }}</span>
+          <Icon :name="item.icon" :size="20" />
         </div>
         <span class="nav-rail__item-label">{{ item.label }}</span>
       </router-link>
     </div>
-    
+
     <div class="nav-rail__footer">
       <button class="nav-rail__item" @click="$emit('logout')">
         <div class="nav-rail__item-icon">
-          <span class="material-icons">logout</span>
+          <Icon name="logout" :size="20" />
         </div>
         <span class="nav-rail__item-label">Salir</span>
       </button>
@@ -34,6 +32,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import Icon from '@/components/ui/Icon.vue';
 
 const route = useRoute();
 
@@ -56,38 +55,29 @@ const isActive = (path) => {
 .nav-rail {
   display: flex;
   flex-direction: column;
-  width: var(--md-sys-layout-nav-rail-width);
+  width: var(--sidebar-width);
   height: 100vh;
-  background-color: var(--md-sys-color-surface-container);
-  padding: var(--md-sys-spacing-md) 0;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--glass-border);
+  padding: var(--space-4) 0;
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-fixed);
 }
 
-.nav-rail__header {
+.nav-rail__logo {
   display: flex;
   justify-content: center;
-  padding-bottom: var(--md-sys-spacing-md);
-}
-
-.nav-rail__menu-btn {
-  width: 56px;
-  height: 56px;
-  border: none;
-  background: transparent;
-  border-radius: var(--md-sys-shape-corner-large);
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  color: var(--md-sys-color-on-surface);
-  transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  padding-bottom: var(--space-6);
 }
 
-.nav-rail__menu-btn:hover {
-  background-color: var(--md-sys-color-surface-container-high);
+.logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .nav-rail__items {
@@ -95,56 +85,63 @@ const isActive = (path) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--md-sys-spacing-xs);
-  padding: 0 var(--md-sys-spacing-sm);
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
 }
 
 .nav-rail__item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--md-sys-spacing-xs);
-  padding: var(--md-sys-spacing-xs);
+  gap: 2px;
+  padding: var(--space-2) var(--space-1);
   width: 100%;
   text-decoration: none;
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--text-muted);
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: var(--md-sys-shape-corner-large);
-  transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
 .nav-rail__item:hover {
-  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--text-secondary);
+  background: var(--glass-hover);
 }
 
 .nav-rail__item--active {
-  color: var(--md-sys-color-on-secondary-container);
+  color: var(--primary);
 }
 
 .nav-rail__item-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 32px;
-  border-radius: var(--md-sys-shape-corner-full);
-  transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  width: 48px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
 .nav-rail__item--active .nav-rail__item-icon {
-  background-color: var(--md-sys-color-secondary-container);
+  background: var(--primary-soft);
 }
 
 .nav-rail__item-label {
-  font: var(--md-sys-typescale-label-medium);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .nav-rail__footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 var(--md-sys-spacing-sm);
+  padding: 0 var(--space-2);
+  border-top: 1px solid var(--glass-border);
+  padding-top: var(--space-4);
 }
 </style>

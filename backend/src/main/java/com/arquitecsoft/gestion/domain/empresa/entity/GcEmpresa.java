@@ -11,27 +11,38 @@ public class GcEmpresa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "tipo", nullable = false, length = 20)
-    @Enumerated(EnumType.STRING)
-    private TipoEmpresa tipo;
-
     @Column(name = "razon_social", nullable = false, length = 200)
     private String razonSocial;
+
+    @Column(name = "tipo_doc", length = 20)
+    private String tipoDoc;
 
     @Column(name = "identificacion_tributaria", length = 50)
     private String identificacionTributaria;
 
+    @Column(name = "dv", nullable = false)
+    private Integer dv;
+
+    @Column(name = "pais", length = 3)
+    private String pais;
+
+    @Column(name = "departamento", length = 10)
+    private String departamento;
+
+    @Column(name = "ciudad", length = 10)
+    private String ciudad;
+
+    @Column(name = "direccion_fisica", length = 500)
+    private String direccionFisica;
+
     @Column(name = "sitio_web", length = 200)
     private String sitioWeb;
-
-    @Column(name = "pais", length = 100)
-    private String pais;
 
     @Column(name = "estado", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private EstadoEmpresa estado = EstadoEmpresa.ACTIVA;
 
-    @Column(name = "creado_por")
+    @Column(name = "creado_por", nullable = false)
     private Long creadoPor;
 
     @Column(name = "modificado_por")
@@ -43,23 +54,11 @@ public class GcEmpresa {
     @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
-    public enum TipoEmpresa {
-        EMPRESA, MULTINACIONAL, ALIADO
-    }
-
     public enum EstadoEmpresa {
         ACTIVA, INACTIVA
     }
 
-    // Constructors
-    public GcEmpresa() {
-    }
-
-    public GcEmpresa(TipoEmpresa tipo, String razonSocial) {
-        this.tipo = tipo;
-        this.razonSocial = razonSocial;
-        this.estado = EstadoEmpresa.ACTIVA;
-    }
+    public GcEmpresa() {}
 
     @PrePersist
     protected void onCreate() {
@@ -72,83 +71,45 @@ public class GcEmpresa {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getRazonSocial() { return razonSocial; }
+    public void setRazonSocial(String razonSocial) { this.razonSocial = razonSocial; }
 
-    public TipoEmpresa getTipo() {
-        return tipo;
-    }
+    public String getTipoDoc() { return tipoDoc; }
+    public void setTipoDoc(String tipoDoc) { this.tipoDoc = tipoDoc; }
 
-    public void setTipo(TipoEmpresa tipo) {
-        this.tipo = tipo;
-    }
+    public String getIdentificacionTributaria() { return identificacionTributaria; }
+    public void setIdentificacionTributaria(String identificacionTributaria) { this.identificacionTributaria = identificacionTributaria; }
 
-    public String getRazonSocial() {
-        return razonSocial;
-    }
+    public Integer getDv() { return dv; }
+    public void setDv(Integer dv) { this.dv = dv; }
 
-    public void setRazonSocial(String razonSocial) {
-        this.razonSocial = razonSocial;
-    }
+    public String getPais() { return pais; }
+    public void setPais(String pais) { this.pais = pais; }
 
-    public String getIdentificacionTributaria() {
-        return identificacionTributaria;
-    }
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
 
-    public void setIdentificacionTributaria(String identificacionTributaria) {
-        this.identificacionTributaria = identificacionTributaria;
-    }
+    public String getCiudad() { return ciudad; }
+    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
 
-    public String getSitioWeb() {
-        return sitioWeb;
-    }
+    public String getDireccionFisica() { return direccionFisica; }
+    public void setDireccionFisica(String direccionFisica) { this.direccionFisica = direccionFisica; }
 
-    public void setSitioWeb(String sitioWeb) {
-        this.sitioWeb = sitioWeb;
-    }
+    public String getSitioWeb() { return sitioWeb; }
+    public void setSitioWeb(String sitioWeb) { this.sitioWeb = sitioWeb; }
 
-    public String getPais() {
-        return pais;
-    }
+    public EstadoEmpresa getEstado() { return estado; }
+    public void setEstado(EstadoEmpresa estado) { this.estado = estado; }
 
-    public void setPais(String pais) {
-        this.pais = pais;
-    }
+    public Long getCreadoPor() { return creadoPor; }
+    public void setCreadoPor(Long creadoPor) { this.creadoPor = creadoPor; }
 
-    public EstadoEmpresa getEstado() {
-        return estado;
-    }
+    public Long getModificadoPor() { return modificadoPor; }
+    public void setModificadoPor(Long modificadoPor) { this.modificadoPor = modificadoPor; }
 
-    public void setEstado(EstadoEmpresa estado) {
-        this.estado = estado;
-    }
-
-    public Long getCreadoPor() {
-        return creadoPor;
-    }
-
-    public void setCreadoPor(Long creadoPor) {
-        this.creadoPor = creadoPor;
-    }
-
-    public Long getModificadoPor() {
-        return modificadoPor;
-    }
-
-    public void setModificadoPor(Long modificadoPor) {
-        this.modificadoPor = modificadoPor;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public LocalDateTime getFechaModificacion() {
-        return fechaModificacion;
-    }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public LocalDateTime getFechaModificacion() { return fechaModificacion; }
 }

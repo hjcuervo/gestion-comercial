@@ -23,7 +23,6 @@ public class EmpresaController {
     @GetMapping
     public ResponseEntity<PageResponse<EmpresaResponse>> listar(
             @RequestParam(required = false) String q,
-            @RequestParam(required = false) String tipo,
             @RequestParam(required = false) String estado,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20", name = "page_size") int pageSize) {
@@ -32,7 +31,7 @@ public class EmpresaController {
             pageSize = 100;
         }
 
-        PageResponse<EmpresaResponse> response = empresaService.listar(q, tipo, estado, page, pageSize);
+        PageResponse<EmpresaResponse> response = empresaService.listar(q, estado, page, pageSize);
         return ResponseEntity.ok(response);
     }
 

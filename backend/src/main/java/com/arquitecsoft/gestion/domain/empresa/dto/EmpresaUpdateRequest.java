@@ -1,74 +1,71 @@
 package com.arquitecsoft.gestion.domain.empresa.dto;
 
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class EmpresaUpdateRequest {
-
-    private String tipo;
 
     @Size(max = 200, message = "La razón social no puede exceder 200 caracteres")
     private String razonSocial;
 
-    @Size(max = 50, message = "La identificación tributaria no puede exceder 50 caracteres")
+    @Size(max = 20, message = "El tipo de documento no puede exceder 20 caracteres")
+    private String tipoDoc;
+
+    @Pattern(regexp = "^[0-9]*$", message = "La identificación solo puede contener números")
+    @Size(max = 50, message = "La identificación no puede exceder 50 caracteres")
     private String identificacionTributaria;
 
-    @Size(max = 200, message = "El sitio web no puede exceder 200 caracteres")
-    private String sitioWeb;
+    @Min(value = 0, message = "El DV debe ser entre 0 y 9")
+    @Max(value = 9, message = "El DV debe ser entre 0 y 9")
+    private Integer dv;
 
-    @Size(max = 100, message = "El país no puede exceder 100 caracteres")
+    @Size(max = 3, message = "El código de país no puede exceder 3 caracteres")
     private String pais;
+
+    @Size(max = 10, message = "El código de departamento no puede exceder 10 caracteres")
+    private String departamento;
+
+    @Size(max = 10, message = "El código de ciudad no puede exceder 10 caracteres")
+    private String ciudad;
+
+    @Size(max = 500, message = "La dirección no puede exceder 500 caracteres")
+    private String direccionFisica;
+
+    @Size(max = 200, message = "El sitio web no puede exceder 200 caracteres")
+    @Pattern(regexp = "^(https?://.*)?$", message = "El sitio web debe ser una URL válida (http:// o https://)")
+    private String sitioWeb;
 
     private String estado;
 
-    public EmpresaUpdateRequest() {
-    }
+    public EmpresaUpdateRequest() {}
 
     // Getters and Setters
-    public String getTipo() {
-        return tipo;
-    }
+    public String getRazonSocial() { return razonSocial; }
+    public void setRazonSocial(String razonSocial) { this.razonSocial = razonSocial; }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
+    public String getTipoDoc() { return tipoDoc; }
+    public void setTipoDoc(String tipoDoc) { this.tipoDoc = tipoDoc; }
 
-    public String getRazonSocial() {
-        return razonSocial;
-    }
+    public String getIdentificacionTributaria() { return identificacionTributaria; }
+    public void setIdentificacionTributaria(String identificacionTributaria) { this.identificacionTributaria = identificacionTributaria; }
 
-    public void setRazonSocial(String razonSocial) {
-        this.razonSocial = razonSocial;
-    }
+    public Integer getDv() { return dv; }
+    public void setDv(Integer dv) { this.dv = dv; }
 
-    public String getIdentificacionTributaria() {
-        return identificacionTributaria;
-    }
+    public String getPais() { return pais; }
+    public void setPais(String pais) { this.pais = pais; }
 
-    public void setIdentificacionTributaria(String identificacionTributaria) {
-        this.identificacionTributaria = identificacionTributaria;
-    }
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
 
-    public String getSitioWeb() {
-        return sitioWeb;
-    }
+    public String getCiudad() { return ciudad; }
+    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
 
-    public void setSitioWeb(String sitioWeb) {
-        this.sitioWeb = sitioWeb;
-    }
+    public String getDireccionFisica() { return direccionFisica; }
+    public void setDireccionFisica(String direccionFisica) { this.direccionFisica = direccionFisica; }
 
-    public String getPais() {
-        return pais;
-    }
+    public String getSitioWeb() { return sitioWeb; }
+    public void setSitioWeb(String sitioWeb) { this.sitioWeb = sitioWeb; }
 
-    public void setPais(String pais) {
-        this.pais = pais;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

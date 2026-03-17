@@ -1,10 +1,10 @@
 <template>
   <div class="app-layout">
     <NavRail :items="navItems" @logout="handleLogout" />
-    
+
     <div class="app-layout__main">
       <TopAppBar :title="pageTitle" :user-name="userName" />
-      
+
       <main class="app-layout__content">
         <slot />
       </main>
@@ -23,9 +23,10 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 
+// Icon names MUST match keys in Icon.vue
 const navItems = [
   { path: '/', label: 'Inicio', icon: 'dashboard' },
-  { path: '/pipeline', label: 'Pipeline', icon: 'view_kanban' },
+  { path: '/pipeline', label: 'Pipeline', icon: 'pipeline' },
   { path: '/empresas', label: 'Empresas', icon: 'business' },
   { path: '/personas', label: 'Personas', icon: 'people' },
 ];
@@ -56,14 +57,15 @@ const handleLogout = () => {
 
 .app-layout__main {
   flex: 1;
-  margin-left: var(--md-sys-layout-nav-rail-width);
+  margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 .app-layout__content {
   flex: 1;
-  padding: var(--md-sys-spacing-lg);
-  background-color: var(--md-sys-color-background);
+  padding: var(--space-6);
+  background: var(--bg-base);
 }
 </style>
