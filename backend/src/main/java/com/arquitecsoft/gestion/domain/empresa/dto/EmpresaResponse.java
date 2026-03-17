@@ -11,8 +11,11 @@ public class EmpresaResponse {
     private String identificacionTributaria;
     private Integer dv;
     private String pais;
+    private String paisNombre;
     private String departamento;
+    private String departamentoNombre;
     private String ciudad;
+    private String ciudadNombre;
     private String direccionFisica;
     private String sitioWeb;
     private String estado;
@@ -56,11 +59,20 @@ public class EmpresaResponse {
     public String getPais() { return pais; }
     public void setPais(String pais) { this.pais = pais; }
 
+    public String getPaisNombre() { return paisNombre; }
+    public void setPaisNombre(String paisNombre) { this.paisNombre = paisNombre; }
+
     public String getDepartamento() { return departamento; }
     public void setDepartamento(String departamento) { this.departamento = departamento; }
 
+    public String getDepartamentoNombre() { return departamentoNombre; }
+    public void setDepartamentoNombre(String departamentoNombre) { this.departamentoNombre = departamentoNombre; }
+
     public String getCiudad() { return ciudad; }
     public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+
+    public String getCiudadNombre() { return ciudadNombre; }
+    public void setCiudadNombre(String ciudadNombre) { this.ciudadNombre = ciudadNombre; }
 
     public String getDireccionFisica() { return direccionFisica; }
     public void setDireccionFisica(String direccionFisica) { this.direccionFisica = direccionFisica; }

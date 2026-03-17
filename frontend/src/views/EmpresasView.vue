@@ -73,12 +73,12 @@
                   <span v-else class="cell-empty">—</span>
                 </td>
                 <td>
-                  <div class="cell-location">
-                    <span v-if="empresa.pais" class="cell-location__pais">{{ empresa.pais }}</span>
-                    <span v-if="empresa.departamento" class="cell-location__dept">{{ empresa.departamento }}</span>
-                    <span v-if="empresa.ciudad" class="cell-location__city">{{ empresa.ciudad }}</span>
-                    <span v-if="!empresa.pais && !empresa.departamento && !empresa.ciudad" class="cell-empty">—</span>
+                  <div class="cell-location" v-if="empresa.paisNombre || empresa.departamentoNombre || empresa.ciudadNombre">
+                    <span v-if="empresa.paisNombre" class="cell-location__pais">{{ empresa.paisNombre }}</span>
+                    <span v-if="empresa.departamentoNombre" class="cell-location__dept">{{ empresa.departamentoNombre }}</span>
+                    <span v-if="empresa.ciudadNombre" class="cell-location__city">{{ empresa.ciudadNombre }}</span>
                   </div>
+                  <span v-else class="cell-empty">—</span>
                 </td>
                 <td>
                   <a v-if="empresa.sitioWeb" :href="empresa.sitioWeb" target="_blank" rel="noopener" class="cell-link">
@@ -206,13 +206,12 @@ function formatUrl(url) { return url ? url.replace(/^https?:\/\/(www\.)?/, '').r
 .cell-id__num { color: var(--text-secondary); }
 .cell-id__dv { color: var(--text-muted); }
 
-.cell-location { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-secondary); }
+.cell-location { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-secondary); flex-wrap: wrap; }
 .cell-location__pais { font-weight: 600; }
 .cell-location__dept::before, .cell-location__city::before { content: '·'; margin-right: 4px; color: var(--text-muted); }
 
 .cell-link { display: flex; align-items: center; gap: 4px; color: var(--primary); font-size: var(--text-xs); text-decoration: none; transition: opacity 0.15s; }
 .cell-link:hover { opacity: 0.8; }
-
 .cell-empty { color: var(--text-muted); font-size: var(--text-xs); }
 
 .badge { display: inline-flex; align-items: center; padding: 1px var(--space-2); border-radius: var(--radius-full); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }

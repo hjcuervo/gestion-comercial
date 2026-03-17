@@ -5,7 +5,10 @@ import com.arquitecsoft.gestion.domain.empresa.dto.EmpresaResponse;
 import com.arquitecsoft.gestion.domain.empresa.dto.EmpresaUpdateRequest;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa.EstadoEmpresa;
+import com.arquitecsoft.gestion.domain.empresa.repository.GcDepartamentoRepository;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcEmpresaRepository;
+import com.arquitecsoft.gestion.domain.empresa.repository.GcMunicipioRepository;
+import com.arquitecsoft.gestion.domain.empresa.repository.GcPaisRepository;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
 import com.arquitecsoft.gestion.infrastructure.exception.BusinessException;
 import com.arquitecsoft.gestion.infrastructure.security.SecurityUtils;
@@ -21,11 +24,40 @@ import org.springframework.util.StringUtils;
 public class EmpresaService {
 
     private final GcEmpresaRepository empresaRepository;
+    private final GcPaisRepository paisRepository;
+    private final GcDepartamentoRepository departamentoRepository;
+    private final GcMunicipioRepository municipioRepository;
     private final SecurityUtils securityUtils;
 
-    public EmpresaService(GcEmpresaRepository empresaRepository, SecurityUtils securityUtils) {
+    public EmpresaService(GcEmpresaRepository empresaRepository,
+                          GcPaisRepository paisRepository,
+                          GcDepartamentoRepository departamentoRepository,
+                          GcMunicipioRepository municipioRepository,
+                          SecurityUtils securityUtils) {
         this.empresaRepository = empresaRepository;
+        this.paisRepository = paisRepository;
+        this.departamentoRepository = departamentoRepository;
+        this.municipioRepository = municipioRepository;
         this.securityUtils = securityUtils;
+    }
+
+    private EmpresaResponse enriquecerResponse(GcEmpresa empresa) {
+        EmpresaResponse response = EmpresaResponse.fromEntity(empresa);
+
+        if (StringUtils.hasText(empresa.getPais())) {
+            paisRepository.findById(empresa.getPais())
+                    .ifPresent(p -> response.setPaisNombre(p.getNombre()));
+        }
+        if (StringUtils.hasText(empresa.getDepartamento())) {
+            departamentoRepository.findById(empresa.getDepartamento())
+                    .ifPresent(d -> response.setDepartamentoNombre(d.getDescripcion()));
+        }
+        if (StringUtils.hasText(empresa.getCiudad())) {
+            municipioRepository.findById(empresa.getCiudad())
+                    .ifPresent(m -> response.setCiudadNombre(m.getDescripcion()));
+        }
+
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -43,20 +75,18 @@ public class EmpresaService {
 
         Page<GcEmpresa> pageResult = empresaRepository.findWithFilters(q, estadoEnum, pageable);
 
-        return PageResponse.from(pageResult, EmpresaResponse::fromEntity);
+        return PageResponse.from(pageResult, this::enriquecerResponse);
     }
 
     @Transactional(readOnly = true)
     public EmpresaResponse obtenerPorId(Long id) {
         GcEmpresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada con ID: " + id));
-
-        return EmpresaResponse.fromEntity(empresa);
+        return enriquecerResponse(empresa);
     }
 
     @Transactional
     public EmpresaResponse crear(EmpresaCreateRequest request) {
-        // Validar identificación tributaria única
         if (StringUtils.hasText(request.getIdentificacionTributaria())) {
             if (empresaRepository.existsByIdentificacionTributaria(request.getIdentificacionTributaria())) {
                 throw new BusinessException("DUPLICATE_ERROR",
@@ -78,8 +108,7 @@ public class EmpresaService {
         empresa.setCreadoPor(securityUtils.getCurrentUserId());
 
         empresa = empresaRepository.save(empresa);
-
-        return EmpresaResponse.fromEntity(empresa);
+        return enriquecerResponse(empresa);
     }
 
     @Transactional
@@ -87,17 +116,12 @@ public class EmpresaService {
         GcEmpresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada con ID: " + id));
 
-        // Actualizar razón social
         if (StringUtils.hasText(request.getRazonSocial())) {
             empresa.setRazonSocial(request.getRazonSocial().trim());
         }
-
-        // Actualizar tipo documento
         if (request.getTipoDoc() != null) {
             empresa.setTipoDoc(request.getTipoDoc());
         }
-
-        // Actualizar identificación tributaria
         if (request.getIdentificacionTributaria() != null) {
             if (StringUtils.hasText(request.getIdentificacionTributaria())) {
                 empresaRepository.findByIdentificacionTributaria(request.getIdentificacionTributaria())
@@ -110,13 +134,9 @@ public class EmpresaService {
             }
             empresa.setIdentificacionTributaria(request.getIdentificacionTributaria());
         }
-
-        // Actualizar DV
         if (request.getDv() != null) {
             empresa.setDv(request.getDv());
         }
-
-        // Actualizar ubicación
         if (request.getPais() != null) {
             empresa.setPais(request.getPais());
         }
@@ -129,13 +149,9 @@ public class EmpresaService {
         if (request.getDireccionFisica() != null) {
             empresa.setDireccionFisica(request.getDireccionFisica());
         }
-
-        // Actualizar sitio web
         if (request.getSitioWeb() != null) {
             empresa.setSitioWeb(request.getSitioWeb());
         }
-
-        // Actualizar estado
         if (StringUtils.hasText(request.getEstado())) {
             EstadoEmpresa nuevoEstado;
             try {
@@ -148,7 +164,6 @@ public class EmpresaService {
 
         empresa.setModificadoPor(securityUtils.getCurrentUserId());
         empresa = empresaRepository.save(empresa);
-
-        return EmpresaResponse.fromEntity(empresa);
+        return enriquecerResponse(empresa);
     }
 }
