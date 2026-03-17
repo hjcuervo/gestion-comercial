@@ -61,10 +61,9 @@ public class PersonaService {
 
     @Transactional
     public PersonaResponse crear(PersonaCreateRequest request) {
-        // Validar email único si viene
         if (StringUtils.hasText(request.getEmail())) {
             if (personaRepository.existsByEmail(request.getEmail())) {
-                throw new BusinessException("DUPLICATE_ERROR", 
+                throw new BusinessException("DUPLICATE_ERROR",
                     "Ya existe una persona con el email: " + request.getEmail());
             }
         }
@@ -96,7 +95,6 @@ public class PersonaService {
         }
 
         if (request.getEmail() != null) {
-            // Validar email único
             if (StringUtils.hasText(request.getEmail())) {
                 personaRepository.findByEmail(request.getEmail())
                         .ifPresent(existente -> {
@@ -131,9 +129,8 @@ public class PersonaService {
         GcEmpresa empresa = empresaRepository.findById(request.getEmpresaId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada con ID: " + request.getEmpresaId()));
 
-        // Validar que no exista la relación
         if (personaEmpresaRepository.existsByPersonaIdAndEmpresaId(personaId, request.getEmpresaId())) {
-            throw new BusinessException("DUPLICATE_ERROR", 
+            throw new BusinessException("DUPLICATE_ERROR",
                 "La persona ya está asociada a esta empresa");
         }
 
@@ -144,7 +141,6 @@ public class PersonaService {
         personaEmpresa.setTelefonoEmpresarial(request.getTelefonoEmpresarial());
         personaEmpresa.setEsContactoPrincipal(request.getEsContactoPrincipal() != null && request.getEsContactoPrincipal() ? 1 : 0);
 
-        // Validar y asignar rol de contacto
         if (StringUtils.hasText(request.getRolContacto())) {
             try {
                 personaEmpresa.setRolContacto(RolContacto.valueOf(request.getRolContacto()));
@@ -156,5 +152,20 @@ public class PersonaService {
         personaEmpresa = personaEmpresaRepository.save(personaEmpresa);
 
         return PersonaEmpresaResponse.fromEntity(personaEmpresa);
+    }
+
+    @Transactional
+    public void desasociarEmpresa(Long personaId, Long empresaId) {
+        // Validar que la persona existe
+        if (!personaRepository.existsById(personaId)) {
+            throw new BusinessException("NOT_FOUND", "Persona no encontrada con ID: " + personaId);
+        }
+
+        GcPersonaEmpresa personaEmpresa = personaEmpresaRepository
+                .findByPersonaIdAndEmpresaId(personaId, empresaId)
+                .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                    "No existe asociación entre la persona " + personaId + " y la empresa " + empresaId));
+
+        personaEmpresaRepository.delete(personaEmpresa);
     }
 }

@@ -60,4 +60,12 @@ public class PersonaController {
         PersonaEmpresaResponse response = personaService.asociarEmpresa(id, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @DeleteMapping("/{personaId}/empresas/{empresaId}")
+    public ResponseEntity<Void> desasociarEmpresa(
+            @PathVariable Long personaId,
+            @PathVariable Long empresaId) {
+        personaService.desasociarEmpresa(personaId, empresaId);
+        return ResponseEntity.noContent().build();
+    }
 }
