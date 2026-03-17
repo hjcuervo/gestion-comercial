@@ -36,7 +36,7 @@ const pageTitle = computed(() => {
     '/': 'Dashboard',
     '/pipeline': 'Pipeline de Oportunidades',
     '/empresas': 'Empresas',
-    '/personas': 'Personas',
+    '/personas': 'Contactos',
   };
   return titles[route.path] || route.name || '';
 });
@@ -61,11 +61,14 @@ const handleLogout = () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
 }
 
 .app-layout__content {
   flex: 1;
   padding: var(--space-6);
   background: var(--bg-base);
+  overflow: hidden;
+  min-width: 0;
 }
 </style>
