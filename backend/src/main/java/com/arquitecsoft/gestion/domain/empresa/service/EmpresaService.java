@@ -5,7 +5,6 @@ import com.arquitecsoft.gestion.domain.empresa.dto.EmpresaResponse;
 import com.arquitecsoft.gestion.domain.empresa.dto.EmpresaUpdateRequest;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa.EstadoEmpresa;
-import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa.TipoEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcEmpresaRepository;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
 import com.arquitecsoft.gestion.infrastructure.exception.BusinessException;
@@ -30,17 +29,8 @@ public class EmpresaService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<EmpresaResponse> listar(String q, String tipo, String estado, int page, int pageSize) {
+    public PageResponse<EmpresaResponse> listar(String q, String estado, int page, int pageSize) {
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("razonSocial").ascending());
-
-        TipoEmpresa tipoEnum = null;
-        if (StringUtils.hasText(tipo)) {
-            try {
-                tipoEnum = TipoEmpresa.valueOf(tipo);
-            } catch (IllegalArgumentException e) {
-                throw new BusinessException("VALIDATION_ERROR", "Tipo de empresa inválido: " + tipo);
-            }
-        }
 
         EstadoEmpresa estadoEnum = null;
         if (StringUtils.hasText(estado)) {
@@ -51,7 +41,7 @@ public class EmpresaService {
             }
         }
 
-        Page<GcEmpresa> pageResult = empresaRepository.findWithFilters(q, tipoEnum, estadoEnum, pageable);
+        Page<GcEmpresa> pageResult = empresaRepository.findWithFilters(q, estadoEnum, pageable);
 
         return PageResponse.from(pageResult, EmpresaResponse::fromEntity);
     }
@@ -66,28 +56,24 @@ public class EmpresaService {
 
     @Transactional
     public EmpresaResponse crear(EmpresaCreateRequest request) {
-        // Validar tipo
-        TipoEmpresa tipo;
-        try {
-            tipo = TipoEmpresa.valueOf(request.getTipo());
-        } catch (IllegalArgumentException e) {
-            throw new BusinessException("VALIDATION_ERROR", "Tipo de empresa inválido: " + request.getTipo());
-        }
-
         // Validar identificación tributaria única
         if (StringUtils.hasText(request.getIdentificacionTributaria())) {
             if (empresaRepository.existsByIdentificacionTributaria(request.getIdentificacionTributaria())) {
-                throw new BusinessException("DUPLICATE_ERROR", 
+                throw new BusinessException("DUPLICATE_ERROR",
                     "Ya existe una empresa con la identificación tributaria: " + request.getIdentificacionTributaria());
             }
         }
 
         GcEmpresa empresa = new GcEmpresa();
-        empresa.setTipo(tipo);
         empresa.setRazonSocial(request.getRazonSocial().trim());
+        empresa.setTipoDoc(request.getTipoDoc());
         empresa.setIdentificacionTributaria(request.getIdentificacionTributaria());
-        empresa.setSitioWeb(request.getSitioWeb());
+        empresa.setDv(request.getDv());
         empresa.setPais(request.getPais());
+        empresa.setDepartamento(request.getDepartamento());
+        empresa.setCiudad(request.getCiudad());
+        empresa.setDireccionFisica(request.getDireccionFisica());
+        empresa.setSitioWeb(request.getSitioWeb());
         empresa.setEstado(EstadoEmpresa.ACTIVA);
         empresa.setCreadoPor(securityUtils.getCurrentUserId());
 
@@ -101,23 +87,18 @@ public class EmpresaService {
         GcEmpresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada con ID: " + id));
 
-        // Actualizar tipo si viene
-        if (StringUtils.hasText(request.getTipo())) {
-            try {
-                empresa.setTipo(TipoEmpresa.valueOf(request.getTipo()));
-            } catch (IllegalArgumentException e) {
-                throw new BusinessException("VALIDATION_ERROR", "Tipo de empresa inválido: " + request.getTipo());
-            }
-        }
-
-        // Actualizar razón social si viene
+        // Actualizar razón social
         if (StringUtils.hasText(request.getRazonSocial())) {
             empresa.setRazonSocial(request.getRazonSocial().trim());
         }
 
-        // Actualizar identificación tributaria si viene
+        // Actualizar tipo documento
+        if (request.getTipoDoc() != null) {
+            empresa.setTipoDoc(request.getTipoDoc());
+        }
+
+        // Actualizar identificación tributaria
         if (request.getIdentificacionTributaria() != null) {
-            // Validar que no exista otra empresa con esa identificación
             if (StringUtils.hasText(request.getIdentificacionTributaria())) {
                 empresaRepository.findByIdentificacionTributaria(request.getIdentificacionTributaria())
                         .ifPresent(existente -> {
@@ -130,16 +111,31 @@ public class EmpresaService {
             empresa.setIdentificacionTributaria(request.getIdentificacionTributaria());
         }
 
-        // Actualizar otros campos si vienen
+        // Actualizar DV
+        if (request.getDv() != null) {
+            empresa.setDv(request.getDv());
+        }
+
+        // Actualizar ubicación
+        if (request.getPais() != null) {
+            empresa.setPais(request.getPais());
+        }
+        if (request.getDepartamento() != null) {
+            empresa.setDepartamento(request.getDepartamento());
+        }
+        if (request.getCiudad() != null) {
+            empresa.setCiudad(request.getCiudad());
+        }
+        if (request.getDireccionFisica() != null) {
+            empresa.setDireccionFisica(request.getDireccionFisica());
+        }
+
+        // Actualizar sitio web
         if (request.getSitioWeb() != null) {
             empresa.setSitioWeb(request.getSitioWeb());
         }
 
-        if (request.getPais() != null) {
-            empresa.setPais(request.getPais());
-        }
-
-        // Actualizar estado si viene
+        // Actualizar estado
         if (StringUtils.hasText(request.getEstado())) {
             EstadoEmpresa nuevoEstado;
             try {
@@ -147,17 +143,6 @@ public class EmpresaService {
             } catch (IllegalArgumentException e) {
                 throw new BusinessException("VALIDATION_ERROR", "Estado de empresa inválido: " + request.getEstado());
             }
-
-            // Validar que no se inactive si tiene oportunidades activas
-            if (nuevoEstado == EstadoEmpresa.INACTIVA && empresa.getEstado() == EstadoEmpresa.ACTIVA) {
-                // Esta validación se puede habilitar cuando exista la entidad Oportunidad
-                // long oportunidadesActivas = empresaRepository.countOportunidadesActivas(id);
-                // if (oportunidadesActivas > 0) {
-                //     throw new BusinessException("BUSINESS_ERROR",
-                //         "No se puede inactivar la empresa porque tiene " + oportunidadesActivas + " oportunidades activas");
-                // }
-            }
-
             empresa.setEstado(nuevoEstado);
         }
 
