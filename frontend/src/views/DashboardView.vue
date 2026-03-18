@@ -62,50 +62,20 @@
           </div>
         </section>
 
-        <!-- Charts Row -->
+        <!-- Row 1: Top Oportunidades + Por Empresa -->
         <section class="charts-row animate-slideUp delay-2">
-          <!-- Funnel por etapa -->
-          <div class="chart-card glass">
-            <div class="chart-card__header">
-              <h3 class="chart-card__title"><Icon name="pipeline" :size="16" color="var(--primary)" /> Embudo por Etapa</h3>
-            </div>
-            <div class="funnel-container">
-              <div v-if="!stats.porEtapa?.length" class="chart-empty">Sin datos de etapas</div>
-              <div v-else class="funnel">
-                <div v-for="(etapa, i) in stats.porEtapa" :key="etapa.etapaId" class="funnel-row">
-                  <span class="funnel-label">{{ etapa.etapaNombre }}</span>
-                  <div class="funnel-bar-wrap">
-                    <div class="funnel-bar" :style="{ width: funnelWidth(etapa.cantidad) + '%', background: etapa.etapaColor || 'var(--primary)' }">
-                      <span class="funnel-bar__value">{{ etapa.cantidad }}</span>
-                    </div>
-                  </div>
-                  <span class="funnel-amount">{{ formatCurrency(etapa.valorTotal) }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tendencia mensual -->
-          <div class="chart-card glass">
-            <div class="chart-card__header">
-              <h3 class="chart-card__title"><Icon name="trending-up" :size="16" color="var(--secondary)" /> Tendencia Mensual</h3>
-            </div>
-            <div class="chart-canvas-wrap">
-              <canvas ref="trendChart"></canvas>
-            </div>
-          </div>
-        </section>
-
-        <!-- Bottom Row -->
-        <section class="bottom-row animate-slideUp delay-3">
-          <!-- Top Oportunidades -->
           <div class="chart-card glass">
             <div class="chart-card__header">
               <h3 class="chart-card__title"><Icon name="wallet" :size="16" color="var(--primary)" /> Top Oportunidades</h3>
             </div>
             <div v-if="!stats.topOportunidades?.length" class="chart-empty">Sin oportunidades abiertas</div>
             <div v-else class="top-list">
-              <div v-for="(op, i) in stats.topOportunidades" :key="op.id" class="top-item">
+              <div
+                v-for="(op, i) in stats.topOportunidades"
+                :key="op.id"
+                class="top-item top-item--clickable"
+                @click="goToDetalle(op.id)"
+              >
                 <span class="top-rank">{{ i + 1 }}</span>
                 <div class="top-info">
                   <span class="top-name">{{ op.nombre }}</span>
@@ -115,11 +85,11 @@
                   <span class="top-valor">{{ formatCurrency(op.valorEstimado) }}</span>
                   <span v-if="op.probabilidad != null" class="top-prob">{{ op.probabilidad }}%</span>
                 </div>
+                <Icon name="chevron-right" :size="14" class="top-arrow" />
               </div>
             </div>
           </div>
 
-          <!-- Por Empresa -->
           <div class="chart-card glass">
             <div class="chart-card__header">
               <h3 class="chart-card__title"><Icon name="business" :size="16" color="var(--accent)" /> Por Empresa</h3>
@@ -139,18 +109,50 @@
             </div>
           </div>
         </section>
+
+        <!-- Row 2: Embudo + Tendencia -->
+        <section class="charts-row animate-slideUp delay-3">
+          <div class="chart-card glass">
+            <div class="chart-card__header">
+              <h3 class="chart-card__title"><Icon name="pipeline" :size="16" color="var(--primary)" /> Embudo por Etapa</h3>
+            </div>
+            <div v-if="!stats.porEtapa?.length" class="chart-empty">Sin datos de etapas</div>
+            <div v-else class="funnel">
+              <div v-for="etapa in stats.porEtapa" :key="etapa.etapaId" class="funnel-row">
+                <span class="funnel-label">{{ etapa.etapaNombre }}</span>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar" :style="{ width: funnelWidth(etapa.cantidad) + '%', background: etapa.etapaColor || 'var(--primary)' }">
+                    <span class="funnel-bar__value">{{ etapa.cantidad }}</span>
+                  </div>
+                </div>
+                <span class="funnel-amount">{{ formatCurrency(etapa.valorTotal) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card glass">
+            <div class="chart-card__header">
+              <h3 class="chart-card__title"><Icon name="trending-up" :size="16" color="var(--secondary)" /> Tendencia Mensual</h3>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas ref="trendChart"></canvas>
+            </div>
+          </div>
+        </section>
       </template>
     </div>
   </AppLayout>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import AppLayout from '@/components/layout/AppLayout.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { dashboardService } from '@/services/dashboard.service';
 import { pipelineService } from '@/services/pipeline.service';
 
+const router = useRouter();
 const stats = ref(null);
 const pipelines = ref([]);
 const loading = ref(true);
@@ -181,6 +183,10 @@ async function loadStats() {
   }
 }
 
+function goToDetalle(id) {
+  router.push(`/oportunidades/${id}`);
+}
+
 function funnelWidth(cantidad) {
   if (!stats.value?.porEtapa?.length) return 0;
   const max = Math.max(...stats.value.porEtapa.map(e => e.cantidad));
@@ -190,7 +196,6 @@ function funnelWidth(cantidad) {
 async function renderTrendChart() {
   if (!trendChart.value || !stats.value?.porMes?.length) return;
 
-  // Load Chart.js dynamically
   if (!window.Chart) {
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
@@ -258,7 +263,7 @@ function formatCurrency(value) {
 
 /* KPI Grid */
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
-.kpi-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); position: relative; overflow: hidden; }
+.kpi-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
 .kpi-icon { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
 .kpi-icon--pipeline { background: var(--primary-soft); color: var(--primary); }
 .kpi-icon--ganada { background: var(--success-soft); color: var(--success); }
@@ -271,12 +276,37 @@ function formatCurrency(value) {
 
 /* Chart cards */
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
-.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
-
 .chart-card { border-radius: var(--radius-xl); padding: var(--space-5); display: flex; flex-direction: column; }
 .chart-card__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
 .chart-card__title { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); margin: 0; }
 .chart-empty { display: flex; align-items: center; justify-content: center; height: 120px; color: var(--text-muted); font-size: var(--text-xs); }
+
+/* Top list */
+.top-list { display: flex; flex-direction: column; gap: var(--space-1); max-height: 340px; overflow-y: auto; }
+.top-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); transition: all 0.15s; }
+.top-item--clickable { cursor: pointer; }
+.top-item--clickable:hover { background: rgba(0, 212, 255, 0.06); border-color: rgba(0, 212, 255, 0.1); }
+.top-rank { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); min-width: 20px; text-align: center; font-weight: 600; }
+.top-info { flex: 1; min-width: 0; }
+.top-name { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-empresa { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.top-right { text-align: right; flex-shrink: 0; }
+.top-valor { display: block; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--primary); }
+.top-prob { display: block; font-size: 9px; color: var(--text-muted); }
+.top-arrow { color: var(--text-muted); flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+.top-item--clickable:hover .top-arrow { opacity: 1; }
+
+/* Empresa list */
+.empresa-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 340px; overflow-y: auto; }
+.empresa-item { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); border-radius: var(--radius-md); transition: background 0.15s; }
+.empresa-item:hover { background: rgba(255,255,255,0.02); }
+.empresa-item__info { flex: 1; min-width: 0; }
+.empresa-item__name { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empresa-item__badges { display: flex; gap: var(--space-2); margin-top: 3px; }
+.mini-badge { font-size: 9px; padding: 1px 6px; border-radius: var(--radius-full); font-weight: 600; }
+.mini-badge--open { background: var(--primary-soft); color: var(--primary); }
+.mini-badge--won { background: var(--success-soft); color: var(--success); }
+.empresa-item__valor { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
 
 /* Funnel */
 .funnel { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -290,33 +320,9 @@ function formatCurrency(value) {
 /* Trend chart */
 .chart-canvas-wrap { position: relative; height: 260px; }
 
-/* Top list */
-.top-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 320px; overflow-y: auto; }
-.top-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); transition: background 0.15s; }
-.top-item:hover { background: rgba(255,255,255,0.02); }
-.top-rank { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); min-width: 20px; text-align: center; font-weight: 600; }
-.top-info { flex: 1; min-width: 0; }
-.top-name { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.top-empresa { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
-.top-right { text-align: right; flex-shrink: 0; }
-.top-valor { display: block; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--primary); }
-.top-prob { display: block; font-size: 9px; color: var(--text-muted); }
-
-/* Empresa list */
-.empresa-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 320px; overflow-y: auto; }
-.empresa-item { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); border-radius: var(--radius-md); transition: background 0.15s; }
-.empresa-item:hover { background: rgba(255,255,255,0.02); }
-.empresa-item__info { flex: 1; min-width: 0; }
-.empresa-item__name { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.empresa-item__badges { display: flex; gap: var(--space-2); margin-top: 3px; }
-.mini-badge { font-size: 9px; padding: 1px 6px; border-radius: var(--radius-full); font-weight: 600; }
-.mini-badge--open { background: var(--primary-soft); color: var(--primary); }
-.mini-badge--won { background: var(--success-soft); color: var(--success); }
-.empresa-item__valor { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
-
 @media (max-width: 1100px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .charts-row, .bottom-row { grid-template-columns: 1fr; }
+  .charts-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
   .kpi-grid { grid-template-columns: 1fr; }

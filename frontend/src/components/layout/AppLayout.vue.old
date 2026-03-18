@@ -27,23 +27,18 @@ const authStore = useAuthStore();
 const navItems = [
   { path: '/', label: 'Inicio', icon: 'dashboard' },
   { path: '/pipeline', label: 'Pipeline', icon: 'pipeline' },
-  { path: '/oportunidades', label: 'Oportunidades', icon: 'wallet' },
   { path: '/empresas', label: 'Empresas', icon: 'business' },
-  { path: '/personas', label: 'Contactos', icon: 'people' },
+  { path: '/personas', label: 'Personas', icon: 'people' },
 ];
 
 const pageTitle = computed(() => {
   const titles = {
     '/': 'Dashboard',
     '/pipeline': 'Pipeline de Oportunidades',
-    '/oportunidades': 'Oportunidades',
     '/empresas': 'Empresas',
     '/personas': 'Contactos',
   };
-  // Check for exact match first, then prefix match for sub-routes
-  if (titles[route.path]) return titles[route.path];
-  if (route.path.startsWith('/oportunidades/')) return 'Detalle de Oportunidad';
-  return route.name || '';
+  return titles[route.path] || route.name || '';
 });
 
 const userName = computed(() => authStore.userName);

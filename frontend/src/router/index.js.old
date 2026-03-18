@@ -33,12 +33,6 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/oportunidades',
-    name: 'Oportunidades',
-    component: () => import('@/views/OportunidadesListView.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
     path: '/oportunidades/:id',
     name: 'OportunidadDetalle',
     component: () => import('@/views/OportunidadDetalleView.vue'),
