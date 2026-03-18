@@ -1,5 +1,7 @@
 package com.arquitecsoft.gestion.domain.empresa.controller;
 
+import com.arquitecsoft.gestion.domain.actividad.entity.GcTipoActividad;
+import com.arquitecsoft.gestion.domain.actividad.repository.GcTipoActividadRepository;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcDepartamento;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcDocumentType;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcMunicipio;
@@ -21,16 +23,19 @@ public class CatalogoController {
     private final GcPaisRepository paisRepo;
     private final GcDepartamentoRepository departamentoRepo;
     private final GcMunicipioRepository municipioRepo;
+    private final GcTipoActividadRepository tipoActividadRepo;
 
     public CatalogoController(
             GcDocumentTypeRepository documentTypeRepo,
             GcPaisRepository paisRepo,
             GcDepartamentoRepository departamentoRepo,
-            GcMunicipioRepository municipioRepo) {
+            GcMunicipioRepository municipioRepo,
+            GcTipoActividadRepository tipoActividadRepo) {
         this.documentTypeRepo = documentTypeRepo;
         this.paisRepo = paisRepo;
         this.departamentoRepo = departamentoRepo;
         this.municipioRepo = municipioRepo;
+        this.tipoActividadRepo = tipoActividadRepo;
     }
 
     @GetMapping("/tipos-documento")
@@ -56,5 +61,10 @@ public class CatalogoController {
                 municipioRepo.findByCodigoDepartamentoOrderByDescripcionAsc(departamento));
         }
         return ResponseEntity.ok(municipioRepo.findAllByOrderByDescripcionAsc());
+    }
+
+    @GetMapping("/tipos-actividad")
+    public ResponseEntity<List<GcTipoActividad>> listarTiposActividad() {
+        return ResponseEntity.ok(tipoActividadRepo.findByActivoTrueOrderByNombreAsc());
     }
 }
