@@ -93,9 +93,6 @@
                 >
                   <div class="card-header">
                     <span class="card-name">{{ op.nombre }}</span>
-                    <button class="card-action" @click.stop="openCerrar(op)" title="Cerrar oportunidad">
-                      <Icon name="check-circle" :size="14" />
-                    </button>
                   </div>
                   <div class="card-empresa">{{ op.empresaNombre }}</div>
                   <div class="card-footer">
@@ -104,6 +101,11 @@
                     <span v-if="op.fechaEstimadaCierre" class="card-fecha">
                       <Icon name="clock" :size="10" /> {{ formatDate(op.fechaEstimadaCierre) }}
                     </span>
+                  </div>
+                  <div class="card-actions">
+                    <button class="card-btn card-btn--cerrar" @click.stop="openCerrar(op)" title="Cerrar oportunidad">
+                      <Icon name="check-circle" :size="14" /> Cerrar
+                    </button>
                   </div>
                 </div>
 
@@ -468,13 +470,16 @@ function formatDate(date) {
 
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); }
 .card-name { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); line-height: 1.3; }
-.card-action { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px; display: flex; border-radius: var(--radius-sm); transition: all 0.15s; flex-shrink: 0; }
-.card-action:hover { color: var(--success); background: var(--success-soft); }
 .card-empresa { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
 .card-footer { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
 .card-valor { font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--primary); }
 .card-prob { font-size: 9px; color: var(--text-muted); background: var(--bg-surface); padding: 0 4px; border-radius: var(--radius-full); }
 .card-fecha { display: flex; align-items: center; gap: 2px; font-size: 9px; color: var(--text-muted); }
+
+.card-actions { display: flex; justify-content: flex-end; margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--glass-border); }
+.card-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-full); border: 1px solid transparent; font-family: var(--font-body); font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.card-btn--cerrar { background: rgba(16,185,129,0.08); color: var(--success); border-color: rgba(16,185,129,0.2); }
+.card-btn--cerrar:hover { background: rgba(16,185,129,0.2); border-color: var(--success); }
 
 /* ==================== CONFIG ==================== */
 .config-section { display: flex; flex-direction: column; gap: var(--space-5); flex: 1; min-height: 0; overflow-y: auto; }

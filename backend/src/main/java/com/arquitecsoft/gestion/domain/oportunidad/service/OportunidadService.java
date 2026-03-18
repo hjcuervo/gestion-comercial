@@ -46,8 +46,8 @@ public class OportunidadService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<OportunidadResponse> listar(String q, Long empresaId, Long pipelineId, 
-                                                     Long etapaId, String estadoMacro, 
+    public PageResponse<OportunidadResponse> listar(String q, Long empresaId, Long pipelineId,
+                                                     Long etapaId, String estadoMacro,
                                                      int page, int pageSize) {
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("fechaCreacion").descending());
 
@@ -76,26 +76,21 @@ public class OportunidadService {
 
     @Transactional
     public OportunidadResponse crear(OportunidadCreateRequest request) {
-        // Validar empresa
         GcEmpresa empresa = empresaRepository.findById(request.getEmpresaId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada con ID: " + request.getEmpresaId()));
 
-        // Validar pipeline
         GcPipeline pipeline = pipelineRepository.findById(request.getPipelineId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Pipeline no encontrado con ID: " + request.getPipelineId()));
 
-        // Determinar etapa inicial
         GcEtapa etapa;
         if (request.getEtapaId() != null) {
             etapa = etapaRepository.findById(request.getEtapaId())
                     .orElseThrow(() -> new BusinessException("NOT_FOUND", "Etapa no encontrada con ID: " + request.getEtapaId()));
-            
-            // Validar que la etapa pertenezca al pipeline
+
             if (!etapa.getPipeline().getId().equals(pipeline.getId())) {
                 throw new BusinessException("VALIDATION_ERROR", "La etapa no pertenece al pipeline especificado");
             }
         } else {
-            // Usar la primera etapa del pipeline
             List<GcEtapa> etapas = etapaRepository.findActivasByPipelineId(pipeline.getId());
             if (etapas.isEmpty()) {
                 throw new BusinessException("VALIDATION_ERROR", "El pipeline no tiene etapas activas");
@@ -118,8 +113,6 @@ public class OportunidadService {
         oportunidad.setCreadoPor(securityUtils.getCurrentUserId());
 
         oportunidad = oportunidadRepository.save(oportunidad);
-
-        // Recargar con relaciones
         oportunidad = oportunidadRepository.findByIdWithRelations(oportunidad.getId()).orElse(oportunidad);
 
         return OportunidadResponse.fromEntity(oportunidad);
@@ -130,7 +123,6 @@ public class OportunidadService {
         GcOportunidad oportunidad = oportunidadRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Oportunidad no encontrada con ID: " + id));
 
-        // No permitir editar oportunidades cerradas
         if (oportunidad.isCerrada()) {
             throw new BusinessException("BUSINESS_ERROR", "No se puede editar una oportunidad cerrada");
         }
@@ -138,27 +130,21 @@ public class OportunidadService {
         if (StringUtils.hasText(request.getNombre())) {
             oportunidad.setNombre(request.getNombre().trim());
         }
-
         if (request.getValorEstimado() != null) {
             oportunidad.setValorEstimado(request.getValorEstimado());
         }
-
         if (StringUtils.hasText(request.getMoneda())) {
             oportunidad.setMoneda(request.getMoneda());
         }
-
         if (request.getProbabilidad() != null) {
             oportunidad.setProbabilidad(request.getProbabilidad());
         }
-
         if (request.getFechaEstimadaCierre() != null) {
             oportunidad.setFechaEstimadaCierre(request.getFechaEstimadaCierre());
         }
-
         if (request.getFuente() != null) {
             oportunidad.setFuente(request.getFuente());
         }
-
         if (request.getTipoServicio() != null) {
             oportunidad.setTipoServicio(request.getTipoServicio());
         }
@@ -174,7 +160,6 @@ public class OportunidadService {
         GcOportunidad oportunidad = oportunidadRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Oportunidad no encontrada con ID: " + id));
 
-        // No permitir mover oportunidades cerradas
         if (oportunidad.isCerrada()) {
             throw new BusinessException("BUSINESS_ERROR", "No se puede mover una oportunidad cerrada");
         }
@@ -182,20 +167,16 @@ public class OportunidadService {
         GcEtapa nuevaEtapa = etapaRepository.findById(request.getEtapaId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Etapa no encontrada con ID: " + request.getEtapaId()));
 
-        // Validar que la etapa pertenezca al mismo pipeline
         if (!nuevaEtapa.getPipeline().getId().equals(oportunidad.getPipeline().getId())) {
             throw new BusinessException("VALIDATION_ERROR", "La etapa no pertenece al pipeline de la oportunidad");
         }
 
-        // Actualizar etapa
         oportunidad.setEtapa(nuevaEtapa);
-        
-        // Actualizar probabilidad si la etapa tiene una sugerida
+
         if (nuevaEtapa.getProbabilidadSugerida() != null) {
             oportunidad.setProbabilidad(nuevaEtapa.getProbabilidadSugerida());
         }
 
-        // Cambiar estado a SEGUIMIENTO si estaba en ABIERTA
         if (oportunidad.getEstadoMacro() == EstadoMacro.ABIERTA) {
             oportunidad.setEstadoMacro(EstadoMacro.SEGUIMIENTO);
         }
@@ -211,12 +192,10 @@ public class OportunidadService {
         GcOportunidad oportunidad = oportunidadRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Oportunidad no encontrada con ID: " + id));
 
-        // No permitir cerrar oportunidades ya cerradas
         if (oportunidad.isCerrada()) {
             throw new BusinessException("BUSINESS_ERROR", "La oportunidad ya esta cerrada");
         }
 
-        // Validar estado de cierre
         EstadoMacro nuevoEstado;
         try {
             nuevoEstado = EstadoMacro.valueOf(request.getEstadoMacro());
@@ -228,19 +207,12 @@ public class OportunidadService {
             throw new BusinessException("VALIDATION_ERROR", "Estado de cierre debe ser GANADA, PERDIDA o NO_CONCRETADA");
         }
 
-        // Validar motivo para PERDIDA y NO_CONCRETADA
-        if ((nuevoEstado == EstadoMacro.PERDIDA || nuevoEstado == EstadoMacro.NO_CONCRETADA) 
-            && request.getMotivoCierreId() == null) {
-            throw new BusinessException("VALIDATION_ERROR", "El motivo de cierre es requerido para oportunidades PERDIDA o NO_CONCRETADA");
-        }
-
         oportunidad.setEstadoMacro(nuevoEstado);
         oportunidad.setMotivoCierreId(request.getMotivoCierreId());
         oportunidad.setComentarioCierre(request.getComentario());
         oportunidad.setFechaCierre(LocalDateTime.now());
         oportunidad.setModificadoPor(securityUtils.getCurrentUserId());
 
-        // Si es GANADA, poner probabilidad en 100
         if (nuevoEstado == EstadoMacro.GANADA) {
             oportunidad.setProbabilidad(100);
         } else {
