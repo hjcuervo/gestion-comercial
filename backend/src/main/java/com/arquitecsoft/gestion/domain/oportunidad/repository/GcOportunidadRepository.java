@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -43,4 +44,17 @@ public interface GcOportunidadRepository extends JpaRepository<GcOportunidad, Lo
 
     @Query("SELECT COUNT(o) FROM GcOportunidad o WHERE o.etapa.id = :etapaId AND o.estadoMacro IN ('ABIERTA', 'SEGUIMIENTO')")
     long countOportunidadesActivasByEtapa(@Param("etapaId") Long etapaId);
+
+    @Query("SELECT o FROM GcOportunidad o " +
+           "JOIN FETCH o.empresa " +
+           "JOIN FETCH o.pipeline " +
+           "JOIN FETCH o.etapa")
+    List<GcOportunidad> findAllWithRelations();
+
+    @Query("SELECT o FROM GcOportunidad o " +
+           "JOIN FETCH o.empresa " +
+           "JOIN FETCH o.pipeline " +
+           "JOIN FETCH o.etapa " +
+           "WHERE o.pipeline.id = :pipelineId")
+    List<GcOportunidad> findAllWithRelationsByPipeline(@Param("pipelineId") Long pipelineId);
 }

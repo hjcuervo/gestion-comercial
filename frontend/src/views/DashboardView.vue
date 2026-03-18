@@ -1,388 +1,324 @@
 <template>
-  <Layout>
+  <AppLayout>
     <div class="dashboard">
-      <!-- Welcome -->
-      <section class="dashboard__welcome animate-slideUp">
-        <div class="dashboard__welcome-content">
-          <h2 class="dashboard__welcome-title">
-            Bienvenido, <span class="gradient-text">{{ firstName }}</span>
-          </h2>
-          <p class="dashboard__welcome-text">
-            Aquí tienes un resumen de tu actividad comercial
-          </p>
+      <!-- Header -->
+      <section class="dashboard__header animate-slideUp">
+        <div class="header-left">
+          <h1 class="page-title gradient-text">Dashboard</h1>
+          <p class="page-subtitle">Análisis de oportunidades comerciales</p>
         </div>
-        <Button variant="primary" icon="plus">
-          Nueva Oportunidad
-        </Button>
+        <div class="header-filters">
+          <select v-model="selectedPipelineId" class="filter-select" @change="loadStats">
+            <option :value="null">Todos los pipelines</option>
+            <option v-for="p in pipelines" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+          </select>
+          <select v-model="selectedMeses" class="filter-select" @change="loadStats">
+            <option :value="6">Últimos 6 meses</option>
+            <option :value="12">Últimos 12 meses</option>
+            <option :value="24">Últimos 24 meses</option>
+          </select>
+        </div>
       </section>
 
-      <!-- Stats -->
-      <section class="dashboard__stats">
-        <StatCard
-          v-for="(stat, i) in stats"
-          :key="stat.label"
-          v-bind="stat"
-          class="animate-slideUp"
-          :style="{ animationDelay: `${(i + 1) * 80}ms` }"
-        />
-      </section>
+      <!-- Loading -->
+      <div v-if="loading" class="loading-state">
+        <Icon name="loader" :size="32" class="animate-spin" /><p>Cargando estadísticas...</p>
+      </div>
 
-      <!-- Content Grid -->
-      <section class="dashboard__content">
-        <!-- Opportunities -->
-        <Card 
-          title="Oportunidades Recientes" 
-          subtitle="Últimas actualizaciones"
-          icon="trending-up"
-          class="dashboard__card animate-slideUp"
-          style="animation-delay: 400ms"
-        >
-          <template #actions>
-            <Button variant="ghost" size="sm" trailing-icon="arrow-right">
-              Ver todas
-            </Button>
-          </template>
-          
-          <div class="opp-list">
-            <div v-for="opp in opportunities" :key="opp.id" class="opp-item">
-              <div class="opp-item__info">
-                <span class="opp-item__name">{{ opp.nombre }}</span>
-                <span class="opp-item__company">{{ opp.empresa }}</span>
-              </div>
-              <div class="opp-item__meta">
-                <span class="opp-item__value">{{ formatCurrency(opp.valor) }}</span>
-                <span :class="['opp-item__stage', `opp-item__stage--${opp.etapaClass}`]">
-                  {{ opp.etapa }}
-                </span>
+      <template v-else-if="stats">
+        <!-- KPI Cards -->
+        <section class="kpi-grid animate-slideUp delay-1">
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--pipeline"><Icon name="pipeline" :size="20" /></div>
+            <div class="kpi-body">
+              <span class="kpi-value">{{ formatCurrency(stats.valorTotalPipeline) }}</span>
+              <span class="kpi-label">Valor en Pipeline</span>
+            </div>
+            <span class="kpi-count">{{ stats.totalAbiertas }} abiertas</span>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--ganada"><Icon name="trophy" :size="20" /></div>
+            <div class="kpi-body">
+              <span class="kpi-value">{{ formatCurrency(stats.valorTotalGanado) }}</span>
+              <span class="kpi-label">Valor Ganado</span>
+            </div>
+            <span class="kpi-count">{{ stats.totalGanadas }} ganadas</span>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--perdida"><Icon name="trending-down" :size="20" /></div>
+            <div class="kpi-body">
+              <span class="kpi-value">{{ formatCurrency(stats.valorTotalPerdido) }}</span>
+              <span class="kpi-label">Valor Perdido</span>
+            </div>
+            <span class="kpi-count">{{ stats.totalPerdidas }} perdidas</span>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--conversion"><Icon name="chart" :size="20" /></div>
+            <div class="kpi-body">
+              <span class="kpi-value">{{ stats.tasaConversion }}%</span>
+              <span class="kpi-label">Tasa de Conversión</span>
+            </div>
+            <span class="kpi-count">{{ stats.totalGanadas + stats.totalPerdidas + stats.totalNoConcretadas }} cerradas</span>
+          </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-row animate-slideUp delay-2">
+          <!-- Funnel por etapa -->
+          <div class="chart-card glass">
+            <div class="chart-card__header">
+              <h3 class="chart-card__title"><Icon name="pipeline" :size="16" color="var(--primary)" /> Embudo por Etapa</h3>
+            </div>
+            <div class="funnel-container">
+              <div v-if="!stats.porEtapa?.length" class="chart-empty">Sin datos de etapas</div>
+              <div v-else class="funnel">
+                <div v-for="(etapa, i) in stats.porEtapa" :key="etapa.etapaId" class="funnel-row">
+                  <span class="funnel-label">{{ etapa.etapaNombre }}</span>
+                  <div class="funnel-bar-wrap">
+                    <div class="funnel-bar" :style="{ width: funnelWidth(etapa.cantidad) + '%', background: etapa.etapaColor || 'var(--primary)' }">
+                      <span class="funnel-bar__value">{{ etapa.cantidad }}</span>
+                    </div>
+                  </div>
+                  <span class="funnel-amount">{{ formatCurrency(etapa.valorTotal) }}</span>
+                </div>
               </div>
             </div>
           </div>
-        </Card>
 
-        <!-- Commitments -->
-        <Card 
-          title="Próximos Compromisos" 
-          subtitle="Tareas pendientes"
-          icon="calendar"
-          class="dashboard__card animate-slideUp"
-          style="animation-delay: 500ms"
-        >
-          <div class="commit-list">
-            <div v-for="item in commitments" :key="item.id" class="commit-item">
-              <div :class="['commit-item__bar', `commit-item__bar--${item.prioridad}`]"></div>
-              <div class="commit-item__content">
-                <span class="commit-item__title">{{ item.descripcion }}</span>
-                <span class="commit-item__date">
-                  <Icon name="clock" :size="14" />
-                  {{ formatDate(item.fecha) }}
-                </span>
-              </div>
-              <Button variant="ghost" size="sm" icon="check" icon-only />
+          <!-- Tendencia mensual -->
+          <div class="chart-card glass">
+            <div class="chart-card__header">
+              <h3 class="chart-card__title"><Icon name="trending-up" :size="16" color="var(--secondary)" /> Tendencia Mensual</h3>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas ref="trendChart"></canvas>
             </div>
           </div>
-        </Card>
-      </section>
+        </section>
 
-      <!-- Quick Actions -->
-      <section class="dashboard__actions animate-slideUp" style="animation-delay: 600ms">
-        <h3 class="dashboard__section-title">Acciones Rápidas</h3>
-        <div class="actions-grid">
-          <button 
-            v-for="action in quickActions" 
-            :key="action.label"
-            class="action-card"
-            @click="$router.push(action.route)"
-          >
-            <div class="action-card__icon">
-              <Icon :name="action.icon" :size="28" />
+        <!-- Bottom Row -->
+        <section class="bottom-row animate-slideUp delay-3">
+          <!-- Top Oportunidades -->
+          <div class="chart-card glass">
+            <div class="chart-card__header">
+              <h3 class="chart-card__title"><Icon name="wallet" :size="16" color="var(--primary)" /> Top Oportunidades</h3>
             </div>
-            <span class="action-card__label">{{ action.label }}</span>
-          </button>
-        </div>
-      </section>
+            <div v-if="!stats.topOportunidades?.length" class="chart-empty">Sin oportunidades abiertas</div>
+            <div v-else class="top-list">
+              <div v-for="(op, i) in stats.topOportunidades" :key="op.id" class="top-item">
+                <span class="top-rank">{{ i + 1 }}</span>
+                <div class="top-info">
+                  <span class="top-name">{{ op.nombre }}</span>
+                  <span class="top-empresa">{{ op.empresaNombre }} · {{ op.etapaNombre }}</span>
+                </div>
+                <div class="top-right">
+                  <span class="top-valor">{{ formatCurrency(op.valorEstimado) }}</span>
+                  <span v-if="op.probabilidad != null" class="top-prob">{{ op.probabilidad }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Por Empresa -->
+          <div class="chart-card glass">
+            <div class="chart-card__header">
+              <h3 class="chart-card__title"><Icon name="business" :size="16" color="var(--accent)" /> Por Empresa</h3>
+            </div>
+            <div v-if="!stats.porEmpresa?.length" class="chart-empty">Sin datos de empresas</div>
+            <div v-else class="empresa-list">
+              <div v-for="emp in stats.porEmpresa" :key="emp.empresaId" class="empresa-item">
+                <div class="empresa-item__info">
+                  <span class="empresa-item__name">{{ emp.empresaNombre }}</span>
+                  <div class="empresa-item__badges">
+                    <span class="mini-badge mini-badge--open">{{ emp.abiertas }} abiertas</span>
+                    <span class="mini-badge mini-badge--won">{{ emp.ganadas }} ganadas</span>
+                  </div>
+                </div>
+                <span class="empresa-item__valor">{{ formatCurrency(emp.valorTotal) }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </template>
     </div>
-  </Layout>
+  </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useAuthStore } from '@/stores/auth.store';
-import Layout from '@/components/layout/Layout.vue';
-import Card from '@/components/ui/Card.vue';
-import StatCard from '@/components/ui/StatCard.vue';
-import Button from '@/components/ui/Button.vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { dashboardService } from '@/services/dashboard.service';
+import { pipelineService } from '@/services/pipeline.service';
 
-const authStore = useAuthStore();
+const stats = ref(null);
+const pipelines = ref([]);
+const loading = ref(true);
+const selectedPipelineId = ref(null);
+const selectedMeses = ref(12);
+const trendChart = ref(null);
+let chartInstance = null;
 
-const firstName = computed(() => (authStore.userName || 'Usuario').split(' ')[0]);
+onMounted(async () => {
+  try {
+    pipelines.value = await pipelineService.listarActivos();
+  } catch {}
+  await loadStats();
+});
 
-const stats = ref([
-  { icon: 'wallet', value: 450000000, label: 'Valor en Pipeline', trend: '+12.5%', trendUp: true, format: 'currency', color: 'primary' },
-  { icon: 'handshake', value: 24, label: 'Oportunidades Activas', trend: '+3', trendUp: true, format: 'number', color: 'secondary' },
-  { icon: 'business', value: 128, label: 'Empresas Registradas', format: 'number', color: 'success' },
-  { icon: 'trophy', value: 87, label: 'Tasa de Conversión', trend: '+2.3%', trendUp: true, format: 'percent', color: 'warning' },
-]);
+async function loadStats() {
+  loading.value = true;
+  try {
+    const params = { meses: selectedMeses.value };
+    if (selectedPipelineId.value) params.pipeline_id = selectedPipelineId.value;
+    stats.value = await dashboardService.obtenerStats(params);
+    await nextTick();
+    renderTrendChart();
+  } catch (err) {
+    console.error('Error cargando stats:', err);
+  } finally {
+    loading.value = false;
+  }
+}
 
-const opportunities = ref([
-  { id: 1, nombre: 'Implementación ERP', empresa: 'Acme Corporation', valor: 150000000, etapa: 'Negociación', etapaClass: 'negotiation' },
-  { id: 2, nombre: 'Migración Cloud AWS', empresa: 'Tech Solutions', valor: 85000000, etapa: 'Propuesta', etapaClass: 'proposal' },
-  { id: 3, nombre: 'App Móvil E-commerce', empresa: 'Retail Plus', valor: 45000000, etapa: 'Calificación', etapaClass: 'qualification' },
-  { id: 4, nombre: 'Consultoría Digital', empresa: 'Financial Group', valor: 32000000, etapa: 'Descubrimiento', etapaClass: 'discovery' },
-]);
+function funnelWidth(cantidad) {
+  if (!stats.value?.porEtapa?.length) return 0;
+  const max = Math.max(...stats.value.porEtapa.map(e => e.cantidad));
+  return max > 0 ? (cantidad / max) * 100 : 0;
+}
 
-const commitments = ref([
-  { id: 1, descripcion: 'Enviar propuesta técnica a Acme Corp', fecha: '2026-02-25', prioridad: 'alta' },
-  { id: 2, descripcion: 'Reunión de seguimiento con Tech Solutions', fecha: '2026-02-26', prioridad: 'media' },
-  { id: 3, descripcion: 'Demo de producto para Retail Plus', fecha: '2026-02-27', prioridad: 'alta' },
-  { id: 4, descripcion: 'Llamada de cierre con Financial Group', fecha: '2026-02-28', prioridad: 'baja' },
-]);
+async function renderTrendChart() {
+  if (!trendChart.value || !stats.value?.porMes?.length) return;
 
-const quickActions = [
-  { icon: 'building-add', label: 'Nueva Empresa', route: '/empresas/nueva' },
-  { icon: 'person-add', label: 'Nuevo Contacto', route: '/personas/nuevo' },
-  { icon: 'note-add', label: 'Nueva Actividad', route: '/actividades/nueva' },
-  { icon: 'bar-chart', label: 'Ver Reportes', route: '/reportes' },
-];
+  // Load Chart.js dynamically
+  if (!window.Chart) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
 
-const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', notation: 'compact', maximumFractionDigits: 0 }).format(val);
-const formatDate = (date) => new Date(date).toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+  if (chartInstance) chartInstance.destroy();
+
+  const ctx = trendChart.value.getContext('2d');
+  const labels = stats.value.porMes.map(m => m.mesLabel);
+  const nuevas = stats.value.porMes.map(m => m.nuevas);
+  const ganadas = stats.value.porMes.map(m => m.ganadas);
+  const perdidas = stats.value.porMes.map(m => m.perdidas);
+
+  chartInstance = new window.Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Nuevas', data: nuevas, backgroundColor: 'rgba(0, 212, 255, 0.7)', borderRadius: 4, barPercentage: 0.7 },
+        { label: 'Ganadas', data: ganadas, backgroundColor: 'rgba(16, 185, 129, 0.7)', borderRadius: 4, barPercentage: 0.7 },
+        { label: 'Perdidas', data: perdidas, backgroundColor: 'rgba(244, 63, 94, 0.7)', borderRadius: 4, barPercentage: 0.7 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: 'rgba(255,255,255,0.6)', font: { size: 11 }, boxWidth: 12, padding: 16 } },
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, maxRotation: 45 } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, stepSize: 1 }, beginAtZero: true },
+      },
+    },
+  });
+}
+
+function formatCurrency(value) {
+  const num = Number(value);
+  if (!num) return '$0';
+  if (num >= 1000000000) return `$${(num / 1000000000).toFixed(1)}B`;
+  if (num >= 1000000) return `$${(num / 1000000).toFixed(0)}M`;
+  if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`;
+  return `$${num.toLocaleString()}`;
+}
 </script>
 
 <style scoped>
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+.dashboard { display: flex; flex-direction: column; gap: var(--space-6); }
+
+.dashboard__header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+.page-title { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; margin: 0; }
+.page-subtitle { color: var(--text-tertiary); font-size: var(--text-sm); margin: var(--space-1) 0 0; }
+.header-filters { display: flex; gap: var(--space-3); }
+.filter-select { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-xs); padding: var(--space-2) var(--space-4); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px; }
+.filter-select:focus { outline: none; border-color: var(--primary); }
+.filter-select option { background: var(--bg-elevated); }
+
+.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-8); color: var(--text-tertiary); font-size: var(--text-sm); }
+
+/* KPI Grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.kpi-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); position: relative; overflow: hidden; }
+.kpi-icon { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.kpi-icon--pipeline { background: var(--primary-soft); color: var(--primary); }
+.kpi-icon--ganada { background: var(--success-soft); color: var(--success); }
+.kpi-icon--perdida { background: var(--error-soft); color: var(--error); }
+.kpi-icon--conversion { background: var(--secondary-soft); color: var(--secondary); }
+.kpi-body { display: flex; flex-direction: column; }
+.kpi-value { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); }
+.kpi-label { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 2px; }
+.kpi-count { font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
+
+/* Chart cards */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+
+.chart-card { border-radius: var(--radius-xl); padding: var(--space-5); display: flex; flex-direction: column; }
+.chart-card__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+.chart-card__title { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); margin: 0; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 120px; color: var(--text-muted); font-size: var(--text-xs); }
+
+/* Funnel */
+.funnel { display: flex; flex-direction: column; gap: var(--space-3); }
+.funnel-row { display: flex; align-items: center; gap: var(--space-3); }
+.funnel-label { font-size: var(--text-xs); color: var(--text-secondary); min-width: 100px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.funnel-bar-wrap { flex: 1; height: 28px; background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden; }
+.funnel-bar { height: 100%; border-radius: var(--radius-sm); display: flex; align-items: center; padding-left: var(--space-3); min-width: 30px; transition: width 0.6s ease; }
+.funnel-bar__value { font-size: 11px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.funnel-amount { font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); min-width: 60px; text-align: right; }
+
+/* Trend chart */
+.chart-canvas-wrap { position: relative; height: 260px; }
+
+/* Top list */
+.top-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 320px; overflow-y: auto; }
+.top-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); transition: background 0.15s; }
+.top-item:hover { background: rgba(255,255,255,0.02); }
+.top-rank { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); min-width: 20px; text-align: center; font-weight: 600; }
+.top-info { flex: 1; min-width: 0; }
+.top-name { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-empresa { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.top-right { text-align: right; flex-shrink: 0; }
+.top-valor { display: block; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--primary); }
+.top-prob { display: block; font-size: 9px; color: var(--text-muted); }
+
+/* Empresa list */
+.empresa-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 320px; overflow-y: auto; }
+.empresa-item { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); border-radius: var(--radius-md); transition: background 0.15s; }
+.empresa-item:hover { background: rgba(255,255,255,0.02); }
+.empresa-item__info { flex: 1; min-width: 0; }
+.empresa-item__name { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empresa-item__badges { display: flex; gap: var(--space-2); margin-top: 3px; }
+.mini-badge { font-size: 9px; padding: 1px 6px; border-radius: var(--radius-full); font-weight: 600; }
+.mini-badge--open { background: var(--primary-soft); color: var(--primary); }
+.mini-badge--won { background: var(--success-soft); color: var(--success); }
+.empresa-item__valor { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
+
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-row, .bottom-row { grid-template-columns: 1fr; }
 }
-
-/* Welcome */
-.dashboard__welcome {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-6);
-  background: var(--gradient-card);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(20px);
-}
-
-.dashboard__welcome-title {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-semibold);
-  margin-bottom: var(--space-1);
-}
-
-.dashboard__welcome-text {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-/* Stats */
-.dashboard__stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-4);
-}
-
-@media (max-width: 1200px) {
-  .dashboard__stats { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 768px) {
-  .dashboard__stats { grid-template-columns: 1fr; }
-}
-
-/* Content */
-.dashboard__content {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: var(--space-4);
-}
-
-@media (max-width: 1024px) {
-  .dashboard__content { grid-template-columns: 1fr; }
-}
-
-/* Opportunity List */
-.opp-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.opp-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--border);
-  transition: background var(--duration-fast);
-}
-
-.opp-item:last-child { border-bottom: none; }
-
-.opp-item:hover {
-  background: var(--glass-bg);
-  margin: 0 calc(var(--space-4) * -1);
-  padding-left: var(--space-4);
-  padding-right: var(--space-4);
-  border-radius: var(--radius-md);
-}
-
-.opp-item__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.opp-item__name {
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--text-primary);
-}
-
-.opp-item__company {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
-.opp-item__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-1);
-}
-
-.opp-item__value {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--primary);
-}
-
-.opp-item__stage {
-  font-size: var(--text-xs);
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  font-weight: var(--font-medium);
-}
-
-.opp-item__stage--negotiation { background: var(--success-soft); color: var(--success); }
-.opp-item__stage--proposal { background: var(--primary-soft); color: var(--primary); }
-.opp-item__stage--qualification { background: var(--warning-soft); color: var(--warning); }
-.opp-item__stage--discovery { background: var(--secondary-soft); color: var(--secondary); }
-
-/* Commitment List */
-.commit-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.commit-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--glass-bg);
-  border-radius: var(--radius-lg);
-  transition: all var(--duration-fast);
-}
-
-.commit-item:hover {
-  background: var(--glass-hover);
-}
-
-.commit-item__bar {
-  width: 4px;
-  height: 40px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.commit-item__bar--alta { background: var(--error); }
-.commit-item__bar--media { background: var(--warning); }
-.commit-item__bar--baja { background: var(--text-muted); }
-
-.commit-item__content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.commit-item__title {
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.commit-item__date {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
-/* Quick Actions */
-.dashboard__section-title {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--space-4);
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
-}
-
-@media (max-width: 768px) {
-  .actions-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-.action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-6);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
-}
-
-.action-card:hover {
-  background: var(--primary-soft);
-  border-color: var(--primary);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-glow-sm);
-}
-
-.action-card__icon {
-  color: var(--primary);
-}
-
-.action-card:hover .action-card__icon {
-  color: var(--text-primary);
-}
-
-.action-card__label {
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--text-secondary);
-}
-
-.action-card:hover .action-card__label {
-  color: var(--text-primary);
+@media (max-width: 600px) {
+  .kpi-grid { grid-template-columns: 1fr; }
 }
 </style>
