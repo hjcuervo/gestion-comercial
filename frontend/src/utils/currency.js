@@ -1,32 +1,33 @@
 /**
  * Format currency abbreviated in millions (M)
- * Examples: 6.000.000 → $6 M | 60.000.000 → $60 M | 6.000.000.000 → $6.000 M
- * Values under 1M show with thousand separators: 500.000 → $500.000
+ * Always uses currency code as prefix: COP 1.000 M, USD 10.000, EUR 50 M
+ * Values under 1M show with thousand separators: COP 500.000
  */
 export function formatCurrency(value, moneda) {
   const num = Number(value);
-  if (!num) return prefijo(moneda) + '0';
+  const code = moneda || 'COP';
+  if (!num) return `${code} 0`;
 
   if (num >= 1000000) {
     const millions = num / 1000000;
-    // Show decimals only if not integer
     const formatted = millions % 1 === 0
       ? millions.toLocaleString('es-CO')
       : millions.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-    return `${prefijo(moneda)}${formatted} M`;
+    return `${code} ${formatted} M`;
   }
 
-  return prefijo(moneda) + num.toLocaleString('es-CO');
+  return `${code} ${num.toLocaleString('es-CO')}`;
 }
 
 /**
  * Format currency full (no abbreviation) with thousand separators
- * Example: 1000000000 → $1.000.000.000
+ * Example: 1000000000 → COP 1.000.000.000
  */
 export function formatCurrencyFull(value, moneda) {
   const num = Number(value);
-  if (!num) return prefijo(moneda) + '0';
-  return prefijo(moneda) + num.toLocaleString('es-CO');
+  const code = moneda || 'COP';
+  if (!num) return `${code} 0`;
+  return `${code} ${num.toLocaleString('es-CO')}`;
 }
 
 /**
@@ -48,10 +49,4 @@ export function formatMoneyInput(value) {
   const num = Number(value);
   if (!num && num !== 0) return '';
   return num.toLocaleString('es-CO', { maximumFractionDigits: 0 });
-}
-
-function prefijo(moneda) {
-  if (moneda === 'USD') return 'US$';
-  if (moneda === 'EUR') return '€';
-  return '$';
 }

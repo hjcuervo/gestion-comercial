@@ -1,6 +1,7 @@
 package com.arquitecsoft.gestion.domain.documento.controller;
 
 import com.arquitecsoft.gestion.domain.documento.dto.DocumentoCreateRequest;
+import com.arquitecsoft.gestion.domain.documento.dto.DocumentoEnlaceRequest;
 import com.arquitecsoft.gestion.domain.documento.dto.DocumentoResponse;
 import com.arquitecsoft.gestion.domain.documento.service.DocumentoService;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
@@ -29,9 +30,7 @@ public class DocumentoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20", name = "page_size") int pageSize) {
 
-        if (pageSize > 100) {
-            pageSize = 100;
-        }
+        if (pageSize > 100) pageSize = 100;
 
         PageResponse<DocumentoResponse> response = documentoService.listar(
                 oportunidadId, actividadId, tipoDocumentoId, page, pageSize);
@@ -59,6 +58,12 @@ public class DocumentoController {
     @PostMapping
     public ResponseEntity<DocumentoResponse> crear(@Valid @RequestBody DocumentoCreateRequest request) {
         DocumentoResponse response = documentoService.crear(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/enlace")
+    public ResponseEntity<DocumentoResponse> crearEnlace(@Valid @RequestBody DocumentoEnlaceRequest request) {
+        DocumentoResponse response = documentoService.crearEnlace(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
