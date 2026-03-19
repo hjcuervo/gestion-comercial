@@ -13,7 +13,6 @@
               <Input v-model="form.nombre" label="Nombre de la Oportunidad" placeholder="Ej: Implementación ERP Acme" icon="handshake" :error="errors.nombre" required />
             </div>
 
-            <!-- Empresa -->
             <div class="form-group">
               <label class="form-label">Empresa <span class="required">*</span></label>
               <select v-model="form.empresaId" class="form-select" :disabled="isEditing">
@@ -23,7 +22,6 @@
               <span v-if="errors.empresaId" class="form-error">{{ errors.empresaId }}</span>
             </div>
 
-            <!-- Pipeline + Etapa (solo en creación) -->
             <div v-if="!isEditing" class="form-row">
               <div class="form-group form-group--half">
                 <label class="form-label">Pipeline <span class="required">*</span></label>
@@ -46,7 +44,15 @@
             <div class="form-row">
               <div class="form-group form-group--grow">
                 <label class="form-label">Valor Estimado</label>
-                <input v-model.number="form.valorEstimado" type="number" class="form-input" placeholder="0" min="0" step="1000" />
+                <input
+                  :value="valorDisplay"
+                  @input="onValorInput($event)"
+                  @blur="onValorBlur"
+                  type="text"
+                  inputmode="numeric"
+                  class="form-input"
+                  placeholder="0"
+                />
               </div>
               <div class="form-group form-group--shrink">
                 <label class="form-label">Moneda</label>
@@ -62,7 +68,6 @@
               </div>
             </div>
 
-            <!-- Fecha cierre + Fuente -->
             <div class="form-row">
               <div class="form-group form-group--half">
                 <label class="form-label">Fecha Estimada Cierre</label>
@@ -98,6 +103,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Input from '@/components/ui/Input.vue';
 import Button from '@/components/ui/Button.vue';
 import { pipelineService } from '@/services/pipeline.service';
+import { formatMoneyInput, parseMoney } from '@/utils/currency';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -119,6 +125,24 @@ const form = reactive({
   fechaEstimadaCierre: '', fuente: '', tipoServicio: '',
 });
 const errors = reactive({ nombre: '', empresaId: '', pipelineId: '' });
+
+// Money input display
+const valorDisplay = computed(() => {
+  if (form.valorEstimado == null || form.valorEstimado === '') return '';
+  return formatMoneyInput(form.valorEstimado);
+});
+
+function onValorInput(event) {
+  const raw = event.target.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+  const num = parseInt(raw, 10);
+  form.valorEstimado = isNaN(num) ? null : num;
+  // Reformat display
+  event.target.value = form.valorEstimado != null ? formatMoneyInput(form.valorEstimado) : '';
+}
+
+function onValorBlur() {
+  // Ensure display is formatted
+}
 
 watch(() => props.visible, async (val) => {
   if (val) {
@@ -149,9 +173,8 @@ async function onPipelineChange() {
 }
 
 async function loadEtapas(pipelineId) {
-  try {
-    etapasDisponibles.value = await pipelineService.listarEtapas(pipelineId);
-  } catch { etapasDisponibles.value = []; }
+  try { etapasDisponibles.value = await pipelineService.listarEtapas(pipelineId); }
+  catch { etapasDisponibles.value = []; }
 }
 
 function validate() {

@@ -2,6 +2,7 @@ package com.arquitecsoft.gestion.domain.oportunidad.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public class OportunidadStatsResponse {
 
@@ -10,10 +11,12 @@ public class OportunidadStatsResponse {
     private long totalGanadas;
     private long totalPerdidas;
     private long totalNoConcretadas;
-    private BigDecimal valorTotalPipeline;
-    private BigDecimal valorTotalGanado;
-    private BigDecimal valorTotalPerdido;
-    private double tasaConversion; // ganadas / (ganadas + perdidas + no_concretadas) * 100
+    private double tasaConversion;
+
+    // KPIs por moneda: { "COP": 50000000, "USD": 10000 }
+    private Map<String, BigDecimal> valorPipelinePorMoneda;
+    private Map<String, BigDecimal> valorGanadoPorMoneda;
+    private Map<String, BigDecimal> valorPerdidoPorMoneda;
 
     // Por etapa (funnel)
     private List<EtapaStat> porEtapa;
@@ -60,8 +63,8 @@ public class OportunidadStatsResponse {
     }
 
     public static class MesStat {
-        private String mes; // "2026-01", "2026-02", etc.
-        private String mesLabel; // "Ene 2026", "Feb 2026"
+        private String mes;
+        private String mesLabel;
         private long nuevas;
         private long ganadas;
         private long perdidas;
@@ -69,7 +72,6 @@ public class OportunidadStatsResponse {
         private BigDecimal valorGanado;
 
         public MesStat() {}
-
         public String getMes() { return mes; }
         public void setMes(String mes) { this.mes = mes; }
         public String getMesLabel() { return mesLabel; }
@@ -97,7 +99,6 @@ public class OportunidadStatsResponse {
         private Integer probabilidad;
 
         public TopOportunidad() {}
-
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
         public String getNombre() { return nombre; }
@@ -125,7 +126,6 @@ public class OportunidadStatsResponse {
         private BigDecimal valorTotal;
 
         public EmpresaStat() {}
-
         public Long getEmpresaId() { return empresaId; }
         public void setEmpresaId(Long empresaId) { this.empresaId = empresaId; }
         public String getEmpresaNombre() { return empresaNombre; }
@@ -149,14 +149,14 @@ public class OportunidadStatsResponse {
     public void setTotalPerdidas(long totalPerdidas) { this.totalPerdidas = totalPerdidas; }
     public long getTotalNoConcretadas() { return totalNoConcretadas; }
     public void setTotalNoConcretadas(long totalNoConcretadas) { this.totalNoConcretadas = totalNoConcretadas; }
-    public BigDecimal getValorTotalPipeline() { return valorTotalPipeline; }
-    public void setValorTotalPipeline(BigDecimal valorTotalPipeline) { this.valorTotalPipeline = valorTotalPipeline; }
-    public BigDecimal getValorTotalGanado() { return valorTotalGanado; }
-    public void setValorTotalGanado(BigDecimal valorTotalGanado) { this.valorTotalGanado = valorTotalGanado; }
-    public BigDecimal getValorTotalPerdido() { return valorTotalPerdido; }
-    public void setValorTotalPerdido(BigDecimal valorTotalPerdido) { this.valorTotalPerdido = valorTotalPerdido; }
     public double getTasaConversion() { return tasaConversion; }
     public void setTasaConversion(double tasaConversion) { this.tasaConversion = tasaConversion; }
+    public Map<String, BigDecimal> getValorPipelinePorMoneda() { return valorPipelinePorMoneda; }
+    public void setValorPipelinePorMoneda(Map<String, BigDecimal> valorPipelinePorMoneda) { this.valorPipelinePorMoneda = valorPipelinePorMoneda; }
+    public Map<String, BigDecimal> getValorGanadoPorMoneda() { return valorGanadoPorMoneda; }
+    public void setValorGanadoPorMoneda(Map<String, BigDecimal> valorGanadoPorMoneda) { this.valorGanadoPorMoneda = valorGanadoPorMoneda; }
+    public Map<String, BigDecimal> getValorPerdidoPorMoneda() { return valorPerdidoPorMoneda; }
+    public void setValorPerdidoPorMoneda(Map<String, BigDecimal> valorPerdidoPorMoneda) { this.valorPerdidoPorMoneda = valorPerdidoPorMoneda; }
     public List<EtapaStat> getPorEtapa() { return porEtapa; }
     public void setPorEtapa(List<EtapaStat> porEtapa) { this.porEtapa = porEtapa; }
     public List<MesStat> getPorMes() { return porMes; }

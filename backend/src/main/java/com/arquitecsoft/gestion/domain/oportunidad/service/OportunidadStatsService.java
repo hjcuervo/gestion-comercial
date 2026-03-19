@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -34,8 +33,6 @@ public class OportunidadStatsService {
         if (meses == null || meses <= 0) meses = 12;
 
         List<GcOportunidad> todas;
-
-        // Filtrar por pipeline si se especifica
         if (pipelineId != null) {
             todas = oportunidadRepository.findAllWithRelationsByPipeline(pipelineId);
         } else {
@@ -50,21 +47,6 @@ public class OportunidadStatsService {
         long perdidas = todas.stream().filter(o -> o.getEstadoMacro() == EstadoMacro.PERDIDA).count();
         long noConcretadas = todas.stream().filter(o -> o.getEstadoMacro() == EstadoMacro.NO_CONCRETADA).count();
 
-        BigDecimal valorPipeline = todas.stream()
-                .filter(o -> o.getEstadoMacro() == EstadoMacro.ABIERTA || o.getEstadoMacro() == EstadoMacro.SEGUIMIENTO)
-                .map(o -> o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal valorGanado = todas.stream()
-                .filter(o -> o.getEstadoMacro() == EstadoMacro.GANADA)
-                .map(o -> o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal valorPerdido = todas.stream()
-                .filter(o -> o.getEstadoMacro() == EstadoMacro.PERDIDA)
-                .map(o -> o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         long cerradas = ganadas + perdidas + noConcretadas;
         double tasaConversion = cerradas > 0 ? (double) ganadas / cerradas * 100 : 0;
 
@@ -72,12 +54,22 @@ public class OportunidadStatsService {
         stats.setTotalGanadas(ganadas);
         stats.setTotalPerdidas(perdidas);
         stats.setTotalNoConcretadas(noConcretadas);
-        stats.setValorTotalPipeline(valorPipeline);
-        stats.setValorTotalGanado(valorGanado);
-        stats.setValorTotalPerdido(valorPerdido);
         stats.setTasaConversion(Math.round(tasaConversion * 10.0) / 10.0);
 
-        // === Por etapa (funnel) - solo abiertas/seguimiento ===
+        // === Valores por moneda ===
+        stats.setValorPipelinePorMoneda(sumarPorMoneda(todas.stream()
+                .filter(o -> o.getEstadoMacro() == EstadoMacro.ABIERTA || o.getEstadoMacro() == EstadoMacro.SEGUIMIENTO)
+                .collect(Collectors.toList())));
+
+        stats.setValorGanadoPorMoneda(sumarPorMoneda(todas.stream()
+                .filter(o -> o.getEstadoMacro() == EstadoMacro.GANADA)
+                .collect(Collectors.toList())));
+
+        stats.setValorPerdidoPorMoneda(sumarPorMoneda(todas.stream()
+                .filter(o -> o.getEstadoMacro() == EstadoMacro.PERDIDA)
+                .collect(Collectors.toList())));
+
+        // === Por etapa (funnel) ===
         Map<Long, List<GcOportunidad>> porEtapaMap = todas.stream()
                 .filter(o -> o.getEstadoMacro() == EstadoMacro.ABIERTA || o.getEstadoMacro() == EstadoMacro.SEGUIMIENTO)
                 .collect(Collectors.groupingBy(o -> o.getEtapa().getId()));
@@ -88,23 +80,16 @@ public class OportunidadStatsService {
             BigDecimal valor = ops.stream()
                     .map(o -> o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            etapaStats.add(new EtapaStat(
-                    etapaId,
-                    sample.getEtapa().getNombre(),
-                    sample.getEtapa().getColor(),
-                    sample.getEtapa().getOrden(),
-                    ops.size(),
-                    valor
-            ));
+            etapaStats.add(new EtapaStat(etapaId, sample.getEtapa().getNombre(), sample.getEtapa().getColor(),
+                    sample.getEtapa().getOrden(), ops.size(), valor));
         });
         etapaStats.sort(Comparator.comparingInt(e -> e.getEtapaOrden() != null ? e.getEtapaOrden() : 0));
         stats.setPorEtapa(etapaStats);
 
-        // === Por mes (últimos N meses) ===
+        // === Por mes ===
         LocalDateTime desde = LocalDateTime.now().minusMonths(meses).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         DateTimeFormatter fmtKey = DateTimeFormatter.ofPattern("yyyy-MM");
 
-        // Generar todos los meses del rango
         Map<String, MesStat> mesMap = new LinkedHashMap<>();
         for (int i = 0; i < meses; i++) {
             LocalDateTime m = LocalDateTime.now().minusMonths(meses - 1 - i);
@@ -112,47 +97,35 @@ public class OportunidadStatsService {
             MesStat ms = new MesStat();
             ms.setMes(key);
             ms.setMesLabel(MESES_ES[m.getMonthValue()] + " " + m.getYear());
-            ms.setNuevas(0);
-            ms.setGanadas(0);
-            ms.setPerdidas(0);
-            ms.setValorNuevas(BigDecimal.ZERO);
-            ms.setValorGanado(BigDecimal.ZERO);
+            ms.setNuevas(0); ms.setGanadas(0); ms.setPerdidas(0);
+            ms.setValorNuevas(BigDecimal.ZERO); ms.setValorGanado(BigDecimal.ZERO);
             mesMap.put(key, ms);
         }
 
-        // Contar nuevas por fecha de creación
-        todas.stream()
-                .filter(o -> o.getFechaCreacion() != null && o.getFechaCreacion().isAfter(desde))
-                .forEach(o -> {
-                    String key = o.getFechaCreacion().format(fmtKey);
-                    MesStat ms = mesMap.get(key);
-                    if (ms != null) {
-                        ms.setNuevas(ms.getNuevas() + 1);
-                        ms.setValorNuevas(ms.getValorNuevas().add(
-                                o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO));
-                    }
-                });
+        todas.stream().filter(o -> o.getFechaCreacion() != null && o.getFechaCreacion().isAfter(desde)).forEach(o -> {
+            String key = o.getFechaCreacion().format(fmtKey);
+            MesStat ms = mesMap.get(key);
+            if (ms != null) {
+                ms.setNuevas(ms.getNuevas() + 1);
+                ms.setValorNuevas(ms.getValorNuevas().add(o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO));
+            }
+        });
 
-        // Contar ganadas/perdidas por fecha de cierre
-        todas.stream()
-                .filter(o -> o.getFechaCierre() != null && o.getFechaCierre().isAfter(desde))
-                .forEach(o -> {
-                    String key = o.getFechaCierre().format(fmtKey);
-                    MesStat ms = mesMap.get(key);
-                    if (ms != null) {
-                        if (o.getEstadoMacro() == EstadoMacro.GANADA) {
-                            ms.setGanadas(ms.getGanadas() + 1);
-                            ms.setValorGanado(ms.getValorGanado().add(
-                                    o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO));
-                        } else if (o.getEstadoMacro() == EstadoMacro.PERDIDA) {
-                            ms.setPerdidas(ms.getPerdidas() + 1);
-                        }
-                    }
-                });
-
+        todas.stream().filter(o -> o.getFechaCierre() != null && o.getFechaCierre().isAfter(desde)).forEach(o -> {
+            String key = o.getFechaCierre().format(fmtKey);
+            MesStat ms = mesMap.get(key);
+            if (ms != null) {
+                if (o.getEstadoMacro() == EstadoMacro.GANADA) {
+                    ms.setGanadas(ms.getGanadas() + 1);
+                    ms.setValorGanado(ms.getValorGanado().add(o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO));
+                } else if (o.getEstadoMacro() == EstadoMacro.PERDIDA) {
+                    ms.setPerdidas(ms.getPerdidas() + 1);
+                }
+            }
+        });
         stats.setPorMes(new ArrayList<>(mesMap.values()));
 
-        // === Top 10 oportunidades por valor (abiertas/seguimiento) ===
+        // === Top 10 ===
         List<TopOportunidad> top = todas.stream()
                 .filter(o -> o.getEstadoMacro() == EstadoMacro.ABIERTA || o.getEstadoMacro() == EstadoMacro.SEGUIMIENTO)
                 .filter(o -> o.getValorEstimado() != null)
@@ -160,8 +133,7 @@ public class OportunidadStatsService {
                 .limit(10)
                 .map(o -> {
                     TopOportunidad t = new TopOportunidad();
-                    t.setId(o.getId());
-                    t.setNombre(o.getNombre());
+                    t.setId(o.getId()); t.setNombre(o.getNombre());
                     t.setEmpresaNombre(o.getEmpresa().getRazonSocial());
                     t.setEtapaNombre(o.getEtapa().getNombre());
                     t.setEstadoMacro(o.getEstadoMacro().name());
@@ -169,34 +141,36 @@ public class OportunidadStatsService {
                     t.setMoneda(o.getMoneda());
                     t.setProbabilidad(o.getProbabilidad());
                     return t;
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
         stats.setTopOportunidades(top);
 
-        // === Por empresa (top 10) ===
+        // === Por empresa ===
         Map<Long, List<GcOportunidad>> porEmpresaMap = todas.stream()
                 .collect(Collectors.groupingBy(o -> o.getEmpresa().getId()));
-
-        List<EmpresaStat> empresaStats = porEmpresaMap.entrySet().stream()
-                .map(entry -> {
-                    List<GcOportunidad> ops = entry.getValue();
-                    GcOportunidad sample = ops.get(0);
-                    EmpresaStat es = new EmpresaStat();
-                    es.setEmpresaId(entry.getKey());
-                    es.setEmpresaNombre(sample.getEmpresa().getRazonSocial());
-                    es.setTotalOportunidades(ops.size());
-                    es.setAbiertas(ops.stream().filter(o -> o.getEstadoMacro() == EstadoMacro.ABIERTA || o.getEstadoMacro() == EstadoMacro.SEGUIMIENTO).count());
-                    es.setGanadas(ops.stream().filter(o -> o.getEstadoMacro() == EstadoMacro.GANADA).count());
-                    es.setValorTotal(ops.stream()
-                            .map(o -> o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add));
-                    return es;
-                })
-                .sorted((a, b) -> b.getValorTotal().compareTo(a.getValorTotal()))
-                .limit(10)
-                .collect(Collectors.toList());
+        List<EmpresaStat> empresaStats = porEmpresaMap.entrySet().stream().map(entry -> {
+            List<GcOportunidad> ops = entry.getValue();
+            GcOportunidad sample = ops.get(0);
+            EmpresaStat es = new EmpresaStat();
+            es.setEmpresaId(entry.getKey());
+            es.setEmpresaNombre(sample.getEmpresa().getRazonSocial());
+            es.setTotalOportunidades(ops.size());
+            es.setAbiertas(ops.stream().filter(o -> o.getEstadoMacro() == EstadoMacro.ABIERTA || o.getEstadoMacro() == EstadoMacro.SEGUIMIENTO).count());
+            es.setGanadas(ops.stream().filter(o -> o.getEstadoMacro() == EstadoMacro.GANADA).count());
+            es.setValorTotal(ops.stream().map(o -> o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add));
+            return es;
+        }).sorted((a, b) -> b.getValorTotal().compareTo(a.getValorTotal())).limit(10).collect(Collectors.toList());
         stats.setPorEmpresa(empresaStats);
 
         return stats;
+    }
+
+    private Map<String, BigDecimal> sumarPorMoneda(List<GcOportunidad> oportunidades) {
+        Map<String, BigDecimal> result = new LinkedHashMap<>();
+        for (GcOportunidad o : oportunidades) {
+            String moneda = o.getMoneda() != null ? o.getMoneda() : "COP";
+            BigDecimal valor = o.getValorEstimado() != null ? o.getValorEstimado() : BigDecimal.ZERO;
+            result.merge(moneda, valor, BigDecimal::add);
+        }
+        return result;
     }
 }
