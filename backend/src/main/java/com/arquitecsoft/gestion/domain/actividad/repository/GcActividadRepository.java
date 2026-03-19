@@ -25,6 +25,13 @@ public interface GcActividadRepository extends JpaRepository<GcActividad, Long> 
            "ORDER BY a.fechaHora DESC")
     List<GcActividad> findByOportunidadId(@Param("oportunidadId") Long oportunidadId);
 
+    @Query("SELECT DISTINCT a FROM GcActividad a " +
+           "JOIN FETCH a.oportunidad o " +
+           "LEFT JOIN FETCH a.compromisos " +
+           "WHERE a.oportunidad.id = :oportunidadId " +
+           "ORDER BY a.fechaHora DESC")
+    List<GcActividad> findByOportunidadIdWithCompromisos(@Param("oportunidadId") Long oportunidadId);
+
     @Query("SELECT a FROM GcActividad a " +
            "JOIN FETCH a.oportunidad o " +
            "WHERE (:oportunidadId IS NULL OR a.oportunidad.id = :oportunidadId) " +

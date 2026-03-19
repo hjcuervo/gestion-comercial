@@ -26,6 +26,11 @@ export const actividadService = {
   },
 
   // Compromisos
+  async listarCompromisosPendientes() {
+    const { data } = await api.get(`${BASE}/compromisos/pendientes`);
+    return data;
+  },
+
   async listarCompromisos(actividadId) {
     const { data } = await api.get(`${BASE}/${actividadId}/compromisos`);
     return data;

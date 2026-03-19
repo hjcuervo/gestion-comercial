@@ -38,4 +38,11 @@ public interface GcCompromisoRepository extends JpaRepository<GcCompromiso, Long
            "WHERE a.oportunidad.id = :oportunidadId AND c.estado IN ('PENDIENTE', 'EN_PROGRESO') " +
            "ORDER BY c.fechaCompromiso")
     List<GcCompromiso> findPendientesByOportunidadId(@Param("oportunidadId") Long oportunidadId);
+
+    @Query("SELECT c FROM GcCompromiso c " +
+           "JOIN FETCH c.actividad a " +
+           "JOIN FETCH a.oportunidad o " +
+           "WHERE c.estado IN ('PENDIENTE', 'EN_PROGRESO') " +
+           "ORDER BY c.fechaCompromiso ASC")
+    List<GcCompromiso> findAllPendientes();
 }

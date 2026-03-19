@@ -46,13 +46,25 @@ public class ActividadService {
     public PageResponse<ActividadResponse> listarActividades(Long oportunidadId, int page, int pageSize) {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
         Page<GcActividad> pageResult = actividadRepository.findWithFilters(oportunidadId, pageable);
+
+        if (oportunidadId != null) {
+            List<GcActividad> conCompromisos = actividadRepository.findByOportunidadIdWithCompromisos(oportunidadId);
+            java.util.Map<Long, GcActividad> map = conCompromisos.stream()
+                    .collect(Collectors.toMap(GcActividad::getId, a -> a, (a, b) -> a));
+
+            return PageResponse.from(pageResult, a -> {
+                GcActividad enriched = map.get(a.getId());
+                return enriched != null ? ActividadResponse.fromEntity(enriched) : ActividadResponse.fromEntitySimple(a);
+            });
+        }
+
         return PageResponse.from(pageResult, ActividadResponse::fromEntitySimple);
     }
 
     @Transactional(readOnly = true)
     public List<ActividadResponse> listarActividadesPorOportunidad(Long oportunidadId) {
-        return actividadRepository.findByOportunidadId(oportunidadId).stream()
-                .map(ActividadResponse::fromEntitySimple)
+        return actividadRepository.findByOportunidadIdWithCompromisos(oportunidadId).stream()
+                .map(ActividadResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -65,11 +77,9 @@ public class ActividadService {
 
     @Transactional
     public ActividadResponse crearActividad(ActividadCreateRequest request) {
-        // Validar oportunidad
         GcOportunidad oportunidad = oportunidadRepository.findById(request.getOportunidadId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Oportunidad no encontrada con ID: " + request.getOportunidadId()));
 
-        // No permitir actividades en oportunidades cerradas
         if (oportunidad.isCerrada()) {
             throw new BusinessException("BUSINESS_ERROR", "No se pueden registrar actividades en una oportunidad cerrada");
         }
@@ -83,8 +93,6 @@ public class ActividadService {
         actividad.setCreadoPor(securityUtils.getCurrentUserId());
 
         actividad = actividadRepository.save(actividad);
-
-        // Recargar con relaciones
         actividad = actividadRepository.findByIdWithOportunidad(actividad.getId()).orElse(actividad);
 
         return ActividadResponse.fromEntity(actividad);
@@ -103,6 +111,23 @@ public class ActividadService {
     public List<CompromisoResponse> listarCompromisosPendientesPorOportunidad(Long oportunidadId) {
         return compromisoRepository.findPendientesByOportunidadId(oportunidadId).stream()
                 .map(CompromisoResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompromisoPendienteResponse> listarCompromisosPendientesGlobal() {
+        return compromisoRepository.findAllPendientes().stream()
+                .map(c -> {
+                    CompromisoPendienteResponse r = new CompromisoPendienteResponse();
+                    r.setId(c.getId());
+                    r.setDescripcion(c.getDescripcion());
+                    r.setFechaCompromiso(c.getFechaCompromiso());
+                    r.setEstado(c.getEstado().name());
+                    r.setActividadId(c.getActividad().getId());
+                    r.setOportunidadId(c.getActividad().getOportunidad().getId());
+                    r.setOportunidadNombre(c.getActividad().getOportunidad().getNombre());
+                    return r;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -144,7 +169,6 @@ public class ActividadService {
                 throw new BusinessException("VALIDATION_ERROR", "Estado de compromiso invalido: " + request.getEstado());
             }
 
-            // Si se completa o cancela, registrar fecha
             if ((nuevoEstado == EstadoCompromiso.COMPLETADO || nuevoEstado == EstadoCompromiso.CANCELADO)
                 && compromiso.getEstado() != EstadoCompromiso.COMPLETADO
                 && compromiso.getEstado() != EstadoCompromiso.CANCELADO) {

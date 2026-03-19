@@ -28,9 +28,7 @@ public class ActividadController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20", name = "page_size") int pageSize) {
 
-        if (pageSize > 100) {
-            pageSize = 100;
-        }
+        if (pageSize > 100) pageSize = 100;
 
         PageResponse<ActividadResponse> response = actividadService.listarActividades(oportunidadId, page, pageSize);
         return ResponseEntity.ok(response);
@@ -49,6 +47,12 @@ public class ActividadController {
     }
 
     // ==================== COMPROMISOS ====================
+
+    @GetMapping("/compromisos/pendientes")
+    public ResponseEntity<List<CompromisoPendienteResponse>> listarCompromisosPendientes() {
+        List<CompromisoPendienteResponse> response = actividadService.listarCompromisosPendientesGlobal();
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{actividadId}/compromisos")
     public ResponseEntity<List<CompromisoResponse>> listarCompromisos(@PathVariable Long actividadId) {
