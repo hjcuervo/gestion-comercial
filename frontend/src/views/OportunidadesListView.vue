@@ -7,6 +7,7 @@
           <h1 class="page-title gradient-text">Oportunidades</h1>
           <p class="page-subtitle">Listado de oportunidades comerciales</p>
         </div>
+        <button class="btn btn--primary" @click="openCreateOportunidad"><Icon name="plus" :size="14" /> Nueva Oportunidad</button>
       </section>
 
       <!-- Filtros -->
@@ -116,6 +117,9 @@
         </div>
       </section>
     </div>
+
+    <!-- Modal -->
+    <OportunidadModal :visible="showOpModal" :oportunidad="null" :empresas="empresas" :pipelines="pipelines" :saving="saving" :error="modalError" @close="showOpModal = false" @submit="handleCreateOportunidad" />
   </AppLayout>
 </template>
 
@@ -124,12 +128,16 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '@/components/layout/AppLayout.vue';
 import Icon from '@/components/ui/Icon.vue';
+import OportunidadModal from '@/components/oportunidad/OportunidadModal.vue';
 import { oportunidadService } from '@/services/oportunidad.service';
 import { pipelineService } from '@/services/pipeline.service';
+import { empresaService } from '@/services/empresa.service';
+import { formatCurrency } from '@/utils/currency';
 
 const router = useRouter();
 const oportunidades = ref([]);
 const pipelines = ref([]);
+const empresas = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const filtroEstado = ref('');
@@ -139,10 +147,14 @@ const totalPages = ref(1);
 const pageSize = 15;
 let searchTimer = null;
 
+// Modal
+const showOpModal = ref(false);
+const saving = ref(false);
+const modalError = ref(null);
+
 onMounted(async () => {
-  try {
-    pipelines.value = await pipelineService.listarActivos();
-  } catch {}
+  try { pipelines.value = await pipelineService.listarActivos(); } catch {}
+  try { const res = await empresaService.listar({ page_size: 100 }); empresas.value = res.data || []; } catch {}
   await loadOportunidades(1);
 });
 
@@ -168,6 +180,22 @@ async function loadOportunidades(page = 1) {
 function debouncedSearch() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => loadOportunidades(1), 400);
+}
+
+function openCreateOportunidad() { modalError.value = null; showOpModal.value = true; }
+
+async function handleCreateOportunidad(payload) {
+  saving.value = true;
+  modalError.value = null;
+  try {
+    await oportunidadService.crear(payload);
+    showOpModal.value = false;
+    await loadOportunidades(currentPage.value);
+  } catch (err) {
+    modalError.value = err.response?.data?.message || 'Error al crear oportunidad';
+  } finally {
+    saving.value = false;
+  }
 }
 
 function goToDetalle(id) {
@@ -208,6 +236,9 @@ function formatDateShort(date) {
 .oportunidades-list { display: flex; flex-direction: column; gap: var(--space-5); }
 
 .list-header { display: flex; justify-content: space-between; align-items: center; }
+.btn { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-5); border-radius: var(--radius-full); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
+.btn--primary { background: var(--primary); color: #000; }
+.btn--primary:hover { box-shadow: 0 0 20px var(--primary-glow); }
 .page-title { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; margin: 0; }
 .page-subtitle { color: var(--text-tertiary); font-size: var(--text-sm); margin: var(--space-1) 0 0; }
 

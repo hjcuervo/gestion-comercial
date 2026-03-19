@@ -7,7 +7,10 @@
       <template v-else-if="op">
         <section class="detalle__topbar">
           <button class="btn-back" @click="goBack"><Icon name="chevron-left" :size="16" /> Volver</button>
-          <span :class="['estado-badge', `estado-badge--${op.estadoMacro?.toLowerCase()}`]">{{ estadoLabel }}</span>
+          <div class="topbar-right">
+            <button v-if="!isCerrada" class="btn btn--ghost btn--sm" @click="openEditModal"><Icon name="settings" :size="14" /> Editar</button>
+            <span :class="['estado-badge', `estado-badge--${op.estadoMacro?.toLowerCase()}`]">{{ estadoLabel }}</span>
+          </div>
         </section>
 
         <section class="detalle__hero">
@@ -139,6 +142,7 @@
       <ActividadModal v-if="showActividadModal" :oportunidad-id="Number(op.id)" @close="showActividadModal = false" @created="onActividadCreated" />
       <CompromisoModal v-if="showCompromisoModal" :actividad-id="selectedActividadId" @close="showCompromisoModal = false" @created="onCompromisoCreated" />
       <DocumentoModal v-if="showDocumentoModal" :oportunidad-id="Number(op.id)" @close="showDocumentoModal = false" @created="onDocumentoCreated" />
+      <OportunidadModal :visible="showEditModal" :oportunidad="op" :empresas="empresasEdit" :pipelines="[]" :saving="savingEdit" :error="editError" @close="showEditModal = false" @submit="handleEditSubmit" />
     </div>
   </AppLayout>
 </template>
@@ -151,9 +155,11 @@ import Icon from '@/components/ui/Icon.vue';
 import ActividadModal from '@/components/actividad/ActividadModal.vue';
 import CompromisoModal from '@/components/actividad/CompromisoModal.vue';
 import DocumentoModal from '@/components/documento/DocumentoModal.vue';
+import OportunidadModal from '@/components/oportunidad/OportunidadModal.vue';
 import { oportunidadService } from '@/services/oportunidad.service';
 import { actividadService } from '@/services/actividad.service';
 import { documentoService } from '@/services/documento.service';
+import { empresaService } from '@/services/empresa.service';
 import { formatCurrencyFull } from '@/utils/currency';
 
 const route = useRoute();
@@ -176,6 +182,12 @@ const documentos = ref([]);
 const loadingDocumentos = ref(false);
 const tiposDocumento = ref([]);
 const showDocumentoModal = ref(false);
+
+// Editar oportunidad
+const showEditModal = ref(false);
+const savingEdit = ref(false);
+const editError = ref(null);
+const empresasEdit = ref([]);
 
 onMounted(async () => {
   try { op.value = await oportunidadService.obtenerPorId(route.params.id); }
@@ -233,6 +245,27 @@ function getTipoDocNombre(tipoId) { const t = tiposDocumento.value.find(t => t.i
 async function onDocumentoCreated() { showDocumentoModal.value = false; await loadDocumentos(); }
 async function eliminarDocumento(id) { if (!confirm('¿Eliminar este documento?')) return; try { await documentoService.eliminar(id); await loadDocumentos(); } catch {} }
 
+// === Editar Oportunidad ===
+async function openEditModal() {
+  editError.value = null;
+  try { const res = await empresaService.listar({ page_size: 100 }); empresasEdit.value = res.data || []; } catch {}
+  showEditModal.value = true;
+}
+
+async function handleEditSubmit(payload) {
+  savingEdit.value = true;
+  editError.value = null;
+  try {
+    await oportunidadService.actualizar(op.value.id, payload);
+    showEditModal.value = false;
+    op.value = await oportunidadService.obtenerPorId(route.params.id);
+  } catch (err) {
+    editError.value = err.response?.data?.message || 'Error al actualizar oportunidad';
+  } finally {
+    savingEdit.value = false;
+  }
+}
+
 // === Computed ===
 const isCerrada = computed(() => { const e = op.value?.estadoMacro; return e === 'GANADA' || e === 'PERDIDA' || e === 'NO_CONCRETADA'; });
 const estadoLabel = computed(() => ({ ABIERTA: 'Abierta', SEGUIMIENTO: 'Seguimiento', GANADA: 'Ganada', PERDIDA: 'Perdida', NO_CONCRETADA: 'No Concretada' }[op.value?.estadoMacro] || op.value?.estadoMacro));
@@ -253,6 +286,7 @@ function fmtDateShort(d) { if (!d) return '—'; return new Date(d).toLocaleDate
 .error-state { border-radius: var(--radius-xl); padding: var(--space-10); }
 
 .detalle__topbar { display: flex; justify-content: space-between; align-items: center; }
+.topbar-right { display: flex; align-items: center; gap: var(--space-3); }
 .btn-back { display: flex; align-items: center; gap: var(--space-2); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); color: var(--text-secondary); font-family: var(--font-body); font-size: var(--text-xs); cursor: pointer; transition: all 0.15s; }
 .btn-back:hover { background: var(--glass-hover); color: var(--text-primary); border-color: var(--primary); }
 .estado-badge { padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
