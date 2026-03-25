@@ -28,9 +28,15 @@
         <!-- Pipeline Selector -->
         <div class="kanban-toolbar">
           <div class="pipeline-selector">
+            <label class="selector-label">Ámbito:</label>
+            <select v-model="kanbanAmbito" class="pipeline-select pipeline-select--sm" @change="onAmbitoChange">
+              <option value="">Todos</option>
+              <option value="COMERCIAL">Comercial</option>
+              <option value="CONTRATACION">Contratación</option>
+            </select>
             <label class="selector-label">Pipeline:</label>
             <select v-model="selectedPipelineId" class="pipeline-select" @change="onPipelineChange">
-              <option v-for="p in opStore.pipelinesActivos" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+              <option v-for="p in kanbanPipelinesFiltrados" :key="p.id" :value="p.id">{{ p.nombre }}</option>
             </select>
           </div>
           <div class="kanban-stats" v-if="opStore.pipelineActivo">
@@ -46,7 +52,7 @@
         </div>
 
         <!-- Empty -->
-        <div v-else-if="!opStore.pipelinesActivos.length" class="empty-state glass">
+        <div v-else-if="!kanbanPipelinesFiltrados.length" class="empty-state glass">
           <div class="empty-icon"><Icon name="pipeline" :size="48" color="var(--primary)" /></div>
           <h3>No hay pipelines activos</h3>
           <p>Ve a la pestaña Configuración para crear tu primer pipeline con sus etapas.</p>
@@ -166,6 +172,7 @@
                   <div class="pipeline-card__name">{{ pipeline.nombre }}</div>
                   <div class="pipeline-card__meta">
                     <span class="badge" :class="pipeline.estado === 'ACTIVO' ? 'badge--success' : 'badge--muted'">{{ pipeline.estado }}</span>
+                    <span class="badge" :class="pipeline.ambito === 'CONTRATACION' ? 'badge--secondary' : 'badge--primary'">{{ pipeline.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial' }}</span>
                     <span v-if="pipeline.esDefault" class="badge badge--primary">Default</span>
                     <span class="pipeline-card__etapas">{{ pipeline.etapas?.length || 0 }} etapa{{ (pipeline.etapas?.length || 0) !== 1 ? 's' : '' }}</span>
                   </div>
@@ -189,6 +196,7 @@
                       <h2 class="detail-header__name">{{ configSelectedPipeline.nombre }}</h2>
                       <div class="detail-header__meta">
                         <span class="badge" :class="configSelectedPipeline.estado === 'ACTIVO' ? 'badge--success' : 'badge--muted'">{{ configSelectedPipeline.estado }}</span>
+                        <span class="badge" :class="configSelectedPipeline.ambito === 'CONTRATACION' ? 'badge--secondary' : 'badge--primary'">{{ configSelectedPipeline.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial' }}</span>
                         <span v-if="configSelectedPipeline.esDefault" class="badge badge--primary">Default</span>
                         <span class="detail-header__version">v{{ configSelectedPipeline.version }}</span>
                       </div>
@@ -250,7 +258,7 @@
       </Transition>
 
       <!-- Modals: Oportunidad -->
-      <OportunidadModal :visible="showOpModal" :oportunidad="editingOp" :empresas="opStore.empresasActivas" :pipelines="opStore.pipelinesActivos" :pipeline-preseleccionado="selectedPipelineId" :saving="opStore.saving" :error="modalError" @close="closeOpModal" @submit="handleOpSubmit" />
+      <OportunidadModal :visible="showOpModal" :oportunidad="editingOp" :empresas="opStore.empresasActivas" :pipelines="kanbanPipelinesFiltrados" :pipeline-preseleccionado="selectedPipelineId" :saving="opStore.saving" :error="modalError" @close="closeOpModal" @submit="handleOpSubmit" />
       <CerrarOportunidadModal :visible="showCerrarModal" :oportunidad-nombre="cerrandoOp?.nombre || ''" :saving="opStore.saving" :error="modalError" @close="showCerrarModal = false" @submit="handleCerrarSubmit" />
 
       <!-- Modals: Pipeline Config -->
@@ -306,6 +314,14 @@ const nextEtapaOrden = computed(() => {
   return Math.max(...pipStore.etapas.map(e => e.orden)) + 1;
 });
 
+// Filtro de ámbito para Kanban y Configuración
+const kanbanAmbito = ref('');
+const kanbanPipelinesFiltrados = computed(() => {
+  const todos = opStore.pipelinesActivos || [];
+  if (!kanbanAmbito.value) return todos;
+  return todos.filter(p => p.ambito === kanbanAmbito.value);
+});
+
 // ==================== LIFECYCLE ====================
 onMounted(async () => {
   await opStore.cargarPipelinesActivos();
@@ -320,6 +336,14 @@ function getActiveOportunidades(etapaId) {
 }
 
 function onPipelineChange() { opStore.seleccionarPipeline(selectedPipelineId.value); }
+
+function onAmbitoChange() {
+  // Select first pipeline of the filtered list
+  if (kanbanPipelinesFiltrados.value.length) {
+    selectedPipelineId.value = kanbanPipelinesFiltrados.value[0].id;
+    onPipelineChange();
+  }
+}
 
 // Drag & Drop
 function onDragStart(event, op) {
@@ -426,6 +450,7 @@ function formatDate(date) {
 .pipeline-select { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; padding: var(--space-2) var(--space-8) var(--space-2) var(--space-4); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
 .pipeline-select:focus { outline: none; border-color: var(--primary); }
 .pipeline-select option { background: var(--bg-elevated); }
+.pipeline-select--sm { font-size: var(--text-xs); padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3); }
 .kanban-stats { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-muted); }
 .stat-divider { color: var(--glass-border); }
 .stat-item strong { color: var(--text-secondary); }
@@ -544,6 +569,7 @@ function formatDate(date) {
 .badge--success { background: rgba(16,185,129,0.15); color: var(--success); }
 .badge--muted { background: rgba(255,255,255,0.06); color: var(--text-muted); }
 .badge--primary { background: var(--primary-soft); color: var(--primary); }
+.badge--secondary { background: var(--secondary-soft); color: var(--secondary); }
 
 .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-8); color: var(--text-tertiary); font-size: var(--text-sm); }
 .loading-state--small { flex-direction: row; padding: var(--space-6); }

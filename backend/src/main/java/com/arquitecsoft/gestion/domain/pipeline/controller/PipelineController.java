@@ -26,20 +26,20 @@ public class PipelineController {
     public ResponseEntity<PageResponse<PipelineResponse>> listarPipelines(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String ambito,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20", name = "page_size") int pageSize) {
 
-        if (pageSize > 100) {
-            pageSize = 100;
-        }
+        if (pageSize > 100) pageSize = 100;
 
-        PageResponse<PipelineResponse> response = pipelineService.listarPipelines(q, estado, page, pageSize);
+        PageResponse<PipelineResponse> response = pipelineService.listarPipelines(q, estado, ambito, page, pageSize);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/activos")
-    public ResponseEntity<List<PipelineResponse>> listarPipelinesActivos() {
-        List<PipelineResponse> response = pipelineService.listarPipelinesActivos();
+    public ResponseEntity<List<PipelineResponse>> listarPipelinesActivos(
+            @RequestParam(required = false) String ambito) {
+        List<PipelineResponse> response = pipelineService.listarPipelinesActivos(ambito);
         return ResponseEntity.ok(response);
     }
 

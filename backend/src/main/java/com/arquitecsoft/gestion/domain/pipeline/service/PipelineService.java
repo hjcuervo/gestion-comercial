@@ -39,7 +39,7 @@ public class PipelineService {
     // ==================== PIPELINE ====================
 
     @Transactional(readOnly = true)
-    public PageResponse<PipelineResponse> listarPipelines(String q, String estado, int page, int pageSize) {
+    public PageResponse<PipelineResponse> listarPipelines(String q, String estado, String ambito, int page, int pageSize) {
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nombre").ascending());
 
         EstadoPipeline estadoEnum = null;
@@ -51,14 +51,22 @@ public class PipelineService {
             }
         }
 
-        Page<GcPipeline> pageResult = pipelineRepository.findWithFilters(q, estadoEnum, pageable);
+        String ambitoFilter = StringUtils.hasText(ambito) ? ambito : null;
+
+        Page<GcPipeline> pageResult = pipelineRepository.findWithFilters(q, estadoEnum, ambitoFilter, pageable);
 
         return PageResponse.from(pageResult, PipelineResponse::fromEntitySimple);
     }
 
     @Transactional(readOnly = true)
-    public List<PipelineResponse> listarPipelinesActivos() {
-        return pipelineRepository.findAllActivos().stream()
+    public List<PipelineResponse> listarPipelinesActivos(String ambito) {
+        List<GcPipeline> pipelines;
+        if (StringUtils.hasText(ambito)) {
+            pipelines = pipelineRepository.findAllActivosByAmbito(ambito);
+        } else {
+            pipelines = pipelineRepository.findAllActivos();
+        }
+        return pipelines.stream()
                 .map(PipelineResponse::fromEntitySimple)
                 .collect(Collectors.toList());
     }
@@ -73,14 +81,13 @@ public class PipelineService {
 
     @Transactional
     public PipelineResponse crearPipeline(PipelineCreateRequest request) {
-        // Validar nombre unico
         if (pipelineRepository.existsByNombreIgnoreCase(request.getNombre().trim())) {
             throw new BusinessException("DUPLICATE_ERROR", "Ya existe un pipeline con el nombre: " + request.getNombre());
         }
 
         GcPipeline pipeline = new GcPipeline();
         pipeline.setNombre(request.getNombre().trim());
-        pipeline.setAmbito("GESTION_COMERCIAL");
+        pipeline.setAmbito(StringUtils.hasText(request.getAmbito()) ? request.getAmbito() : "COMERCIAL");
         pipeline.setVersion(1);
         pipeline.setEstado(EstadoPipeline.ACTIVO);
         pipeline.setEsDefault(0);
@@ -97,7 +104,6 @@ public class PipelineService {
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Pipeline no encontrado con ID: " + id));
 
         if (StringUtils.hasText(request.getNombre())) {
-            // Validar nombre unico (excluyendo el actual)
             if (!pipeline.getNombre().equalsIgnoreCase(request.getNombre().trim()) &&
                     pipelineRepository.existsByNombreIgnoreCase(request.getNombre().trim())) {
                 throw new BusinessException("DUPLICATE_ERROR", "Ya existe un pipeline con el nombre: " + request.getNombre());
@@ -119,7 +125,6 @@ public class PipelineService {
 
     @Transactional(readOnly = true)
     public List<EtapaResponse> listarEtapasPorPipeline(Long pipelineId) {
-        // Verificar que el pipeline existe
         if (!pipelineRepository.existsById(pipelineId)) {
             throw new BusinessException("NOT_FOUND", "Pipeline no encontrado con ID: " + pipelineId);
         }
@@ -134,9 +139,8 @@ public class PipelineService {
         GcPipeline pipeline = pipelineRepository.findById(pipelineId)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Pipeline no encontrado con ID: " + pipelineId));
 
-        // Validar nombre unico dentro del pipeline
         if (etapaRepository.existsByPipelineIdAndNombreIgnoreCase(pipelineId, request.getNombre().trim())) {
-            throw new BusinessException("DUPLICATE_ERROR", 
+            throw new BusinessException("DUPLICATE_ERROR",
                 "Ya existe una etapa con el nombre '" + request.getNombre() + "' en este pipeline");
         }
 
@@ -148,7 +152,6 @@ public class PipelineService {
         etapa.setModoBloqueo(request.getModoBloqueo() != null ? request.getModoBloqueo() : 0);
         etapa.setEstado(EstadoEtapa.ACTIVA);
 
-        // Calcular orden si no viene
         if (request.getOrden() != null) {
             etapa.setOrden(request.getOrden());
         } else {
@@ -163,7 +166,6 @@ public class PipelineService {
 
     @Transactional
     public EtapaResponse actualizarEtapa(Long pipelineId, Long etapaId, EtapaUpdateRequest request) {
-        // Verificar que el pipeline existe
         if (!pipelineRepository.existsById(pipelineId)) {
             throw new BusinessException("NOT_FOUND", "Pipeline no encontrado con ID: " + pipelineId);
         }
@@ -171,13 +173,11 @@ public class PipelineService {
         GcEtapa etapa = etapaRepository.findById(etapaId)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Etapa no encontrada con ID: " + etapaId));
 
-        // Verificar que la etapa pertenece al pipeline
         if (!etapa.getPipeline().getId().equals(pipelineId)) {
             throw new BusinessException("VALIDATION_ERROR", "La etapa no pertenece al pipeline especificado");
         }
 
         if (StringUtils.hasText(request.getNombre())) {
-            // Validar nombre unico (excluyendo la actual)
             if (!etapa.getNombre().equalsIgnoreCase(request.getNombre().trim()) &&
                     etapaRepository.existsByPipelineIdAndNombreIgnoreCase(pipelineId, request.getNombre().trim())) {
                 throw new BusinessException("DUPLICATE_ERROR",
@@ -186,21 +186,10 @@ public class PipelineService {
             etapa.setNombre(request.getNombre().trim());
         }
 
-        if (request.getOrden() != null) {
-            etapa.setOrden(request.getOrden());
-        }
-
-        if (request.getProbabilidadSugerida() != null) {
-            etapa.setProbabilidadSugerida(request.getProbabilidadSugerida());
-        }
-
-        if (request.getColor() != null) {
-            etapa.setColor(request.getColor());
-        }
-
-        if (request.getModoBloqueo() != null) {
-            etapa.setModoBloqueo(request.getModoBloqueo());
-        }
+        if (request.getOrden() != null) etapa.setOrden(request.getOrden());
+        if (request.getProbabilidadSugerida() != null) etapa.setProbabilidadSugerida(request.getProbabilidadSugerida());
+        if (request.getColor() != null) etapa.setColor(request.getColor());
+        if (request.getModoBloqueo() != null) etapa.setModoBloqueo(request.getModoBloqueo());
 
         if (StringUtils.hasText(request.getEstado())) {
             try {
@@ -211,7 +200,6 @@ public class PipelineService {
         }
 
         etapa = etapaRepository.save(etapa);
-
         return EtapaResponse.fromEntity(etapa);
     }
 }

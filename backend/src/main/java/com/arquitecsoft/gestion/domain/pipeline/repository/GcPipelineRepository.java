@@ -17,14 +17,19 @@ public interface GcPipelineRepository extends JpaRepository<GcPipeline, Long> {
 
     @Query("SELECT p FROM GcPipeline p WHERE " +
            "(:nombre IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))) AND " +
-           "(:estado IS NULL OR p.estado = :estado)")
+           "(:estado IS NULL OR p.estado = :estado) AND " +
+           "(:ambito IS NULL OR p.ambito = :ambito)")
     Page<GcPipeline> findWithFilters(
             @Param("nombre") String nombre,
             @Param("estado") EstadoPipeline estado,
+            @Param("ambito") String ambito,
             Pageable pageable);
 
     @Query("SELECT p FROM GcPipeline p WHERE p.estado = 'ACTIVO'")
     List<GcPipeline> findAllActivos();
+
+    @Query("SELECT p FROM GcPipeline p WHERE p.estado = 'ACTIVO' AND p.ambito = :ambito")
+    List<GcPipeline> findAllActivosByAmbito(@Param("ambito") String ambito);
 
     @Query("SELECT p FROM GcPipeline p LEFT JOIN FETCH p.etapas e WHERE p.id = :id ORDER BY e.orden")
     Optional<GcPipeline> findByIdWithEtapas(@Param("id") Long id);
