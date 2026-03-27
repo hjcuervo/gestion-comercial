@@ -26,6 +26,24 @@
               <span v-if="errors.estadoMacro" class="form-error">{{ errors.estadoMacro }}</span>
             </div>
 
+            <!-- Pipeline de contratación (solo si GANADA) -->
+            <div v-if="form.estadoMacro === 'GANADA'" class="form-group ganada-section">
+              <div class="ganada-info">
+                <Icon name="note-add" :size="16" color="var(--secondary)" />
+                <span>Al ganar, la oportunidad se moverá al pipeline de contratación para iniciar el proceso de formalización.</span>
+              </div>
+              <label class="form-label">Pipeline de Contratación <span class="req">*</span></label>
+              <div v-if="loadingPipelines" class="loading-inline"><Icon name="loader" :size="14" class="animate-spin" /> Cargando pipelines...</div>
+              <select v-else v-model="form.pipelineContratacionId" class="form-select">
+                <option :value="null" disabled>Seleccione un pipeline de contratación</option>
+                <option v-for="p in pipelinesContratacion" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+              </select>
+              <span v-if="!pipelinesContratacion.length && !loadingPipelines" class="form-hint form-hint--warn">
+                No hay pipelines de contratación. Créelos en Pipeline → Configuración con ámbito "Contratación".
+              </span>
+              <span v-if="errors.pipeline" class="form-error">{{ errors.pipeline }}</span>
+            </div>
+
             <div class="form-group">
               <label class="form-label">Comentario de Cierre</label>
               <textarea v-model="form.comentario" class="form-textarea" placeholder="Describe el resultado..." rows="3" maxlength="500"></textarea>
@@ -48,9 +66,10 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import Icon from '@/components/ui/Icon.vue';
 import Button from '@/components/ui/Button.vue';
+import { pipelineService } from '@/services/pipeline.service';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -60,20 +79,52 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'submit']);
-const form = reactive({ estadoMacro: '', comentario: '' });
-const errors = reactive({ estadoMacro: '' });
+const form = reactive({ estadoMacro: '', comentario: '', pipelineContratacionId: null });
+const errors = reactive({ estadoMacro: '', pipeline: '' });
+const pipelinesContratacion = ref([]);
+const loadingPipelines = ref(false);
 
-watch(() => props.visible, (val) => {
-  if (val) { form.estadoMacro = ''; form.comentario = ''; errors.estadoMacro = ''; }
+watch(() => props.visible, async (val) => {
+  if (val) {
+    form.estadoMacro = '';
+    form.comentario = '';
+    form.pipelineContratacionId = null;
+    errors.estadoMacro = '';
+    errors.pipeline = '';
+
+    // Cargar pipelines de contratación
+    loadingPipelines.value = true;
+    try {
+      pipelinesContratacion.value = await pipelineService.listarActivos('CONTRATACION');
+      if (pipelinesContratacion.value.length === 1) {
+        form.pipelineContratacionId = pipelinesContratacion.value[0].id;
+      }
+    } catch {}
+    finally { loadingPipelines.value = false; }
+  }
 });
 
 function handleSubmit() {
   errors.estadoMacro = '';
+  errors.pipeline = '';
+
   if (!form.estadoMacro) { errors.estadoMacro = 'Selecciona un resultado'; return; }
-  emit('submit', {
+
+  if (form.estadoMacro === 'GANADA' && !form.pipelineContratacionId && pipelinesContratacion.value.length > 0) {
+    errors.pipeline = 'Seleccione el pipeline de contratación';
+    return;
+  }
+
+  const payload = {
     estadoMacro: form.estadoMacro,
     comentario: form.comentario?.trim() || undefined,
-  });
+  };
+
+  if (form.estadoMacro === 'GANADA' && form.pipelineContratacionId) {
+    payload.pipelineContratacionId = form.pipelineContratacionId;
+  }
+
+  emit('submit', payload);
 }
 </script>
 
@@ -96,12 +147,21 @@ function handleSubmit() {
 .estado-btn--perdida.active { border-color: var(--error); color: var(--error); background: var(--error-soft); }
 .estado-btn--no-concretada.active { border-color: var(--warning); color: var(--warning); background: var(--warning-soft); }
 
+.ganada-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.ganada-info { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-3); background: var(--secondary-soft); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--secondary); line-height: 1.5; }
+.req { color: var(--error); }
+
 .form-label { display: block; font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2); }
+.form-select { width: 100%; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-3) var(--space-4); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; box-sizing: border-box; }
+.form-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.form-select option { background: var(--bg-elevated); }
 .form-textarea { width: 100%; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-3) var(--space-4); resize: vertical; box-sizing: border-box; }
 .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 .form-textarea::placeholder { color: var(--text-muted); }
 .form-hint { font-size: var(--text-xs); color: var(--text-muted); text-align: right; display: block; margin-top: 2px; }
+.form-hint--warn { color: var(--warning); text-align: left; }
 .form-error { font-size: var(--text-xs); color: var(--error); margin-top: 2px; display: block; text-align: center; }
 .form-error-banner { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.2); border-radius: var(--radius-md); color: var(--error); font-size: var(--text-sm); }
+.loading-inline { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); font-size: var(--text-xs); padding: var(--space-2); }
 .modal-enter-active { transition: opacity 0.25s ease; } .modal-leave-active { transition: opacity 0.2s ease; } .modal-enter-from, .modal-leave-to { opacity: 0; }
 </style>

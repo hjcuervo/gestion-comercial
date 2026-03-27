@@ -1,42 +1,33 @@
 package com.arquitecsoft.gestion.domain.oportunidad.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class CerrarOportunidadRequest {
 
-    @NotNull(message = "El estado de cierre es requerido")
-    private String estadoMacro; // GANADA, PERDIDA, NO_CONCRETADA
+    @NotBlank(message = "El estado de cierre es requerido")
+    private String estadoMacro;
 
-    private Long motivoCierreId; // Requerido para PERDIDA y NO_CONCRETADA
+    private Long motivoCierreId;
 
     @Size(max = 500, message = "El comentario no puede exceder 500 caracteres")
     private String comentario;
 
-    public CerrarOportunidadRequest() {
-    }
+    /**
+     * Pipeline de contratación al que se moverá la oportunidad cuando se marca como GANADA.
+     * Solo aplica para estadoMacro = GANADA. Si no se envía, la oportunidad queda GANADA
+     * sin moverse a un pipeline de contratación (se puede asignar después).
+     */
+    private Long pipelineContratacionId;
 
-    public String getEstadoMacro() {
-        return estadoMacro;
-    }
+    public CerrarOportunidadRequest() {}
 
-    public void setEstadoMacro(String estadoMacro) {
-        this.estadoMacro = estadoMacro;
-    }
-
-    public Long getMotivoCierreId() {
-        return motivoCierreId;
-    }
-
-    public void setMotivoCierreId(Long motivoCierreId) {
-        this.motivoCierreId = motivoCierreId;
-    }
-
-    public String getComentario() {
-        return comentario;
-    }
-
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
-    }
+    public String getEstadoMacro() { return estadoMacro; }
+    public void setEstadoMacro(String estadoMacro) { this.estadoMacro = estadoMacro; }
+    public Long getMotivoCierreId() { return motivoCierreId; }
+    public void setMotivoCierreId(Long motivoCierreId) { this.motivoCierreId = motivoCierreId; }
+    public String getComentario() { return comentario; }
+    public void setComentario(String comentario) { this.comentario = comentario; }
+    public Long getPipelineContratacionId() { return pipelineContratacionId; }
+    public void setPipelineContratacionId(Long pipelineContratacionId) { this.pipelineContratacionId = pipelineContratacionId; }
 }

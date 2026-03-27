@@ -40,7 +40,7 @@
             </div>
             <div class="info-item"><span class="info-item__label">Creación</span><span class="info-item__value">{{ fmtDate(op.fechaCreacion) }}</span></div>
           </div>
-          <div v-if="isCerrada" class="cierre-info">
+          <div v-if="isCerrada || isGanada" class="cierre-info">
             <div class="cierre-header">
               <Icon :name="op.estadoMacro === 'GANADA' ? 'trophy' : 'trending-down'" :size="16" :color="op.estadoMacro === 'GANADA' ? 'var(--success)' : 'var(--error)'" />
               <span class="cierre-title">Cerrada como <strong :class="`text--${op.estadoMacro?.toLowerCase()}`">{{ estadoLabel }}</strong> el {{ fmtDate(op.fechaCierre) }}</span>
@@ -49,73 +49,23 @@
           </div>
         </section>
 
-        <!-- PROCESO DE CONTRATACIÓN (solo para oportunidades GANADAS) -->
-        <section v-if="op.estadoMacro === 'GANADA'" class="proceso-section">
-          <div class="section-header">
-            <h2 class="section-title"><Icon name="note-add" :size="18" color="var(--secondary)" /> Proceso de Contratación</h2>
-            <button v-if="!procesoActivo && !procesoCompletado" class="btn btn--secondary btn--sm" @click="showIniciarProcesoModal = true">
-              <Icon name="plus" :size="14" /> Iniciar Proceso
-            </button>
-          </div>
-
-          <div v-if="loadingProcesos" class="loading-state loading-state--sm"><Icon name="loader" :size="20" class="animate-spin" /></div>
-
-          <!-- Sin proceso -->
-          <div v-else-if="!procesos.length" class="empty-state glass">
-            <Icon name="note-add" :size="32" color="var(--text-muted)" />
-            <p>No se ha iniciado un proceso de contratación</p>
-            <button class="btn btn--ghost btn--sm" @click="showIniciarProcesoModal = true">Iniciar proceso de contratación</button>
-          </div>
-
-          <!-- Proceso activo o histórico -->
-          <div v-else class="procesos-list">
-            <div v-for="proc in procesos" :key="proc.id" class="proceso-card glass">
-              <div class="proceso-card__header">
-                <div class="proceso-card__info">
-                  <span class="proceso-card__pipeline">{{ proc.pipelineNombre }}</span>
-                  <span :class="['proceso-badge', `proceso-badge--${proc.estado?.toLowerCase()}`]">{{ procesoEstadoLabel(proc.estado) }}</span>
-                </div>
-                <span class="proceso-card__fecha">Inicio: {{ fmtDateShort(proc.fechaInicio) }}</span>
+        <!-- PIPELINE CONTRACTUAL (solo para oportunidades GANADAS) -->
+        <section v-if="isGanada" class="proceso-section">
+          <div class="proceso-card glass">
+            <div class="proceso-card__header">
+              <div class="proceso-card__info">
+                <Icon name="note-add" :size="18" color="var(--secondary)" />
+                <span class="proceso-card__pipeline">Pipeline Contractual: {{ op.pipelineNombre }}</span>
               </div>
-
-              <!-- Pipeline visual con etapas -->
-              <div v-if="proc.estado === 'EN_CURSO' && procesoEtapas.length" class="proceso-pipeline">
-                <div v-for="etapa in procesoEtapas" :key="etapa.id" class="proceso-etapa"
-                  :class="{ 'proceso-etapa--active': etapa.id === proc.etapaId, 'proceso-etapa--done': etapa.orden < proc.etapaOrden }"
-                  @click="moverProcesoEtapa(proc.id, etapa.id)">
-                  <div class="proceso-etapa__dot"></div>
-                  <span class="proceso-etapa__name">{{ etapa.nombre }}</span>
-                </div>
-              </div>
-
-              <!-- Etapa actual -->
-              <div v-if="proc.estado === 'EN_CURSO'" class="proceso-card__current">
-                <span class="proceso-card__label">Etapa actual:</span>
-                <span class="proceso-card__etapa" :style="{ color: proc.etapaColor || 'var(--primary)' }">{{ proc.etapaNombre }}</span>
-              </div>
-
-              <!-- Acciones -->
-              <div v-if="proc.estado === 'EN_CURSO'" class="proceso-card__actions">
-                <button class="btn btn--primary btn--sm" @click="completarProceso(proc.id)"><Icon name="check-circle" :size="14" /> Completar Proceso</button>
-                <button class="btn btn--ghost btn--sm" @click="cancelarProceso(proc.id)"><Icon name="x" :size="14" /> Cancelar</button>
-              </div>
-
-              <!-- Proceso completado: mostrar botón formalizar o contratos generados -->
-              <div v-if="proc.estado === 'COMPLETADO'" class="proceso-card__completado">
-                <div v-if="contratosDelProceso(proc.id).length" class="contratos-mini">
-                  <span class="proceso-card__label">Contratos generados:</span>
-                  <div v-for="cont in contratosDelProceso(proc.id)" :key="cont.id" class="contrato-mini-card" @click="$router.push(`/contratos/${cont.id}`)">
-                    <Icon name="note-add" :size="14" color="var(--success)" />
-                    <span>{{ cont.tipoContratoNombre }} — {{ fmtCurrencyFull(cont.valorContrato, cont.moneda) }}</span>
-                    <span :class="['proceso-badge proceso-badge--sm', `proceso-badge--${cont.estado?.toLowerCase()}`]">{{ cont.estado }}</span>
-                  </div>
-                </div>
-                <button class="btn btn--secondary btn--sm" @click="openFormalizarModal(proc.id)"><Icon name="plus" :size="14" /> Formalizar Contrato</button>
-              </div>
-
-              <div v-if="proc.estado === 'CANCELADO'" class="proceso-card__cancelado">
-                <Icon name="alert-circle" :size="14" color="var(--error)" /> Proceso cancelado el {{ fmtDateShort(proc.fechaCompletado) }}
-              </div>
+              <span class="proceso-badge proceso-badge--en_curso">En Proceso</span>
+            </div>
+            <div class="proceso-card__current">
+              <span class="proceso-card__label">Etapa actual:</span>
+              <span class="proceso-card__etapa">{{ op.etapaNombre }}</span>
+            </div>
+            <div class="ganada-hint">
+              <Icon name="pipeline" :size="14" color="var(--text-muted)" />
+              <span>Esta oportunidad está en el pipeline contractual. Gestione las etapas desde el Kanban. Puede registrar actividades, compromisos y documentos aquí.</span>
             </div>
           </div>
         </section>
@@ -214,8 +164,6 @@
       <CompromisoModal v-if="showCompromisoModal" :actividad-id="selectedActividadId" @close="showCompromisoModal = false" @created="onCompromisoCreated" />
       <DocumentoModal v-if="showDocumentoModal" :oportunidad-id="Number(op.id)" @close="showDocumentoModal = false" @created="onDocumentoCreated" />
       <OportunidadModal :visible="showEditModal" :oportunidad="op" :empresas="empresasEdit" :pipelines="[]" :saving="savingEdit" :error="editError" @close="showEditModal = false" @submit="handleEditSubmit" />
-      <IniciarProcesoModal v-if="showIniciarProcesoModal" :oportunidad-id="Number(op.id)" :oportunidad-nombre="op.nombre" @close="showIniciarProcesoModal = false" @created="onProcesoCreated" />
-      <FormalizarContratoModal v-if="showFormalizarModal" :proceso-id="formalizarProcesoId" :moneda-default="op.moneda || 'COP'" :valor-default="op.valorEstimado" @close="showFormalizarModal = false" @created="onContratoCreated" />
     </div>
   </AppLayout>
 </template>
@@ -229,15 +177,10 @@ import ActividadModal from '@/components/actividad/ActividadModal.vue';
 import CompromisoModal from '@/components/actividad/CompromisoModal.vue';
 import DocumentoModal from '@/components/documento/DocumentoModal.vue';
 import OportunidadModal from '@/components/oportunidad/OportunidadModal.vue';
-import IniciarProcesoModal from '@/components/contrato/IniciarProcesoModal.vue';
-import FormalizarContratoModal from '@/components/contrato/FormalizarContratoModal.vue';
 import { oportunidadService } from '@/services/oportunidad.service';
 import { actividadService } from '@/services/actividad.service';
 import { documentoService } from '@/services/documento.service';
 import { empresaService } from '@/services/empresa.service';
-import { procesoContratacionService } from '@/services/procesoContratacion.service';
-import { contratoService } from '@/services/contrato.service';
-import { pipelineService } from '@/services/pipeline.service';
 import { formatCurrencyFull } from '@/utils/currency';
 
 const route = useRoute();
@@ -267,18 +210,6 @@ const savingEdit = ref(false);
 const editError = ref(null);
 const empresasEdit = ref([]);
 
-// Proceso de contratación
-const procesos = ref([]);
-const loadingProcesos = ref(false);
-const procesoEtapas = ref([]);
-const showIniciarProcesoModal = ref(false);
-const showFormalizarModal = ref(false);
-const formalizarProcesoId = ref(null);
-const contratos = ref([]);
-
-const procesoActivo = computed(() => procesos.value.find(p => p.estado === 'EN_CURSO'));
-const procesoCompletado = computed(() => procesos.value.find(p => p.estado === 'COMPLETADO'));
-
 onMounted(async () => {
   try { op.value = await oportunidadService.obtenerPorId(route.params.id); }
   catch (err) { error.value = err.response?.data?.message || 'No se pudo cargar la oportunidad'; }
@@ -289,7 +220,6 @@ onMounted(async () => {
 
   if (op.value) {
     await Promise.all([loadActividades(), loadDocumentos()]);
-    if (op.value.estadoMacro === 'GANADA') await loadProcesos();
   }
 });
 
@@ -355,73 +285,9 @@ async function handleEditSubmit(payload) {
   } finally { savingEdit.value = false; }
 }
 
-// === Proceso de Contratación ===
-async function loadProcesos() {
-  loadingProcesos.value = true;
-  try {
-    procesos.value = await procesoContratacionService.listarPorOportunidad(op.value.id);
-    // Cargar etapas del pipeline del proceso activo
-    const activo = procesos.value.find(p => p.estado === 'EN_CURSO');
-    if (activo) {
-      try {
-        const pip = await pipelineService.obtenerPorId(activo.pipelineId);
-        procesoEtapas.value = pip.etapas || [];
-      } catch {}
-    }
-    // Cargar contratos asociados
-    try { contratos.value = await contratoService.listarPorOportunidad(op.value.id); } catch {}
-  } catch (err) { console.error('Error cargando procesos:', err); }
-  finally { loadingProcesos.value = false; }
-}
-
-function procesoEstadoLabel(estado) {
-  return { EN_CURSO: 'En Curso', COMPLETADO: 'Completado', CANCELADO: 'Cancelado' }[estado] || estado;
-}
-
-function contratosDelProceso(procesoId) {
-  return contratos.value.filter(c => c.procesoContratacionId === procesoId);
-}
-
-async function onProcesoCreated() {
-  showIniciarProcesoModal.value = false;
-  await loadProcesos();
-}
-
-async function moverProcesoEtapa(procesoId, etapaId) {
-  try {
-    await procesoContratacionService.moverEtapa(procesoId, etapaId);
-    await loadProcesos();
-  } catch {}
-}
-
-async function completarProceso(procesoId) {
-  if (!confirm('¿Completar el proceso de contratación? Se habilitará la creación del contrato.')) return;
-  try {
-    await procesoContratacionService.completar(procesoId);
-    await loadProcesos();
-  } catch {}
-}
-
-async function cancelarProceso(procesoId) {
-  if (!confirm('¿Cancelar el proceso de contratación?')) return;
-  try {
-    await procesoContratacionService.cancelar(procesoId);
-    await loadProcesos();
-  } catch {}
-}
-
-function openFormalizarModal(procesoId) {
-  formalizarProcesoId.value = procesoId;
-  showFormalizarModal.value = true;
-}
-
-async function onContratoCreated() {
-  showFormalizarModal.value = false;
-  await loadProcesos();
-}
-
 // === Computed ===
-const isCerrada = computed(() => { const e = op.value?.estadoMacro; return e === 'GANADA' || e === 'PERDIDA' || e === 'NO_CONCRETADA'; });
+const isCerrada = computed(() => { const e = op.value?.estadoMacro; return e === 'PERDIDA' || e === 'NO_CONCRETADA'; });
+const isGanada = computed(() => op.value?.estadoMacro === 'GANADA');
 const estadoLabel = computed(() => ({ ABIERTA: 'Abierta', SEGUIMIENTO: 'Seguimiento', GANADA: 'Ganada', PERDIDA: 'Perdida', NO_CONCRETADA: 'No Concretada' }[op.value?.estadoMacro] || op.value?.estadoMacro));
 const diasEnPipeline = computed(() => { if (!op.value?.fechaCreacion) return 0; return Math.floor((new Date() - new Date(op.value.fechaCreacion)) / 86400000); });
 const diasParaCierre = computed(() => { if (!op.value?.fechaEstimadaCierre) return '—'; const d = Math.floor((new Date(op.value.fechaEstimadaCierre) - new Date()) / 86400000); return d >= 0 ? `${d} días` : `${Math.abs(d)} días vencido`; });
@@ -537,12 +403,8 @@ function fmtDateShort(d) { if (!d) return '—'; return new Date(d).toLocaleDate
 .proceso-card__label { font-size: 10px; color: var(--text-muted); }
 .proceso-card__etapa { font-size: var(--text-xs); font-weight: 600; }
 .proceso-card__actions { display: flex; gap: var(--space-2); }
-.proceso-card__completado { display: flex; flex-direction: column; gap: var(--space-3); }
-.proceso-card__cancelado { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--error); }
 
-.contratos-mini { display: flex; flex-direction: column; gap: var(--space-2); }
-.contrato-mini-card { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--bg-surface); border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; font-size: var(--text-xs); color: var(--text-primary); }
-.contrato-mini-card:hover { background: rgba(0,212,255,0.05); }
+.ganada-hint { display: flex; align-items: flex-start; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-muted); line-height: 1.5; padding-top: var(--space-2); border-top: 1px solid var(--glass-border); }
 
 .btn--secondary { background: var(--secondary-soft); color: var(--secondary); border-color: rgba(168,85,247,0.3); }
 .btn--secondary:hover { box-shadow: 0 0 15px rgba(168,85,247,0.2); }
