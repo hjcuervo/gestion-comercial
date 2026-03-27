@@ -30,7 +30,7 @@
             <div v-if="form.estadoMacro === 'GANADA'" class="form-group ganada-section">
               <div class="ganada-info">
                 <Icon name="note-add" :size="16" color="var(--secondary)" />
-                <span>Al ganar, la oportunidad se moverá al pipeline de contratación para iniciar el proceso de formalización.</span>
+                <span>La oportunidad se moverá al pipeline de contratación para gestionar el proceso de formalización.</span>
               </div>
               <label class="form-label">Pipeline de Contratación <span class="req">*</span></label>
               <div v-if="loadingPipelines" class="loading-inline"><Icon name="loader" :size="14" class="animate-spin" /> Cargando pipelines...</div>
@@ -92,7 +92,6 @@ watch(() => props.visible, async (val) => {
     errors.estadoMacro = '';
     errors.pipeline = '';
 
-    // Cargar pipelines de contratación
     loadingPipelines.value = true;
     try {
       pipelinesContratacion.value = await pipelineService.listarActivos('CONTRATACION');

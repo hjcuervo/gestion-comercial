@@ -75,7 +75,7 @@ public class GcOportunidad {
     private LocalDateTime fechaModificacion;
 
     public enum EstadoMacro {
-        ABIERTA, SEGUIMIENTO, GANADA, PERDIDA, NO_CONCRETADA
+        ABIERTA, SEGUIMIENTO, GANADA, CONTRATADA, PERDIDA, NO_CONCRETADA
     }
 
     public enum Moneda {
@@ -96,27 +96,24 @@ public class GcOportunidad {
         this.fechaModificacion = LocalDateTime.now();
     }
 
-    /**
-     * Una oportunidad está "abierta" (en proceso comercial) si su estado es ABIERTA o SEGUIMIENTO.
-     */
+    /** En proceso comercial activo */
     public boolean isAbierta() {
         return this.estadoMacro == EstadoMacro.ABIERTA || this.estadoMacro == EstadoMacro.SEGUIMIENTO;
     }
 
-    /**
-     * Una oportunidad está "cerrada" definitivamente solo si fue PERDIDA o NO_CONCRETADA.
-     * GANADA NO es cerrada — está en proceso contractual y se puede seguir gestionando.
-     */
+    /** Cerrada definitivamente — no se puede gestionar */
     public boolean isCerrada() {
         return this.estadoMacro == EstadoMacro.PERDIDA || this.estadoMacro == EstadoMacro.NO_CONCRETADA;
     }
 
-    /**
-     * Una oportunidad GANADA está en proceso contractual — se puede mover por el pipeline,
-     * registrar actividades, compromisos y documentos.
-     */
+    /** En proceso contractual — se puede mover, editar, agregar actividades */
     public boolean isEnProcesoContractual() {
         return this.estadoMacro == EstadoMacro.GANADA;
+    }
+
+    /** Contrato formalizado — ya no está en ningún pipeline */
+    public boolean isContratada() {
+        return this.estadoMacro == EstadoMacro.CONTRATADA;
     }
 
     // Getters and Setters

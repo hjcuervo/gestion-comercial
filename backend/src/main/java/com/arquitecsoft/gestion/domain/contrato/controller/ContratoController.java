@@ -20,14 +20,6 @@ public class ContratoController {
         this.contratoService = contratoService;
     }
 
-    // ==================== CONTRATO ====================
-
-    @PostMapping
-    public ResponseEntity<ContratoResponse> crear(@Valid @RequestBody ContratoCreateRequest request) {
-        ContratoResponse response = contratoService.crearDesdeProcesoCompletado(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @GetMapping
     public ResponseEntity<PageResponse<ContratoResponse>> listar(
             @RequestParam(required = false) String estado,
@@ -36,23 +28,37 @@ public class ContratoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20", name = "page_size") int pageSize) {
         if (pageSize > 100) pageSize = 100;
-        PageResponse<ContratoResponse> response = contratoService.listar(estado, empresaId, moneda, page, pageSize);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(contratoService.listar(estado, empresaId, moneda, page, pageSize));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ContratoResponse> obtenerPorId(@PathVariable Long id) {
-        ContratoResponse response = contratoService.obtenerPorId(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(contratoService.obtenerPorId(id));
     }
 
     @GetMapping("/oportunidad/{oportunidadId}")
     public ResponseEntity<List<ContratoResponse>> listarPorOportunidad(@PathVariable Long oportunidadId) {
-        List<ContratoResponse> response = contratoService.listarPorOportunidad(oportunidadId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(contratoService.listarPorOportunidad(oportunidadId));
     }
 
-    // ==================== CAMBIOS DE ESTADO ====================
+    /**
+     * Formalizar contrato desde una oportunidad GANADA.
+     * Crea el contrato y marca la oportunidad como CONTRATADA.
+     */
+    @PostMapping("/formalizar")
+    public ResponseEntity<ContratoResponse> formalizarContrato(@Valid @RequestBody FormalizarContratoRequest request) {
+        ContratoResponse response = contratoService.formalizarContrato(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * @deprecated Usar /formalizar en su lugar
+     */
+    @PostMapping
+    public ResponseEntity<ContratoResponse> crear(@Valid @RequestBody ContratoCreateRequest request) {
+        ContratoResponse response = contratoService.crearDesdeProcesoCompletado(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @PostMapping("/{id}/suspender")
     public ResponseEntity<ContratoResponse> suspender(@PathVariable Long id) {
@@ -74,19 +80,15 @@ public class ContratoController {
         return ResponseEntity.ok(contratoService.liquidar(id));
     }
 
-    // ==================== FORMAS DE PAGO ====================
-
+    // Formas de pago
     @GetMapping("/{contratoId}/formas-pago")
     public ResponseEntity<List<FormaPagoResponse>> listarFormasPago(@PathVariable Long contratoId) {
         return ResponseEntity.ok(contratoService.listarFormasPago(contratoId));
     }
 
     @PostMapping("/{contratoId}/formas-pago")
-    public ResponseEntity<FormaPagoResponse> crearFormaPago(
-            @PathVariable Long contratoId,
-            @Valid @RequestBody FormaPagoCreateRequest request) {
-        FormaPagoResponse response = contratoService.crearFormaPago(contratoId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<FormaPagoResponse> crearFormaPago(@PathVariable Long contratoId, @Valid @RequestBody FormaPagoCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(contratoService.crearFormaPago(contratoId, request));
     }
 
     @DeleteMapping("/formas-pago/{formaPagoId}")
@@ -95,18 +97,14 @@ public class ContratoController {
         return ResponseEntity.noContent().build();
     }
 
-    // ==================== MODIFICACIONES ====================
-
+    // Modificaciones
     @GetMapping("/{contratoId}/modificaciones")
     public ResponseEntity<List<ModificacionResponse>> listarModificaciones(@PathVariable Long contratoId) {
         return ResponseEntity.ok(contratoService.listarModificaciones(contratoId));
     }
 
     @PostMapping("/{contratoId}/modificaciones")
-    public ResponseEntity<ModificacionResponse> crearModificacion(
-            @PathVariable Long contratoId,
-            @Valid @RequestBody ModificacionCreateRequest request) {
-        ModificacionResponse response = contratoService.crearModificacion(contratoId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<ModificacionResponse> crearModificacion(@PathVariable Long contratoId, @Valid @RequestBody ModificacionCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(contratoService.crearModificacion(contratoId, request));
     }
 }

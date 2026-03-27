@@ -13,11 +13,7 @@ public class CerrarOportunidadRequest {
     @Size(max = 500, message = "El comentario no puede exceder 500 caracteres")
     private String comentario;
 
-    /**
-     * Pipeline de contratación al que se moverá la oportunidad cuando se marca como GANADA.
-     * Solo aplica para estadoMacro = GANADA. Si no se envía, la oportunidad queda GANADA
-     * sin moverse a un pipeline de contratación (se puede asignar después).
-     */
+    /** Pipeline de contratación al que se moverá la oportunidad cuando se marca como GANADA. */
     private Long pipelineContratacionId;
 
     public CerrarOportunidadRequest() {}

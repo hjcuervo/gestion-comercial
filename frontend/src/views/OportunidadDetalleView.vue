@@ -40,9 +40,9 @@
             </div>
             <div class="info-item"><span class="info-item__label">Creación</span><span class="info-item__value">{{ fmtDate(op.fechaCreacion) }}</span></div>
           </div>
-          <div v-if="isCerrada || isGanada" class="cierre-info">
+          <div v-if="isCerrada || isGanada || isContratada" class="cierre-info">
             <div class="cierre-header">
-              <Icon :name="op.estadoMacro === 'GANADA' ? 'trophy' : 'trending-down'" :size="16" :color="op.estadoMacro === 'GANADA' ? 'var(--success)' : 'var(--error)'" />
+              <Icon :name="op.estadoMacro === 'GANADA' || op.estadoMacro === 'CONTRATADA' ? 'trophy' : 'trending-down'" :size="16" :color="op.estadoMacro === 'GANADA' || op.estadoMacro === 'CONTRATADA' ? 'var(--success)' : 'var(--error)'" />
               <span class="cierre-title">Cerrada como <strong :class="`text--${op.estadoMacro?.toLowerCase()}`">{{ estadoLabel }}</strong> el {{ fmtDate(op.fechaCierre) }}</span>
             </div>
             <p v-if="op.comentarioCierre" class="cierre-comment">{{ op.comentarioCierre }}</p>
@@ -63,9 +63,31 @@
               <span class="proceso-card__label">Etapa actual:</span>
               <span class="proceso-card__etapa">{{ op.etapaNombre }}</span>
             </div>
+            <div class="proceso-card__actions">
+              <button class="btn btn--secondary btn--sm" @click="showFormalizarModal = true">
+                <Icon name="note-add" :size="14" /> Formalizar Contrato
+              </button>
+            </div>
             <div class="ganada-hint">
               <Icon name="pipeline" :size="14" color="var(--text-muted)" />
-              <span>Esta oportunidad está en el pipeline contractual. Gestione las etapas desde el Kanban. Puede registrar actividades, compromisos y documentos aquí.</span>
+              <span>Gestione las etapas desde el Kanban. Cuando esté listo, formalice el contrato para completar el proceso.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTRATADA — mostrar info del contrato -->
+        <section v-if="isContratada" class="proceso-section">
+          <div class="proceso-card glass">
+            <div class="proceso-card__header">
+              <div class="proceso-card__info">
+                <Icon name="check-circle" :size="18" color="var(--success)" />
+                <span class="proceso-card__pipeline">Contrato Formalizado</span>
+              </div>
+              <span class="proceso-badge proceso-badge--completado">Contratada</span>
+            </div>
+            <div class="ganada-hint">
+              <Icon name="note-add" :size="14" color="var(--text-muted)" />
+              <span>Esta oportunidad fue formalizada como contrato. Gestione el contrato desde el módulo de Contratos.</span>
             </div>
           </div>
         </section>
@@ -164,6 +186,7 @@
       <CompromisoModal v-if="showCompromisoModal" :actividad-id="selectedActividadId" @close="showCompromisoModal = false" @created="onCompromisoCreated" />
       <DocumentoModal v-if="showDocumentoModal" :oportunidad-id="Number(op.id)" @close="showDocumentoModal = false" @created="onDocumentoCreated" />
       <OportunidadModal :visible="showEditModal" :oportunidad="op" :empresas="empresasEdit" :pipelines="[]" :saving="savingEdit" :error="editError" @close="showEditModal = false" @submit="handleEditSubmit" />
+      <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="Number(op.id)" :oportunidad-nombre="op.nombre" :moneda-default="op.moneda || 'COP'" :valor-default="op.valorEstimado" @close="showFormalizarModal = false" @created="onContratoCreated" />
     </div>
   </AppLayout>
 </template>
@@ -177,6 +200,7 @@ import ActividadModal from '@/components/actividad/ActividadModal.vue';
 import CompromisoModal from '@/components/actividad/CompromisoModal.vue';
 import DocumentoModal from '@/components/documento/DocumentoModal.vue';
 import OportunidadModal from '@/components/oportunidad/OportunidadModal.vue';
+import FormalizarContratoModal from '@/components/contrato/FormalizarContratoModal.vue';
 import { oportunidadService } from '@/services/oportunidad.service';
 import { actividadService } from '@/services/actividad.service';
 import { documentoService } from '@/services/documento.service';
@@ -209,6 +233,7 @@ const showEditModal = ref(false);
 const savingEdit = ref(false);
 const editError = ref(null);
 const empresasEdit = ref([]);
+const showFormalizarModal = ref(false);
 
 onMounted(async () => {
   try { op.value = await oportunidadService.obtenerPorId(route.params.id); }
@@ -285,10 +310,17 @@ async function handleEditSubmit(payload) {
   } finally { savingEdit.value = false; }
 }
 
+async function onContratoCreated() {
+  showFormalizarModal.value = false;
+  // Recargar — la oportunidad ahora está CONTRATADA
+  op.value = await oportunidadService.obtenerPorId(route.params.id);
+}
+
 // === Computed ===
 const isCerrada = computed(() => { const e = op.value?.estadoMacro; return e === 'PERDIDA' || e === 'NO_CONCRETADA'; });
 const isGanada = computed(() => op.value?.estadoMacro === 'GANADA');
-const estadoLabel = computed(() => ({ ABIERTA: 'Abierta', SEGUIMIENTO: 'Seguimiento', GANADA: 'Ganada', PERDIDA: 'Perdida', NO_CONCRETADA: 'No Concretada' }[op.value?.estadoMacro] || op.value?.estadoMacro));
+const isContratada = computed(() => op.value?.estadoMacro === 'CONTRATADA');
+const estadoLabel = computed(() => ({ ABIERTA: 'Abierta', SEGUIMIENTO: 'Seguimiento', GANADA: 'Ganada', CONTRATADA: 'Contratada', PERDIDA: 'Perdida', NO_CONCRETADA: 'No Concretada' }[op.value?.estadoMacro] || op.value?.estadoMacro));
 const diasEnPipeline = computed(() => { if (!op.value?.fechaCreacion) return 0; return Math.floor((new Date() - new Date(op.value.fechaCreacion)) / 86400000); });
 const diasParaCierre = computed(() => { if (!op.value?.fechaEstimadaCierre) return '—'; const d = Math.floor((new Date(op.value.fechaEstimadaCierre) - new Date()) / 86400000); return d >= 0 ? `${d} días` : `${Math.abs(d)} días vencido`; });
 const isVencida = computed(() => { if (isCerrada.value || !op.value?.fechaEstimadaCierre) return false; return new Date(op.value.fechaEstimadaCierre) < new Date(); });

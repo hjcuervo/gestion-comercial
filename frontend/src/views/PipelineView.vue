@@ -109,7 +109,10 @@
                     </span>
                   </div>
                   <div class="card-actions">
-                    <button class="card-btn card-btn--cerrar" @click.stop="openCerrar(op)" title="Cerrar oportunidad">
+                    <button v-if="op.estadoMacro === 'GANADA'" class="card-btn card-btn--formalizar" @click.stop="openFormalizar(op)" title="Formalizar contrato">
+                      <Icon name="note-add" :size="14" /> Formalizar
+                    </button>
+                    <button v-else class="card-btn card-btn--cerrar" @click.stop="openCerrar(op)" title="Cerrar oportunidad">
                       <Icon name="check-circle" :size="14" /> Cerrar
                     </button>
                   </div>
@@ -260,6 +263,8 @@
       <!-- Modals: Oportunidad -->
       <OportunidadModal :visible="showOpModal" :oportunidad="editingOp" :empresas="opStore.empresasActivas" :pipelines="kanbanPipelinesFiltrados" :pipeline-preseleccionado="selectedPipelineId" :saving="opStore.saving" :error="modalError" @close="closeOpModal" @submit="handleOpSubmit" />
       <CerrarOportunidadModal :visible="showCerrarModal" :oportunidad-nombre="cerrandoOp?.nombre || ''" :saving="opStore.saving" :error="modalError" @close="showCerrarModal = false" @submit="handleCerrarSubmit" />
+      <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="formalizandoOp?.id" :oportunidad-nombre="formalizandoOp?.nombre || ''" :moneda-default="formalizandoOp?.moneda || 'COP'" :valor-default="formalizandoOp?.valorEstimado" @close="showFormalizarModal = false" @created="onContratoFormalizado" />
+      <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="formalizandoOp?.id" :oportunidad-nombre="formalizandoOp?.nombre || ''" :moneda-default="formalizandoOp?.moneda || 'COP'" :valor-default="formalizandoOp?.valorEstimado" @close="showFormalizarModal = false" @created="onContratoCreated" />
 
       <!-- Modals: Pipeline Config -->
       <PipelineModal :visible="showPipModal" :pipeline="editingPip" :saving="pipStore.saving" :error="modalError" @close="closePipModal" @submit="handlePipSubmit" />
@@ -277,6 +282,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import OportunidadModal from '@/components/oportunidad/OportunidadModal.vue';
 import CerrarOportunidadModal from '@/components/oportunidad/CerrarOportunidadModal.vue';
+import FormalizarContratoModal from '@/components/contrato/FormalizarContratoModal.vue';
 import PipelineModal from '@/components/pipeline/PipelineModal.vue';
 import EtapaModal from '@/components/pipeline/EtapaModal.vue';
 import { useOportunidadStore } from '@/stores/oportunidad.store';
@@ -293,6 +299,8 @@ const showOpModal = ref(false);
 const editingOp = ref(null);
 const showCerrarModal = ref(false);
 const cerrandoOp = ref(null);
+const showFormalizarModal = ref(false);
+const formalizandoOp = ref(null);
 const modalError = ref(null);
 const dragOverEtapaId = ref(null);
 const draggingOp = ref(null);
@@ -381,6 +389,15 @@ async function handleCerrarSubmit(payload) {
   modalError.value = null;
   try { await opStore.cerrarOportunidad(cerrandoOp.value.id, payload); showCerrarModal.value = false; cerrandoOp.value = null; }
   catch (err) { modalError.value = err.response?.data?.message || 'Error al cerrar oportunidad'; }
+}
+
+// Formalizar contrato
+function openFormalizar(op) { formalizandoOp.value = op; modalError.value = null; showFormalizarModal.value = true; }
+async function onContratoFormalizado() {
+  showFormalizarModal.value = false;
+  formalizandoOp.value = null;
+  // Recargar oportunidades — la oportunidad CONTRATADA desaparece del Kanban
+  await opStore.cargarOportunidades();
 }
 
 // ==================== CONFIG: Pipeline CRUD ====================
@@ -499,6 +516,10 @@ function formatDate(date) {
 .card-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-full); border: 1px solid transparent; font-family: var(--font-body); font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .card-btn--cerrar { background: rgba(16,185,129,0.08); color: var(--success); border-color: rgba(16,185,129,0.2); }
 .card-btn--cerrar:hover { background: rgba(16,185,129,0.2); border-color: var(--success); }
+.card-btn--formalizar { background: rgba(168,85,247,0.08); color: var(--secondary); border-color: rgba(168,85,247,0.2); }
+.card-btn--formalizar:hover { background: rgba(168,85,247,0.2); border-color: var(--secondary); }
+.card-btn--formalizar { background: rgba(168,85,247,0.08); color: var(--secondary); border-color: rgba(168,85,247,0.2); }
+.card-btn--formalizar:hover { background: rgba(168,85,247,0.2); border-color: var(--secondary); }
 
 /* ==================== CONFIG ==================== */
 .config-section { display: flex; flex-direction: column; gap: var(--space-5); flex: 1; min-height: 0; overflow-y: auto; }

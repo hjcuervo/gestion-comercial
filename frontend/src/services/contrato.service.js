@@ -3,8 +3,8 @@ import api from './api';
 const BASE = '/contratos';
 
 export const contratoService = {
-  async crear(payload) {
-    const { data } = await api.post(BASE, payload);
+  async formalizarContrato(payload) {
+    const { data } = await api.post(`${BASE}/formalizar`, payload);
     return data;
   },
 
