@@ -212,15 +212,6 @@ function isVencida(op) {
   return new Date(op.fechaEstimadaCierre) < new Date();
 }
 
-function formatCurrency(value) {
-  const num = Number(value);
-  if (!num) return '$0';
-  if (num >= 1000000000) return `$${(num / 1000000000).toFixed(1)}B`;
-  if (num >= 1000000) return `$${(num / 1000000).toFixed(0)}M`;
-  if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`;
-  return `$${num.toLocaleString()}`;
-}
-
 function formatDate(dt) {
   if (!dt) return '—';
   return new Date(dt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });

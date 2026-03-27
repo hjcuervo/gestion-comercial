@@ -2,6 +2,8 @@ package com.arquitecsoft.gestion.domain.empresa.controller;
 
 import com.arquitecsoft.gestion.domain.actividad.entity.GcTipoActividad;
 import com.arquitecsoft.gestion.domain.actividad.repository.GcTipoActividadRepository;
+import com.arquitecsoft.gestion.domain.contrato.entity.GcTipoContrato;
+import com.arquitecsoft.gestion.domain.contrato.repository.GcTipoContratoRepository;
 import com.arquitecsoft.gestion.domain.documento.entity.GcTipoDocumentoOpp;
 import com.arquitecsoft.gestion.domain.documento.repository.GcTipoDocumentoOppRepository;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcDepartamento;
@@ -30,6 +32,7 @@ public class CatalogoController {
     private final GcMunicipioRepository municipioRepo;
     private final GcTipoActividadRepository tipoActividadRepo;
     private final GcTipoDocumentoOppRepository tipoDocumentoOppRepo;
+    private final GcTipoContratoRepository tipoContratoRepo;
 
     public CatalogoController(
             GcDocumentTypeRepository documentTypeRepo,
@@ -37,13 +40,15 @@ public class CatalogoController {
             GcDepartamentoRepository departamentoRepo,
             GcMunicipioRepository municipioRepo,
             GcTipoActividadRepository tipoActividadRepo,
-            GcTipoDocumentoOppRepository tipoDocumentoOppRepo) {
+            GcTipoDocumentoOppRepository tipoDocumentoOppRepo,
+            GcTipoContratoRepository tipoContratoRepo) {
         this.documentTypeRepo = documentTypeRepo;
         this.paisRepo = paisRepo;
         this.departamentoRepo = departamentoRepo;
         this.municipioRepo = municipioRepo;
         this.tipoActividadRepo = tipoActividadRepo;
         this.tipoDocumentoOppRepo = tipoDocumentoOppRepo;
+        this.tipoContratoRepo = tipoContratoRepo;
     }
 
     @GetMapping("/tipos-documento")
@@ -79,5 +84,10 @@ public class CatalogoController {
     @GetMapping("/tipos-documento-opp")
     public ResponseEntity<List<GcTipoDocumentoOpp>> listarTiposDocumentoOpp() {
         return ResponseEntity.ok(tipoDocumentoOppRepo.findByActivoTrueOrderByNombreAsc());
+    }
+
+    @GetMapping("/tipos-contrato")
+    public ResponseEntity<List<GcTipoContrato>> listarTiposContrato() {
+        return ResponseEntity.ok(tipoContratoRepo.findByActivoTrueOrderByNombreAsc());
     }
 }
