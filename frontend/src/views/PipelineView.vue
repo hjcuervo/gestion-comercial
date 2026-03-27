@@ -332,7 +332,7 @@ onMounted(async () => {
 // ==================== KANBAN: Only active opportunities ====================
 function getActiveOportunidades(etapaId) {
   const all = opStore.oportunidadesPorEtapa[etapaId] || [];
-  return all.filter(o => o.estadoMacro === 'ABIERTA' || o.estadoMacro === 'SEGUIMIENTO');
+  return all.filter(o => o.estadoMacro === 'ABIERTA' || o.estadoMacro === 'SEGUIMIENTO' || o.estadoMacro === 'GANADA');
 }
 
 function onPipelineChange() { opStore.seleccionarPipeline(selectedPipelineId.value); }
