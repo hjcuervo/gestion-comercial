@@ -16,13 +16,16 @@ import java.util.Optional;
 public interface GcContratoRepository extends JpaRepository<GcContrato, Long> {
 
     @Query("SELECT c FROM GcContrato c " +
+           "JOIN FETCH c.oportunidad " +
            "JOIN FETCH c.empresa " +
            "JOIN FETCH c.tipoContrato " +
            "LEFT JOIN FETCH c.empresaFacturacion " +
+           "LEFT JOIN FETCH c.procesoContratacion " +
            "WHERE c.id = :id")
     Optional<GcContrato> findByIdWithRelations(@Param("id") Long id);
 
     @Query("SELECT c FROM GcContrato c " +
+           "JOIN FETCH c.oportunidad " +
            "JOIN FETCH c.empresa " +
            "JOIN FETCH c.tipoContrato " +
            "WHERE (:estado IS NULL OR c.estado = :estado) AND " +
@@ -35,17 +38,12 @@ public interface GcContratoRepository extends JpaRepository<GcContrato, Long> {
             Pageable pageable);
 
     @Query("SELECT c FROM GcContrato c " +
+           "JOIN FETCH c.oportunidad " +
            "JOIN FETCH c.empresa " +
            "JOIN FETCH c.tipoContrato " +
            "WHERE c.oportunidad.id = :oportunidadId " +
            "ORDER BY c.fechaCreacion DESC")
     List<GcContrato> findByOportunidadId(@Param("oportunidadId") Long oportunidadId);
-
-    @Query("SELECT c FROM GcContrato c " +
-           "JOIN FETCH c.empresa " +
-           "JOIN FETCH c.tipoContrato " +
-           "WHERE c.procesoContratacion.id = :procesoId")
-    List<GcContrato> findByProcesoContratacionId(@Param("procesoId") Long procesoId);
 
     List<GcContrato> findByEstado(EstadoContrato estado);
 

@@ -55,12 +55,23 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        // Imprimir el stack trace completo
         log.error("Exception no manejada: ", ex);
-        ex.printStackTrace();
-        
+
+        // Obtener el mensaje real de la excepcion para diagnostico
+        String realMessage = ex.getMessage();
+        if (realMessage == null || realMessage.isBlank()) {
+            realMessage = ex.getClass().getSimpleName();
+        }
+
+        // Si hay causa raiz, incluirla
+        Throwable root = ex;
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+        String rootMessage = root != ex ? " | Causa: " + root.getMessage() : "";
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("INTERNAL_ERROR", "Error interno del servidor"));
+                .body(new ErrorResponse("INTERNAL_ERROR", realMessage + rootMessage));
     }
 }

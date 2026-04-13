@@ -41,7 +41,9 @@ public class ContratoResponse {
     public static ContratoResponse fromEntity(GcContrato c) {
         ContratoResponse r = new ContratoResponse();
         r.setId(c.getId());
-        r.setProcesoContratacionId(c.getProcesoContratacion().getId());
+        if (c.getProcesoContratacion() != null) {
+            r.setProcesoContratacionId(c.getProcesoContratacion().getId());
+        }
         r.setOportunidadId(c.getOportunidad().getId());
         r.setOportunidadNombre(c.getOportunidad().getNombre());
         r.setEmpresaId(c.getEmpresa().getId());

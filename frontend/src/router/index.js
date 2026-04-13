@@ -33,15 +33,21 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/oportunidades',
-    name: 'Oportunidades',
-    component: () => import('@/views/OportunidadesListView.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
     path: '/oportunidades/:id',
     name: 'OportunidadDetalle',
     component: () => import('@/views/OportunidadDetalleView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/contratos',
+    name: 'Contratos',
+    component: () => import('@/views/ContratosListView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/contratos/:id',
+    name: 'ContratoDetalle',
+    component: () => import('@/views/ContratoDetalleView.vue'),
     meta: { requiresAuth: true }
   },
   {

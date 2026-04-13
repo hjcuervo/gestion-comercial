@@ -8,12 +8,13 @@
         </div>
 
         <form class="modal__body" @submit.prevent="handleSubmit">
-          <p class="modal__desc">El proceso de contratación ha sido completado. Complete los datos para formalizar el contrato.</p>
+          <p class="modal__desc">Formalizar contrato para la oportunidad <strong>{{ oportunidadNombre }}</strong>. Al confirmar, se creará el contrato y la oportunidad saldrá del pipeline.</p>
 
           <div class="form-row">
             <div class="field">
               <label class="field__label">Tipo de Contrato <span class="req">*</span></label>
-              <select v-model="form.tipoContratoId" class="field__select" required>
+              <div v-if="loadingTipos" class="loading-inline"><Icon name="loader" :size="14" class="animate-spin" /> Cargando...</div>
+              <select v-else v-model="form.tipoContratoId" class="field__select" required>
                 <option :value="null" disabled>Seleccione</option>
                 <option v-for="t in tiposContrato" :key="t.id" :value="t.id">{{ t.nombre }}</option>
               </select>
@@ -107,13 +108,15 @@ import { contratoService } from '@/services/contrato.service';
 import { empresaService } from '@/services/empresa.service';
 
 const props = defineProps({
-  procesoId: { type: Number, required: true },
+  oportunidadId: { type: Number, required: true },
+  oportunidadNombre: { type: String, default: '' },
   monedaDefault: { type: String, default: 'COP' },
   valorDefault: { type: Number, default: null },
 });
 const emit = defineEmits(['close', 'created']);
 
 const tiposContrato = ref([]);
+const loadingTipos = ref(true);
 const empresas = ref([]);
 const form = ref({
   tipoContratoId: null,
@@ -136,6 +139,7 @@ const isValid = computed(() => form.value.tipoContratoId);
 
 onMounted(async () => {
   try { tiposContrato.value = await contratoService.listarTipos(); } catch {}
+  finally { loadingTipos.value = false; }
   try { const res = await empresaService.listar({ page_size: 100 }); empresas.value = res.data || []; } catch {}
 });
 
@@ -145,7 +149,7 @@ async function handleSubmit() {
   submitting.value = true;
   try {
     const payload = {
-      procesoContratacionId: props.procesoId,
+      oportunidadId: props.oportunidadId,
       tipoContratoId: form.value.tipoContratoId,
       moneda: form.value.moneda,
       numeroContratoInterno: form.value.numeroContratoInterno?.trim() || null,
@@ -159,7 +163,7 @@ async function handleSubmit() {
       empresaFacturacionId: form.value.empresaFacturacionId || null,
       observaciones: form.value.observaciones?.trim() || null,
     };
-    const created = await contratoService.crear(payload);
+    const created = await contratoService.formalizarContrato(payload);
     emit('created', created);
   } catch (err) {
     error.value = err.response?.data?.message || 'Error al formalizar contrato';
@@ -176,6 +180,7 @@ async function handleSubmit() {
 .modal__close:hover { color: var(--text-primary); background: var(--glass-hover); }
 .modal__body { display: flex; flex-direction: column; gap: var(--space-4); }
 .modal__desc { font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.6; margin: 0; }
+.modal__desc strong { color: var(--text-primary); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .field { display: flex; flex-direction: column; gap: var(--space-1); }
 .field__label { font-size: var(--text-xs); font-weight: 600; color: var(--text-secondary); }
@@ -187,6 +192,7 @@ async function handleSubmit() {
 .field__textarea { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-xs); padding: var(--space-3); resize: vertical; }
 .field__textarea:focus { outline: none; border-color: var(--primary); }
 .field__hint { font-size: 10px; color: var(--text-muted); }
+.loading-inline { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); font-size: var(--text-xs); padding: var(--space-2); }
 .modal-error { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3); background: var(--error-soft); border-radius: var(--radius-md); color: var(--error); font-size: var(--text-xs); }
 .modal__actions { display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--glass-border); }
 .btn { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-5); border-radius: var(--radius-full); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }

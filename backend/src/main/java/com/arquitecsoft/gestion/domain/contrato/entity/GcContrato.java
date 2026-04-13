@@ -18,7 +18,7 @@ public class GcContrato {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proceso_contratacion_id", nullable = false)
+    @JoinColumn(name = "proceso_contratacion_id")
     private GcProcesoContratacion procesoContratacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -91,7 +91,7 @@ public class GcContrato {
     private List<GcContratoFormaPago> formasPago = new ArrayList<>();
 
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL)
-    @OrderBy("fechaModificacion DESC")
+    @OrderBy("fechaCreacion DESC")
     private List<GcContratoModificacion> modificaciones = new ArrayList<>();
 
     public enum EstadoContrato {
