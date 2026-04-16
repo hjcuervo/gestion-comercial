@@ -19,6 +19,12 @@ public interface GcDocumentoRepository extends JpaRepository<GcDocumento, Long> 
     @Query("SELECT d FROM GcDocumento d WHERE d.actividad.id = :actividadId ORDER BY d.fechaCarga DESC")
     List<GcDocumento> findByActividadId(@Param("actividadId") Long actividadId);
 
+    @Query("SELECT d FROM GcDocumento d WHERE d.contrato.id = :contratoId ORDER BY d.fechaCarga DESC")
+    List<GcDocumento> findByContratoId(@Param("contratoId") Long contratoId);
+
+    @Query("SELECT d FROM GcDocumento d WHERE d.modificacion.id = :modificacionId ORDER BY d.fechaCarga DESC")
+    List<GcDocumento> findByModificacionId(@Param("modificacionId") Long modificacionId);
+
     @Query("SELECT d FROM GcDocumento d WHERE " +
            "(:oportunidadId IS NULL OR d.oportunidad.id = :oportunidadId) AND " +
            "(:actividadId IS NULL OR d.actividad.id = :actividadId) AND " +

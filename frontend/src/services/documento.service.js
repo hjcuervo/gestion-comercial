@@ -13,6 +13,16 @@ export const documentoService = {
     return data;
   },
 
+  async listarPorContrato(contratoId) {
+    const { data } = await api.get(`${BASE}/contrato/${contratoId}`);
+    return data;
+  },
+
+  async listarPorModificacion(modificacionId) {
+    const { data } = await api.get(`${BASE}/modificacion/${modificacionId}`);
+    return data;
+  },
+
   async crearEnlace(payload) {
     const { data } = await api.post(`${BASE}/enlace`, payload);
     return data;

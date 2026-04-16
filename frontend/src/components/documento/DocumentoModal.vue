@@ -10,9 +10,7 @@
         <form class="modal__body" @submit.prevent="handleSubmit">
           <div class="field">
             <label class="field__label">Tipo de Documento <span class="req">*</span></label>
-            <div v-if="loadingTipos" class="loading-tipos">
-              <Icon name="loader" :size="14" class="animate-spin" /> Cargando tipos...
-            </div>
+            <div v-if="loadingTipos" class="loading-tipos"><Icon name="loader" :size="14" class="animate-spin" /> Cargando tipos...</div>
             <select v-else v-model="form.tipoDocumentoId" class="field__select" required>
               <option :value="null" disabled>Seleccione un tipo</option>
               <option v-for="tipo in tiposDocumento" :key="tipo.id" :value="tipo.id">{{ tipo.nombre }}</option>
@@ -21,7 +19,7 @@
 
           <div class="field">
             <label class="field__label">Nombre del Documento <span class="req">*</span></label>
-            <input v-model="form.nombre" type="text" class="field__input" required maxlength="200" placeholder="Ej: Propuesta comercial v2" />
+            <input v-model="form.nombre" type="text" class="field__input" required maxlength="200" placeholder="Ej: Contrato firmado, Póliza de cumplimiento, Otrosí No. 1" />
           </div>
 
           <div class="field">
@@ -35,9 +33,7 @@
             <textarea v-model="form.descripcion" class="field__textarea" rows="2" maxlength="500" placeholder="Descripción breve del documento (opcional)"></textarea>
           </div>
 
-          <div v-if="error" class="modal-error">
-            <Icon name="alert-circle" :size="14" /> {{ error }}
-          </div>
+          <div v-if="error" class="modal-error"><Icon name="alert-circle" :size="14" /> {{ error }}</div>
 
           <div class="modal__actions">
             <button type="button" class="btn btn--ghost" @click="$emit('close')">Cancelar</button>
@@ -57,32 +53,25 @@ import { ref, computed, onMounted } from 'vue';
 import Icon from '@/components/ui/Icon.vue';
 import { documentoService } from '@/services/documento.service';
 
-const props = defineProps({ oportunidadId: { type: Number, required: true } });
+const props = defineProps({
+  oportunidadId: { type: Number, default: null },
+  contratoId: { type: Number, default: null },
+  modificacionId: { type: Number, default: null },
+});
 const emit = defineEmits(['close', 'created']);
 
 const tiposDocumento = ref([]);
 const loadingTipos = ref(true);
-
-const form = ref({
-  tipoDocumentoId: null,
-  nombre: '',
-  url: '',
-  descripcion: '',
-});
-
+const form = ref({ tipoDocumentoId: null, nombre: '', url: '', descripcion: '' });
 const error = ref(null);
 const submitting = ref(false);
 
 const isValid = computed(() => form.value.tipoDocumentoId && form.value.nombre.trim() && form.value.url.trim());
 
 onMounted(async () => {
-  try {
-    tiposDocumento.value = await documentoService.listarTipos();
-  } catch (err) {
-    console.error('Error cargando tipos de documento:', err);
-  } finally {
-    loadingTipos.value = false;
-  }
+  try { tiposDocumento.value = await documentoService.listarTipos(); }
+  catch (err) { console.error('Error cargando tipos:', err); }
+  finally { loadingTipos.value = false; }
 });
 
 async function handleSubmit() {
@@ -90,24 +79,26 @@ async function handleSubmit() {
   error.value = null;
   submitting.value = true;
   try {
-    const created = await documentoService.crearEnlace({
-      oportunidadId: props.oportunidadId,
+    const payload = {
       tipoDocumentoId: form.value.tipoDocumentoId,
       nombre: form.value.nombre.trim(),
       url: form.value.url.trim(),
       descripcion: form.value.descripcion?.trim() || null,
-    });
+    };
+    if (props.oportunidadId) payload.oportunidadId = props.oportunidadId;
+    if (props.contratoId) payload.contratoId = props.contratoId;
+    if (props.modificacionId) payload.modificacionId = props.modificacionId;
+
+    const created = await documentoService.crearEnlace(payload);
     emit('created', created);
   } catch (err) {
     error.value = err.response?.data?.message || 'Error al agregar documento';
-  } finally {
-    submitting.value = false;
-  }
+  } finally { submitting.value = false; }
 }
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: var(--z-modal); padding: var(--space-4); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4); }
 .modal { width: 100%; max-width: 480px; border-radius: var(--radius-xl); padding: var(--space-6); max-height: 90vh; overflow-y: auto; }
 .modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); }
 .modal__title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--text-primary); margin: 0; }
