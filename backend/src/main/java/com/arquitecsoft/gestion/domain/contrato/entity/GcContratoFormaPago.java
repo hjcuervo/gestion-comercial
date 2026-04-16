@@ -24,6 +24,9 @@ public class GcContratoFormaPago {
     @Column(name = "valor", nullable = false, precision = 16, scale = 2)
     private BigDecimal valor;
 
+    @Column(name = "valor_facturado", precision = 16, scale = 2)
+    private BigDecimal valorFacturado;
+
     @Column(name = "fecha_estimada_pago")
     private LocalDate fechaEstimadaPago;
 
@@ -66,6 +69,12 @@ public class GcContratoFormaPago {
         return this.estado == EstadoFormaPago.PENDIENTE && this.fechaEstimadaPago != null && this.fechaEstimadaPago.isBefore(LocalDate.now());
     }
 
+    /** Diferencia entre valor facturado y presupuestado */
+    public BigDecimal getDiferencia() {
+        if (valorFacturado == null) return null;
+        return valorFacturado.subtract(valor);
+    }
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -75,6 +84,8 @@ public class GcContratoFormaPago {
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public BigDecimal getValor() { return valor; }
     public void setValor(BigDecimal valor) { this.valor = valor; }
+    public BigDecimal getValorFacturado() { return valorFacturado; }
+    public void setValorFacturado(BigDecimal valorFacturado) { this.valorFacturado = valorFacturado; }
     public LocalDate getFechaEstimadaPago() { return fechaEstimadaPago; }
     public void setFechaEstimadaPago(LocalDate fechaEstimadaPago) { this.fechaEstimadaPago = fechaEstimadaPago; }
     public EstadoFormaPago getEstado() { return estado; }

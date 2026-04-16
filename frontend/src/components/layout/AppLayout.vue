@@ -1,10 +1,10 @@
 <template>
   <div class="app-layout">
     <NavRail :items="navItems" @logout="handleLogout" />
-
+    
     <div class="app-layout__main">
       <TopAppBar :title="pageTitle" :user-name="userName" />
-
+      
       <main class="app-layout__content">
         <slot />
       </main>
@@ -23,11 +23,11 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 
-// Icon names MUST match keys in Icon.vue
 const navItems = [
   { path: '/', label: 'Inicio', icon: 'dashboard' },
-  { path: '/pipeline', label: 'Pipeline', icon: 'pipeline' },
-  { path: '/contratos', label: 'Contratos', icon: 'note-add' },
+  { path: '/pipeline', label: 'Pipeline', icon: 'view_kanban' },
+  { path: '/contratos', label: 'Contratos', icon: 'description' },
+  { path: '/facturacion', label: 'Facturación', icon: 'receipt' },
   { path: '/empresas', label: 'Empresas', icon: 'business' },
   { path: '/personas', label: 'Personas', icon: 'people' },
 ];
@@ -37,8 +37,9 @@ const pageTitle = computed(() => {
     '/': 'Dashboard',
     '/pipeline': 'Pipeline de Oportunidades',
     '/contratos': 'Contratos',
+    '/facturacion': 'Facturación',
     '/empresas': 'Empresas',
-    '/personas': 'Contactos',
+    '/personas': 'Personas',
   };
   return titles[route.path] || route.name || '';
 });
@@ -62,15 +63,11 @@ const handleLogout = () => {
   margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-width: 0;
 }
 
 .app-layout__content {
   flex: 1;
   padding: var(--space-6);
-  background: var(--bg-base);
-  overflow: hidden;
-  min-width: 0;
+  background-color: var(--bg-base);
 }
 </style>

@@ -51,6 +51,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/facturacion',
+    name: 'Facturacion',
+    component: () => import('@/views/FacturacionView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
@@ -61,7 +67,6 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   

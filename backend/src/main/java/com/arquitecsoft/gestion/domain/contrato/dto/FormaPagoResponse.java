@@ -10,6 +10,7 @@ public class FormaPagoResponse {
     private Long contratoId;
     private String descripcion;
     private BigDecimal valor;
+    private BigDecimal valorFacturado;
     private LocalDate fechaEstimadaPago;
     private String estado;
     private Long facturaId;
@@ -25,6 +26,7 @@ public class FormaPagoResponse {
         r.setContratoId(fp.getContrato().getId());
         r.setDescripcion(fp.getDescripcion());
         r.setValor(fp.getValor());
+        r.setValorFacturado(fp.getValorFacturado());
         r.setFechaEstimadaPago(fp.getFechaEstimadaPago());
         r.setEstado(fp.getEstado().name());
         r.setFacturaId(fp.getFacturaId());
@@ -36,7 +38,6 @@ public class FormaPagoResponse {
         return r;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getContratoId() { return contratoId; }
@@ -45,6 +46,8 @@ public class FormaPagoResponse {
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public BigDecimal getValor() { return valor; }
     public void setValor(BigDecimal valor) { this.valor = valor; }
+    public BigDecimal getValorFacturado() { return valorFacturado; }
+    public void setValorFacturado(BigDecimal valorFacturado) { this.valorFacturado = valorFacturado; }
     public LocalDate getFechaEstimadaPago() { return fechaEstimadaPago; }
     public void setFechaEstimadaPago(LocalDate fechaEstimadaPago) { this.fechaEstimadaPago = fechaEstimadaPago; }
     public String getEstado() { return estado; }
