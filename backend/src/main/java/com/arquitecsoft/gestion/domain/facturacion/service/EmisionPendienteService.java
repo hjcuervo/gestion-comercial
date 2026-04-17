@@ -81,12 +81,11 @@ public class EmisionPendienteService {
                 item.setEstado(fp.getEstado().name());
                 item.setVencida(fp.isVencida());
 
-                // Conversión a COP
-                BigDecimal valorParaCop = fp.getValorFacturado() != null ? fp.getValorFacturado() : fp.getValor();
-                if ("USD".equals(contrato.getMoneda()) && valorParaCop != null && fpAnio > 0) {
-                    item.setValorCop(trmService.convertirACop(valorParaCop, fpAnio, fpMes));
+                // Conversión a COP — valorCop siempre es el presupuestado
+                if ("USD".equals(contrato.getMoneda()) && fp.getValor() != null && fpAnio > 0) {
+                    item.setValorCop(trmService.convertirACop(fp.getValor(), fpAnio, fpMes));
                 } else {
-                    item.setValorCop(valorParaCop);
+                    item.setValorCop(fp.getValor());
                 }
 
                 // Última gestión
@@ -114,6 +113,9 @@ public class EmisionPendienteService {
 
     /**
      * KPIs para el tablero de facturación.
+     *
+     * Pendiente real = Σ presupuestado de TODAS las FP - Σ valor facturado real de las cruzadas
+     * Es decir, si una FP presupuestada en 100M se cruzó por 80M, quedan 20M pendientes.
      */
     @Transactional(readOnly = true)
     public Map<String, Object> obtenerKpis() {
@@ -124,19 +126,30 @@ public class EmisionPendienteService {
         List<EmisionPendienteResponse> pendientes = obtenerPendientes(null, null, "PENDIENTE");
         List<EmisionPendienteResponse> facturadas = obtenerPendientes(null, null, "FACTURADA");
 
-        // Pendientes del mes actual
-        List<EmisionPendienteResponse> pendientesMes = pendientes.stream()
+        // Pendiente real total = FP pendientes + diferencia de las facturadas
+        BigDecimal pendienteSinCruzar = sumarValorCop(pendientes);
+        BigDecimal diferenciaCruzadas = sumarDiferenciaPendienteCop(facturadas);
+        BigDecimal pendienteRealTotal = pendienteSinCruzar.add(diferenciaCruzadas);
+
+        // --- Desglose por mes actual ---
+        List<EmisionPendienteResponse> pendientesMesList = pendientes.stream()
                 .filter(p -> p.getAnio() == anioActual && p.getMes() == mesActual)
                 .collect(Collectors.toList());
 
-        // Vencidas (meses anteriores)
-        List<EmisionPendienteResponse> vencidas = pendientes.stream()
-                .filter(EmisionPendienteResponse::isVencida)
-                .collect(Collectors.toList());
-
-        // Facturadas este mes (por fecha de la forma de pago)
         List<EmisionPendienteResponse> facturadasMes = facturadas.stream()
                 .filter(f -> f.getAnio() == anioActual && f.getMes() == mesActual)
+                .collect(Collectors.toList());
+
+        BigDecimal facturadoRealMes = sumarValorFacturadoCop(facturadasMes);
+
+        // Pendiente mes = FP pendientes del mes + diferencia de facturadas del mes
+        BigDecimal pendienteMesSinCruzar = sumarValorCop(pendientesMesList);
+        BigDecimal diferenciaCruzadasMes = sumarDiferenciaPendienteCop(facturadasMes);
+        BigDecimal pendienteRealMes = pendienteMesSinCruzar.add(diferenciaCruzadasMes);
+
+        // Vencidas
+        List<EmisionPendienteResponse> vencidas = pendientes.stream()
+                .filter(EmisionPendienteResponse::isVencida)
                 .collect(Collectors.toList());
 
         // Facturadas del año
@@ -145,14 +158,14 @@ public class EmisionPendienteService {
                 .collect(Collectors.toList());
 
         Map<String, Object> kpis = new LinkedHashMap<>();
-        kpis.put("pendientesMesCantidad", pendientesMes.size());
-        kpis.put("pendientesMesValorCop", sumarValorCop(pendientesMes));
+        kpis.put("pendientesMesCantidad", pendientesMesList.size());
+        kpis.put("pendientesMesValorCop", pendienteRealMes);
         kpis.put("vencidasCantidad", vencidas.size());
         kpis.put("vencidasValorCop", sumarValorCop(vencidas));
         kpis.put("facturadasMesCantidad", facturadasMes.size());
-        kpis.put("facturadasMesValorCop", sumarValorFacturadoCop(facturadasMes));
+        kpis.put("facturadasMesValorCop", facturadoRealMes);
         kpis.put("pendienteTotalCantidad", pendientes.size());
-        kpis.put("pendienteTotalValorCop", sumarValorCop(pendientes));
+        kpis.put("pendienteTotalValorCop", pendienteRealTotal);
         kpis.put("facturadasAnioCantidad", facturadasAnio.size());
         kpis.put("facturadasAnioValorCop", sumarValorFacturadoCop(facturadasAnio));
 
@@ -169,11 +182,33 @@ public class EmisionPendienteService {
         return items.stream()
                 .map(i -> {
                     BigDecimal val = i.getValorFacturado() != null ? i.getValorFacturado() : i.getValor();
-                    if ("USD".equals(i.getMoneda()) && i.getAnio() > 0) {
+                    if ("USD".equals(i.getMoneda()) && i.getAnio() != null && i.getAnio() > 0) {
                         BigDecimal cop = trmService.convertirACop(val, i.getAnio(), i.getMes());
                         return cop != null ? cop : BigDecimal.ZERO;
                     }
                     return val != null ? val : BigDecimal.ZERO;
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Calcula la diferencia pendiente de las facturadas:
+     * Σ(presupuestado - facturado real) para cada FP facturada.
+     * Esto captura el delta cuando se factura menos de lo presupuestado.
+     */
+    private BigDecimal sumarDiferenciaPendienteCop(List<EmisionPendienteResponse> facturadas) {
+        return facturadas.stream()
+                .map(i -> {
+                    BigDecimal presupuestado = i.getValor() != null ? i.getValor() : BigDecimal.ZERO;
+                    BigDecimal facturado = i.getValorFacturado() != null ? i.getValorFacturado() : presupuestado;
+                    BigDecimal diff = presupuestado.subtract(facturado);
+                    // Solo si quedó pendiente (facturado < presupuestado)
+                    if (diff.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
+                    if ("USD".equals(i.getMoneda()) && i.getAnio() != null && i.getAnio() > 0) {
+                        BigDecimal cop = trmService.convertirACop(diff, i.getAnio(), i.getMes());
+                        return cop != null ? cop : BigDecimal.ZERO;
+                    }
+                    return diff;
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

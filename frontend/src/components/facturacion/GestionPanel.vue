@@ -35,6 +35,22 @@
           </div>
         </div>
 
+        <!-- Acción principal: Cruzar o Descruzar -->
+        <div class="panel__actions">
+          <button v-if="fp.estado === 'PENDIENTE'" class="btn btn--accent btn--full" @click="showCruceModal = true">
+            <Icon name="check-circle" :size="16" /> Cruzar con Factura
+          </button>
+          <div v-else-if="fp.estado === 'FACTURADA'" class="cruzada-info">
+            <div class="cruzada-header">
+              <Icon name="check-circle" :size="16" color="var(--success)" />
+              <span>Cruzada con factura #{{ fp.facturaId }}</span>
+            </div>
+            <button class="btn btn--ghost btn--sm" @click="handleDescruzar">
+              <Icon name="x" :size="14" /> Descruzar
+            </button>
+          </div>
+        </div>
+
         <!-- Bitácora -->
         <div class="panel__section">
           <div class="section-header-panel">
@@ -46,19 +62,11 @@
           <div v-else class="gestiones-list">
             <div v-for="g in gestiones" :key="g.id" class="gestion-item">
               <div class="gestion-item__header">
-                <span :class="['gestion-tipo', isNovedad(g.tipoGestion) ? 'gestion-tipo--novedad' : 'gestion-tipo--normal']">{{ tipoLabel(g.tipoGestion) }}</span>
+                <span :class="['gestion-tipo', getTipoClass(g.tipoGestion)]">{{ tipoLabel(g.tipoGestion) }}</span>
                 <span class="gestion-fecha">{{ fmtDate(g.fechaGestion) }}</span>
               </div>
               <p class="gestion-desc">{{ g.descripcion }}</p>
             </div>
-          </div>
-        </div>
-
-        <!-- Factura cruzada -->
-        <div v-if="fp.facturaId" class="panel__section">
-          <h3 class="section-title-panel"><Icon name="external-link" :size="14" color="var(--success)" /> Factura Cruzada</h3>
-          <div class="factura-info">
-            <span class="factura-num">Factura #{{ fp.facturaId }}</span>
           </div>
         </div>
       </div>
@@ -110,11 +118,81 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Modal Cruzar Factura -->
+  <Teleport to="body">
+    <div v-if="showCruceModal" class="modal-overlay" @click.self="showCruceModal = false">
+      <div class="modal glass animate-slideUp" style="max-width:560px">
+        <div class="modal__header">
+          <h2 class="modal__title">Cruzar con Factura</h2>
+          <button class="modal__close" @click="showCruceModal = false"><Icon name="x" :size="18" /></button>
+        </div>
+        <div class="modal__body">
+          <!-- Tabs: Existente / Nueva -->
+          <div class="cruce-tabs">
+            <button :class="['cruce-tab', cruceTab === 'existente' && 'cruce-tab--active']" @click="cruceTab = 'existente'">Factura existente</button>
+            <button :class="['cruce-tab', cruceTab === 'nueva' && 'cruce-tab--active']" @click="cruceTab = 'nueva'">Registrar nueva</button>
+          </div>
+
+          <!-- Tab: Seleccionar factura existente -->
+          <div v-if="cruceTab === 'existente'">
+            <div v-if="loadingFacturas" class="mini-loading"><Icon name="loader" :size="16" class="animate-spin" /></div>
+            <div v-else-if="!facturas.length" class="mini-empty">No hay facturas registradas. Registre una nueva.</div>
+            <div v-else class="facturas-list">
+              <div v-for="f in facturas" :key="f.id" :class="['factura-option', selectedFacturaId === f.id && 'factura-option--selected']" @click="selectedFacturaId = f.id">
+                <div class="factura-option__left">
+                  <span class="factura-option__num">{{ f.prefijo ? f.prefijo + '-' : '' }}{{ f.numeroFactura }}</span>
+                  <span class="factura-option__meta">{{ f.empresaNombre }} · {{ fmtDateShort(f.fechaEmision) }}</span>
+                </div>
+                <span class="factura-option__valor">{{ fmtCurrencyMoneda(f.valorTotal, f.moneda) }}</span>
+              </div>
+            </div>
+            <div v-if="selectedFacturaId" class="field" style="margin-top:var(--space-3)">
+              <label class="field__label">Valor facturado para esta forma de pago</label>
+              <MoneyInput v-model="cruceValorFacturado" :currency="fp.moneda || 'COP'" :placeholder="'Presupuestado: ' + fp.valor" />
+              <span class="field__hint">Dejar vacío para usar el valor total de la factura</span>
+            </div>
+          </div>
+
+          <!-- Tab: Registrar nueva factura -->
+          <form v-if="cruceTab === 'nueva'" @submit.prevent="submitNuevaFactura">
+            <div class="form-row">
+              <div class="field">
+                <label class="field__label">Prefijo</label>
+                <input v-model="nuevaFactura.prefijo" type="text" class="field__input" maxlength="10" placeholder="Ej: ARQBS" />
+              </div>
+              <div class="field">
+                <label class="field__label">Número Factura <span class="req">*</span></label>
+                <input v-model="nuevaFactura.numeroFactura" type="text" class="field__input" required maxlength="50" placeholder="Ej: 4521" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label">Valor Total (incluido IVA) <span class="req">*</span></label>
+              <MoneyInput v-model="nuevaFactura.valorTotal" :currency="fp.moneda || 'COP'" :required="true" />
+            </div>
+          </form>
+
+          <div v-if="cruceError" class="modal-error"><Icon name="alert-circle" :size="14" /> {{ cruceError }}</div>
+
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" @click="showCruceModal = false">Cancelar</button>
+            <button v-if="cruceTab === 'existente'" class="btn btn--accent" :disabled="!selectedFacturaId || cruceSaving" @click="cruzarExistente">
+              {{ cruceSaving ? 'Cruzando...' : 'Cruzar Factura' }}
+            </button>
+            <button v-else class="btn btn--accent" :disabled="cruceSaving" @click="submitNuevaYCruzar">
+              {{ cruceSaving ? 'Procesando...' : 'Registrar y Cruzar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import Icon from '@/components/ui/Icon.vue';
+import MoneyInput from '@/components/ui/MoneyInput.vue';
 import { facturacionService } from '@/services/facturacion.service';
 
 const props = defineProps({ formaPago: { type: Object, required: true } });
@@ -124,19 +202,54 @@ const fp = ref(props.formaPago);
 const gestiones = ref([]);
 const loadingGestiones = ref(false);
 
+// Gestión modal
 const showGestionModal = ref(false);
 const gestionForm = ref({ tipoGestion: '', descripcion: '', fechaGestion: new Date().toISOString().split('T')[0] });
 const gestionError = ref(null);
 const gestionSaving = ref(false);
 
+// Cruce modal
+const showCruceModal = ref(false);
+const cruceTab = ref('existente');
+const facturas = ref([]);
+const loadingFacturas = ref(false);
+const selectedFacturaId = ref(null);
+const cruceValorFacturado = ref(null);
+const cruceError = ref(null);
+const cruceSaving = ref(false);
+
+// Nueva factura
+const nuevaFactura = ref({ numeroFactura: '', prefijo: '', valorTotal: null });
+
 watch(() => props.formaPago, (v) => { fp.value = v; loadGestiones(); });
 onMounted(() => { loadGestiones(); });
+
+// Cargar facturas cuando se abre el modal de cruce
+watch(showCruceModal, async (v) => {
+  if (v) {
+    cruceTab.value = 'existente';
+    selectedFacturaId.value = null;
+    cruceValorFacturado.value = null;
+    cruceError.value = null;
+    nuevaFactura.value = { numeroFactura: '', prefijo: '', valorTotal: null };
+    await loadFacturas();
+  }
+});
 
 async function loadGestiones() {
   loadingGestiones.value = true;
   try { gestiones.value = await facturacionService.listarGestiones(fp.value.formaPagoId); }
   catch (err) { console.error(err); }
   finally { loadingGestiones.value = false; }
+}
+
+async function loadFacturas() {
+  loadingFacturas.value = true;
+  try {
+    const res = await facturacionService.listarFacturas({ page_size: 50 });
+    facturas.value = res.data || res.content || res || [];
+  } catch (err) { console.error(err); facturas.value = []; }
+  finally { loadingFacturas.value = false; }
 }
 
 async function submitGestion() {
@@ -153,6 +266,50 @@ async function submitGestion() {
   } finally { gestionSaving.value = false; }
 }
 
+async function cruzarExistente() {
+  cruceError.value = null;
+  cruceSaving.value = true;
+  try {
+    await facturacionService.cruzarFactura(selectedFacturaId.value, fp.value.formaPagoId, cruceValorFacturado.value);
+    showCruceModal.value = false;
+    emit('updated');
+    emit('close');
+  } catch (err) {
+    cruceError.value = err.response?.data?.message || 'Error al cruzar factura';
+  } finally { cruceSaving.value = false; }
+}
+
+async function submitNuevaYCruzar() {
+  cruceError.value = null;
+  cruceSaving.value = true;
+  try {
+    const factura = await facturacionService.crearFactura({
+      empresaId: fp.value.empresaId,
+      numeroFactura: nuevaFactura.value.numeroFactura.trim(),
+      prefijo: nuevaFactura.value.prefijo?.trim() || null,
+      fechaEmision: new Date().toISOString().split('T')[0],
+      valorTotal: nuevaFactura.value.valorTotal,
+      moneda: fp.value.moneda || 'COP',
+    });
+    // Cruzar
+    await facturacionService.cruzarFactura(factura.id, fp.value.formaPagoId, cruceValorFacturado.value);
+    showCruceModal.value = false;
+    emit('updated');
+    emit('close');
+  } catch (err) {
+    cruceError.value = err.response?.data?.message || 'Error al registrar/cruzar factura';
+  } finally { cruceSaving.value = false; }
+}
+
+async function handleDescruzar() {
+  if (!confirm('¿Descruzar esta forma de pago de la factura? Volverá a estado PENDIENTE.')) return;
+  try {
+    await facturacionService.descruzarFormaPago(fp.value.formaPagoId);
+    emit('updated');
+    emit('close');
+  } catch (err) { alert(err.response?.data?.message || 'Error al descruzar'); }
+}
+
 const meses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 const tipoLabels = {
@@ -164,9 +321,10 @@ const tipoLabels = {
 };
 
 function tipoLabel(t) { return tipoLabels[t] || t; }
-function isNovedad(t) { return t?.startsWith('NOVEDAD_'); }
+function getTipoClass(t) { if (t === 'FACTURA_CRUZADA') return 'gestion-tipo--cruce'; if (t?.startsWith('NOVEDAD_')) return 'gestion-tipo--novedad'; return 'gestion-tipo--normal'; }
 function fmtMesAnio(a, m) { return meses[m] + ' ' + a; }
 function fmtDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }); }
+function fmtDateShort(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }); }
 function fmtCurrency(v) { if (v == null) return '$0'; return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v); }
 function fmtCurrencyMoneda(v, m) { if (v == null) return '$0'; if (m === 'USD') return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v); return fmtCurrency(v); }
 </script>
@@ -188,28 +346,49 @@ function fmtCurrencyMoneda(v, m) { if (v == null) return '$0'; if (m === 'USD') 
 .estado-pill { display: inline-block; padding: 1px 8px; border-radius: var(--radius-full); font-size: 10px; font-weight: 600; }
 .estado-pill--pendiente { background: var(--warning-soft); color: var(--warning); }
 .estado-pill--facturada { background: var(--success-soft); color: var(--success); }
+/* Actions */
+.panel__actions { display: flex; flex-direction: column; gap: var(--space-2); }
+.btn--full { width: 100%; justify-content: center; }
+.btn--accent { background: var(--accent); color: #fff; border-color: transparent; } .btn--accent:hover { box-shadow: 0 0 20px rgba(255,107,107,0.3); } .btn--accent:disabled { opacity: 0.5; cursor: not-allowed; }
+.cruzada-info { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: var(--success-soft); border-radius: var(--radius-lg); }
+.cruzada-header { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--success); font-weight: 600; }
+/* Sections */
 .panel__section { display: flex; flex-direction: column; gap: var(--space-3); }
 .section-header-panel { display: flex; justify-content: space-between; align-items: center; }
 .section-title-panel { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .mini-loading { display: flex; align-items: center; justify-content: center; padding: var(--space-3); color: var(--text-muted); }
 .mini-empty { font-size: var(--text-xs); color: var(--text-muted); padding: var(--space-3); text-align: center; font-style: italic; }
+/* Gestiones */
 .gestiones-list { display: flex; flex-direction: column; gap: var(--space-2); }
 .gestion-item { padding: var(--space-3); background: var(--bg-surface); border-radius: var(--radius-md); }
 .gestion-item__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1); }
 .gestion-tipo { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: var(--radius-full); text-transform: uppercase; }
 .gestion-tipo--normal { background: var(--primary-soft); color: var(--primary); }
 .gestion-tipo--novedad { background: var(--warning-soft); color: var(--warning); }
+.gestion-tipo--cruce { background: var(--success-soft); color: var(--success); }
 .gestion-fecha { font-size: 9px; color: var(--text-muted); }
 .gestion-desc { font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5; margin: 0; }
-.factura-info { padding: var(--space-3); background: var(--bg-surface); border-radius: var(--radius-md); }
-.factura-num { font-size: var(--text-xs); font-weight: 600; color: var(--primary); }
-/* Modal */
+/* Cruce modal extras */
+.cruce-tabs { display: flex; gap: var(--space-1); margin-bottom: var(--space-3); }
+.cruce-tab { flex: 1; padding: var(--space-2); border: 1px solid var(--glass-border); border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
+.cruce-tab:hover { border-color: var(--primary); color: var(--text-secondary); }
+.cruce-tab--active { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+.facturas-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 200px; overflow-y: auto; }
+.factura-option { display: flex; justify-content: space-between; align-items: center; padding: var(--space-2) var(--space-3); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.15s; }
+.factura-option:hover { border-color: var(--primary); background: rgba(0,212,255,0.03); }
+.factura-option--selected { border-color: var(--accent); background: var(--accent-soft); }
+.factura-option__left { display: flex; flex-direction: column; gap: 1px; }
+.factura-option__num { font-size: var(--text-xs); font-weight: 700; color: var(--text-primary); }
+.factura-option__meta { font-size: 9px; color: var(--text-muted); }
+.factura-option__valor { font-size: var(--text-xs); font-weight: 700; color: var(--primary); font-family: var(--font-mono, monospace); }
+/* Modal shared */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1100; padding: var(--space-4); }
 .modal { width: 100%; max-width: 480px; border-radius: var(--radius-xl); padding: var(--space-6); max-height: 90vh; overflow-y: auto; }
 .modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
 .modal__title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); margin: 0; }
 .modal__close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: var(--radius-sm); } .modal__close:hover { color: var(--text-primary); }
 .modal__body { display: flex; flex-direction: column; gap: var(--space-4); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3); }
 .field { display: flex; flex-direction: column; gap: var(--space-1); }
 .field__label { font-size: var(--text-xs); font-weight: 600; color: var(--text-secondary); } .req { color: var(--error); }
 .field__input, .field__select { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-xs); padding: var(--space-2) var(--space-3); }
@@ -217,6 +396,7 @@ function fmtCurrencyMoneda(v, m) { if (v == null) return '$0'; if (m === 'USD') 
 .field__select option, .field__select optgroup { background: var(--bg-elevated); }
 .field__input:focus, .field__select:focus { outline: none; border-color: var(--primary); }
 .field__textarea { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-xs); padding: var(--space-3); resize: vertical; } .field__textarea:focus { outline: none; border-color: var(--primary); }
+.field__hint { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
 .modal-error { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3); background: var(--error-soft); border-radius: var(--radius-md); color: var(--error); font-size: var(--text-xs); }
 .modal__actions { display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--glass-border); }
 .btn { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
