@@ -10,6 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller REST de contratos.
+ *
+ * NOTA (Mundo 3 rediseñado): Los endpoints de formas de pago fueron retirados.
+ * La gestión de compromisos de ingreso (antes "formas de pago") tendrá su
+ * propio controller CompromisoIngresoController en la siguiente iteración,
+ * bajo /api/v1/compromisos.
+ */
 @RestController
 @RequestMapping("/api/v1/contratos")
 public class ContratoController {
@@ -78,23 +86,6 @@ public class ContratoController {
     @PostMapping("/{id}/liquidar")
     public ResponseEntity<ContratoResponse> liquidar(@PathVariable Long id) {
         return ResponseEntity.ok(contratoService.liquidar(id));
-    }
-
-    // Formas de pago
-    @GetMapping("/{contratoId}/formas-pago")
-    public ResponseEntity<List<FormaPagoResponse>> listarFormasPago(@PathVariable Long contratoId) {
-        return ResponseEntity.ok(contratoService.listarFormasPago(contratoId));
-    }
-
-    @PostMapping("/{contratoId}/formas-pago")
-    public ResponseEntity<FormaPagoResponse> crearFormaPago(@PathVariable Long contratoId, @Valid @RequestBody FormaPagoCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(contratoService.crearFormaPago(contratoId, request));
-    }
-
-    @DeleteMapping("/formas-pago/{formaPagoId}")
-    public ResponseEntity<Void> eliminarFormaPago(@PathVariable Long formaPagoId) {
-        contratoService.eliminarFormaPago(formaPagoId);
-        return ResponseEntity.noContent().build();
     }
 
     // Modificaciones

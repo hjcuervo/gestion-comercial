@@ -1,6 +1,7 @@
 package com.arquitecsoft.gestion.domain.contrato.dto;
 
 import com.arquitecsoft.gestion.domain.contrato.entity.GcContrato;
+import com.arquitecsoft.gestion.domain.facturacion.dto.CompromisoIngresoResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,7 +34,7 @@ public class ContratoResponse {
     private String interventor;
     private String observaciones;
     private LocalDateTime fechaCreacion;
-    private List<FormaPagoResponse> formasPago;
+    private List<CompromisoIngresoResponse> compromisos;
     private List<ModificacionResponse> modificaciones;
 
     public ContratoResponse() {}
@@ -69,9 +70,9 @@ public class ContratoResponse {
         r.setObservaciones(c.getObservaciones());
         r.setFechaCreacion(c.getFechaCreacion());
 
-        if (c.getFormasPago() != null && !c.getFormasPago().isEmpty()) {
-            r.setFormasPago(c.getFormasPago().stream()
-                    .map(FormaPagoResponse::fromEntity)
+        if (c.getCompromisos() != null && !c.getCompromisos().isEmpty()) {
+            r.setCompromisos(c.getCompromisos().stream()
+                    .map(CompromisoIngresoResponse::fromEntity)
                     .collect(Collectors.toList()));
         }
         if (c.getModificaciones() != null && !c.getModificaciones().isEmpty()) {
@@ -152,8 +153,8 @@ public class ContratoResponse {
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
-    public List<FormaPagoResponse> getFormasPago() { return formasPago; }
-    public void setFormasPago(List<FormaPagoResponse> formasPago) { this.formasPago = formasPago; }
+    public List<CompromisoIngresoResponse> getCompromisos() { return compromisos; }
+    public void setCompromisos(List<CompromisoIngresoResponse> compromisos) { this.compromisos = compromisos; }
     public List<ModificacionResponse> getModificaciones() { return modificaciones; }
     public void setModificaciones(List<ModificacionResponse> modificaciones) { this.modificaciones = modificaciones; }
 }

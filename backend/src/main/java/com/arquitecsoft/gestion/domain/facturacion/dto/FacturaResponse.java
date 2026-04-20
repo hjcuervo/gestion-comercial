@@ -1,11 +1,13 @@
 package com.arquitecsoft.gestion.domain.facturacion.dto;
 
 import com.arquitecsoft.gestion.domain.facturacion.entity.GcFactura;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class FacturaResponse {
+
     private Long id;
     private Long empresaId;
     private String empresaNombre;
@@ -21,15 +23,18 @@ public class FacturaResponse {
     private String moneda;
     private String factroId;
     private String observaciones;
+    private Boolean anulada;
+    private LocalDateTime fechaAnulacion;
+    private String motivoAnulacion;
     private LocalDateTime fechaCreacion;
-
-    public FacturaResponse() {}
 
     public static FacturaResponse fromEntity(GcFactura f) {
         FacturaResponse r = new FacturaResponse();
         r.setId(f.getId());
-        r.setEmpresaId(f.getEmpresa().getId());
-        r.setEmpresaNombre(f.getEmpresa().getRazonSocial());
+        if (f.getEmpresa() != null) {
+            r.setEmpresaId(f.getEmpresa().getId());
+            r.setEmpresaNombre(f.getEmpresa().getRazonSocial());
+        }
         if (f.getEmpresaFacturacion() != null) {
             r.setEmpresaFacturacionId(f.getEmpresaFacturacion().getId());
             r.setEmpresaFacturacionNombre(f.getEmpresaFacturacion().getRazonSocial());
@@ -44,11 +49,13 @@ public class FacturaResponse {
         r.setMoneda(f.getMoneda());
         r.setFactroId(f.getFactroId());
         r.setObservaciones(f.getObservaciones());
+        r.setAnulada(f.getAnulada());
+        r.setFechaAnulacion(f.getFechaAnulacion());
+        r.setMotivoAnulacion(f.getMotivoAnulacion());
         r.setFechaCreacion(f.getFechaCreacion());
         return r;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getEmpresaId() { return empresaId; }
@@ -79,6 +86,12 @@ public class FacturaResponse {
     public void setFactroId(String factroId) { this.factroId = factroId; }
     public String getObservaciones() { return observaciones; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+    public Boolean getAnulada() { return anulada; }
+    public void setAnulada(Boolean anulada) { this.anulada = anulada; }
+    public LocalDateTime getFechaAnulacion() { return fechaAnulacion; }
+    public void setFechaAnulacion(LocalDateTime fechaAnulacion) { this.fechaAnulacion = fechaAnulacion; }
+    public String getMotivoAnulacion() { return motivoAnulacion; }
+    public void setMotivoAnulacion(String motivoAnulacion) { this.motivoAnulacion = motivoAnulacion; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 }

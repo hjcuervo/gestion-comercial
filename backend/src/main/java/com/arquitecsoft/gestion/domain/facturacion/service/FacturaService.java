@@ -1,17 +1,13 @@
 package com.arquitecsoft.gestion.domain.facturacion.service;
 
-import com.arquitecsoft.gestion.domain.contrato.entity.GcContratoFormaPago;
-import com.arquitecsoft.gestion.domain.contrato.entity.GcContratoFormaPago.EstadoFormaPago;
-import com.arquitecsoft.gestion.domain.contrato.repository.GcContratoFormaPagoRepository;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcEmpresaRepository;
+import com.arquitecsoft.gestion.domain.facturacion.dto.FacturaAnularRequest;
 import com.arquitecsoft.gestion.domain.facturacion.dto.FacturaCreateRequest;
 import com.arquitecsoft.gestion.domain.facturacion.dto.FacturaResponse;
 import com.arquitecsoft.gestion.domain.facturacion.entity.GcFactura;
-import com.arquitecsoft.gestion.domain.facturacion.entity.GcFormaPagoGestion;
-import com.arquitecsoft.gestion.domain.facturacion.entity.GcFormaPagoGestion.TipoGestion;
+import com.arquitecsoft.gestion.domain.facturacion.repository.GcCompromisoFacturaRepository;
 import com.arquitecsoft.gestion.domain.facturacion.repository.GcFacturaRepository;
-import com.arquitecsoft.gestion.domain.facturacion.repository.GcFormaPagoGestionRepository;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
 import com.arquitecsoft.gestion.infrastructure.exception.BusinessException;
 import com.arquitecsoft.gestion.infrastructure.security.SecurityUtils;
@@ -24,25 +20,36 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+/**
+ * Servicio de facturas.
+ *
+ * Responsabilidades: CRUD puro de la entidad GcFactura (crear, listar,
+ * obtener, anular). Las operaciones de aplicación/reversión contra
+ * compromisos viven en CompromisoIngresoService.registrarFactura /
+ * revertirFactura, NO aquí.
+ *
+ * Nota sobre anulación: al anular una factura, el servicio detecta si hay
+ * aplicaciones vigentes contra compromisos y bloquea la anulación con un
+ * mensaje claro. El usuario debe revertir cada aplicación primero (lo que
+ * dispara eventos FACTURA_REVERTIDA en cada compromiso), y solo entonces
+ * anular la factura. Esto preserva la integridad del modelo de eventos.
+ */
 @Service
 public class FacturaService {
 
     private final GcFacturaRepository facturaRepository;
-    private final GcContratoFormaPagoRepository formaPagoRepository;
-    private final GcFormaPagoGestionRepository gestionRepository;
+    private final GcCompromisoFacturaRepository aplicacionRepository;
     private final GcEmpresaRepository empresaRepository;
     private final SecurityUtils securityUtils;
 
     public FacturaService(GcFacturaRepository facturaRepository,
-                          GcContratoFormaPagoRepository formaPagoRepository,
-                          GcFormaPagoGestionRepository gestionRepository,
+                          GcCompromisoFacturaRepository aplicacionRepository,
                           GcEmpresaRepository empresaRepository,
                           SecurityUtils securityUtils) {
         this.facturaRepository = facturaRepository;
-        this.formaPagoRepository = formaPagoRepository;
-        this.gestionRepository = gestionRepository;
+        this.aplicacionRepository = aplicacionRepository;
         this.empresaRepository = empresaRepository;
         this.securityUtils = securityUtils;
     }
@@ -50,7 +57,8 @@ public class FacturaService {
     @Transactional(readOnly = true)
     public FacturaResponse obtenerPorId(Long id) {
         GcFactura factura = facturaRepository.findByIdWithRelations(id)
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Factura no encontrada con ID: " + id));
+                .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                    "Factura no encontrada con ID: " + id));
         return FacturaResponse.fromEntity(factura);
     }
 
@@ -64,13 +72,14 @@ public class FacturaService {
     @Transactional
     public FacturaResponse crear(FacturaCreateRequest request) {
         GcEmpresa empresa = empresaRepository.findById(request.getEmpresaId())
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada"));
+                .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                    "Empresa no encontrada con ID: " + request.getEmpresaId()));
 
-        // Verificar unicidad
-        if (facturaRepository.findByNumeroFacturaAndPrefijo(request.getNumeroFactura(), request.getPrefijo()).isPresent()) {
-            throw new BusinessException("DUPLICATE_ERROR",
-                "Ya existe una factura con número " + request.getNumeroFactura() +
-                (StringUtils.hasText(request.getPrefijo()) ? " prefijo " + request.getPrefijo() : ""));
+        // Validar duplicado (numero + prefijo)
+        if (facturaRepository.findByNumeroFacturaAndPrefijo(
+                request.getNumeroFactura(), request.getPrefijo()).isPresent()) {
+            throw new BusinessException("BUSINESS_ERROR",
+                "Ya existe una factura con el mismo número y prefijo.");
         }
 
         GcFactura factura = new GcFactura();
@@ -78,12 +87,13 @@ public class FacturaService {
 
         if (request.getEmpresaFacturacionId() != null) {
             GcEmpresa empresaFact = empresaRepository.findById(request.getEmpresaFacturacionId())
-                    .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa de facturación no encontrada"));
+                    .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                        "Empresa de facturación no encontrada con ID: " + request.getEmpresaFacturacionId()));
             factura.setEmpresaFacturacion(empresaFact);
         }
 
         factura.setNumeroFactura(request.getNumeroFactura().trim());
-        factura.setPrefijo(request.getPrefijo() != null ? request.getPrefijo().trim() : null);
+        factura.setPrefijo(request.getPrefijo());
         factura.setFechaEmision(request.getFechaEmision());
         factura.setFechaVencimiento(request.getFechaVencimiento());
         factura.setValorBase(request.getValorBase());
@@ -92,71 +102,43 @@ public class FacturaService {
         factura.setMoneda(StringUtils.hasText(request.getMoneda()) ? request.getMoneda() : "COP");
         factura.setFactroId(request.getFactroId());
         factura.setObservaciones(request.getObservaciones());
+        factura.setAnulada(false);
         factura.setCreadoPor(securityUtils.getCurrentUserId());
 
         factura = facturaRepository.save(factura);
-        factura = facturaRepository.findByIdWithRelations(factura.getId()).orElse(factura);
         return FacturaResponse.fromEntity(factura);
     }
 
     /**
-     * RN-01: Una forma de pago solo puede cruzarse con UNA factura
-     * RN-03: Al cruzar, estado → FACTURADA, se actualiza valor_facturado
-     * RN-04: Solo se pueden cruzar formas de pago PENDIENTES
+     * Anula una factura.
+     *
+     * Requisito: no debe tener aplicaciones vigentes contra compromisos. Si
+     * las tiene, el usuario debe revertir cada una primero vía
+     * CompromisoIngresoService.revertirFactura (lo que emite eventos
+     * FACTURA_REVERTIDA en cada compromiso afectado).
      */
     @Transactional
-    public void cruzarConFormaPago(Long facturaId, Long formaPagoId, BigDecimal valorFacturado) {
-        GcFactura factura = facturaRepository.findById(facturaId)
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Factura no encontrada"));
+    public FacturaResponse anular(Long id, FacturaAnularRequest request) {
+        GcFactura factura = facturaRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                    "Factura no encontrada con ID: " + id));
 
-        GcContratoFormaPago fp = formaPagoRepository.findById(formaPagoId)
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Forma de pago no encontrada"));
+        if (Boolean.TRUE.equals(factura.getAnulada())) {
+            throw new BusinessException("BUSINESS_ERROR", "La factura ya está anulada.");
+        }
 
-        if (fp.getEstado() != EstadoFormaPago.PENDIENTE) {
+        BigDecimal aplicadoVigente = aplicacionRepository.sumAplicadoVigenteByFacturaId(id);
+        if (aplicadoVigente != null && aplicadoVigente.compareTo(BigDecimal.ZERO) > 0) {
             throw new BusinessException("BUSINESS_ERROR",
-                "Solo se pueden cruzar formas de pago PENDIENTES. Estado actual: " + fp.getEstado());
+                "La factura tiene aplicaciones vigentes contra compromisos " +
+                "(" + aplicadoVigente + "). Revertir cada aplicación antes de anular.");
         }
 
-        if (fp.getFacturaId() != null) {
-            throw new BusinessException("BUSINESS_ERROR", "Esta forma de pago ya está cruzada con otra factura");
-        }
+        factura.setAnulada(true);
+        factura.setFechaAnulacion(LocalDateTime.now());
+        factura.setMotivoAnulacion(request.getMotivo());
+        factura = facturaRepository.save(factura);
 
-        // Cruzar
-        fp.setFacturaId(facturaId);
-        fp.setEstado(EstadoFormaPago.FACTURADA);
-        fp.setValorFacturado(valorFacturado != null ? valorFacturado : factura.getValorTotal());
-        fp.setModificadoPor(securityUtils.getCurrentUserId());
-        formaPagoRepository.save(fp);
-
-        // Registrar en bitácora automáticamente
-        GcFormaPagoGestion gestion = new GcFormaPagoGestion();
-        gestion.setFormaPago(fp);
-        gestion.setTipoGestion(TipoGestion.FACTURA_CRUZADA);
-        gestion.setDescripcion("Cruzada con factura " +
-            (factura.getPrefijo() != null ? factura.getPrefijo() + "-" : "") +
-            factura.getNumeroFactura() +
-            " por " + fp.getValorFacturado());
-        gestion.setFechaGestion(LocalDate.now());
-        gestion.setCreadoPor(securityUtils.getCurrentUserId());
-        gestionRepository.save(gestion);
-    }
-
-    /**
-     * RN-05: Se puede descruzar — forma de pago vuelve a PENDIENTE
-     */
-    @Transactional
-    public void descruzarFormaPago(Long formaPagoId) {
-        GcContratoFormaPago fp = formaPagoRepository.findById(formaPagoId)
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Forma de pago no encontrada"));
-
-        if (fp.getFacturaId() == null) {
-            throw new BusinessException("BUSINESS_ERROR", "Esta forma de pago no está cruzada con ninguna factura");
-        }
-
-        fp.setFacturaId(null);
-        fp.setEstado(EstadoFormaPago.PENDIENTE);
-        fp.setValorFacturado(null);
-        fp.setModificadoPor(securityUtils.getCurrentUserId());
-        formaPagoRepository.save(fp);
+        return FacturaResponse.fromEntity(factura);
     }
 }

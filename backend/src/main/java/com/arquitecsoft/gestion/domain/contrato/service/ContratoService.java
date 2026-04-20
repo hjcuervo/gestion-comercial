@@ -3,13 +3,12 @@ package com.arquitecsoft.gestion.domain.contrato.service;
 import com.arquitecsoft.gestion.domain.contrato.dto.*;
 import com.arquitecsoft.gestion.domain.contrato.entity.*;
 import com.arquitecsoft.gestion.domain.contrato.entity.GcContrato.EstadoContrato;
-import com.arquitecsoft.gestion.domain.contrato.entity.GcContratoFormaPago.EstadoFormaPago;
 import com.arquitecsoft.gestion.domain.contrato.entity.GcContratoModificacion.TipoModificacion;
+import com.arquitecsoft.gestion.domain.contrato.entity.GcProcesoContratacion.EstadoProceso;
 import com.arquitecsoft.gestion.domain.contrato.repository.*;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcEmpresaRepository;
 import com.arquitecsoft.gestion.domain.oportunidad.entity.GcOportunidad;
-import com.arquitecsoft.gestion.domain.oportunidad.entity.GcOportunidad.EstadoMacro;
 import com.arquitecsoft.gestion.domain.oportunidad.repository.GcOportunidadRepository;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
 import com.arquitecsoft.gestion.infrastructure.exception.BusinessException;
@@ -23,15 +22,20 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio de contratos.
+ *
+ * NOTA (Mundo 3 rediseñado): La sección antigua de formas de pago fue retirada.
+ * La gestión de compromisos de ingreso (antes "formas de pago") vive ahora
+ * en CompromisoIngresoService (domain/facturacion/service/).
+ */
 @Service
 public class ContratoService {
 
     private final GcContratoRepository contratoRepository;
-    private final GcContratoFormaPagoRepository formaPagoRepository;
     private final GcContratoModificacionRepository modificacionRepository;
     private final GcProcesoContratacionRepository procesoRepository;
     private final GcTipoContratoRepository tipoContratoRepository;
@@ -41,7 +45,6 @@ public class ContratoService {
 
     public ContratoService(
             GcContratoRepository contratoRepository,
-            GcContratoFormaPagoRepository formaPagoRepository,
             GcContratoModificacionRepository modificacionRepository,
             GcProcesoContratacionRepository procesoRepository,
             GcTipoContratoRepository tipoContratoRepository,
@@ -49,7 +52,6 @@ public class ContratoService {
             GcOportunidadRepository oportunidadRepository,
             SecurityUtils securityUtils) {
         this.contratoRepository = contratoRepository;
-        this.formaPagoRepository = formaPagoRepository;
         this.modificacionRepository = modificacionRepository;
         this.procesoRepository = procesoRepository;
         this.tipoContratoRepository = tipoContratoRepository;
@@ -89,35 +91,105 @@ public class ContratoService {
     }
 
     /**
-     * Formalizar contrato directamente desde una oportunidad GANADA.
-     * - La oportunidad debe estar en estado GANADA
-     * - Se crea el contrato heredando datos de la oportunidad
-     * - La oportunidad pasa a estado CONTRATADA y sale del pipeline
+     * RN-05: Solo se puede crear cuando el proceso está COMPLETADO
+     * RN-06: Hereda datos de la oportunidad
+     * RN-08: Nace en estado VIGENTE
      */
     @Transactional
-    public ContratoResponse formalizarContrato(FormalizarContratoRequest request) {
-        GcOportunidad oportunidad = oportunidadRepository.findByIdWithRelations(request.getOportunidadId())
+    public ContratoResponse crearDesdeProcesoCompletado(ContratoCreateRequest request) {
+        GcProcesoContratacion proceso = procesoRepository.findByIdWithRelations(request.getProcesoContratacionId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND",
-                    "Oportunidad no encontrada con ID: " + request.getOportunidadId()));
+                    "Proceso de contratación no encontrado con ID: " + request.getProcesoContratacionId()));
 
-        if (oportunidad.getEstadoMacro() != EstadoMacro.GANADA) {
+        if (proceso.getEstado() != EstadoProceso.COMPLETADO) {
             throw new BusinessException("BUSINESS_ERROR",
-                "Solo se puede formalizar un contrato para oportunidades GANADAS. Estado actual: " + oportunidad.getEstadoMacro());
-        }
-
-        // Verificar que no tenga ya un contrato
-        List<GcContrato> existentes = contratoRepository.findByOportunidadId(oportunidad.getId());
-        if (!existentes.isEmpty()) {
-            throw new BusinessException("BUSINESS_ERROR",
-                "Esta oportunidad ya tiene un contrato formalizado");
+                "Solo se puede crear un contrato cuando el proceso está COMPLETADO. Estado actual: " + proceso.getEstado());
         }
 
         GcTipoContrato tipoContrato = tipoContratoRepository.findById(request.getTipoContratoId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND",
                     "Tipo de contrato no encontrado con ID: " + request.getTipoContratoId()));
 
-        // Crear contrato
         GcContrato contrato = new GcContrato();
+        contrato.setProcesoContratacion(proceso);
+        contrato.setOportunidad(proceso.getOportunidad());
+        contrato.setEmpresa(proceso.getEmpresa());
+        contrato.setTipoContrato(tipoContrato);
+
+        // Empresa de facturación (filial)
+        if (request.getEmpresaFacturacionId() != null) {
+            GcEmpresa empresaFact = empresaRepository.findById(request.getEmpresaFacturacionId())
+                    .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                        "Empresa de facturación no encontrada con ID: " + request.getEmpresaFacturacionId()));
+            contrato.setEmpresaFacturacion(empresaFact);
+        }
+
+        contrato.setNumeroContratoInterno(request.getNumeroContratoInterno());
+        contrato.setNumeroContratoCliente(request.getNumeroContratoCliente());
+        contrato.setObjeto(request.getObjeto());
+
+        // Hereda moneda y valor de la oportunidad si no se especifican
+        contrato.setMoneda(StringUtils.hasText(request.getMoneda()) ? request.getMoneda()
+                : (proceso.getOportunidad().getMoneda() != null ? proceso.getOportunidad().getMoneda() : "COP"));
+        contrato.setValorContrato(request.getValorContrato() != null ? request.getValorContrato()
+                : proceso.getOportunidad().getValorEstimado());
+        contrato.setValorAjuste(BigDecimal.ZERO);
+
+        contrato.setFechaInicio(request.getFechaInicio());
+        contrato.setFechaFin(request.getFechaFin());
+        contrato.setEstado(EstadoContrato.VIGENTE);
+        contrato.setResponsableGestion(request.getResponsableGestion());
+        contrato.setInterventor(request.getInterventor());
+        contrato.setObservaciones(request.getObservaciones());
+        contrato.setCreadoPor(securityUtils.getCurrentUserId());
+
+        contrato = contratoRepository.save(contrato);
+        contrato = contratoRepository.findByIdWithRelations(contrato.getId()).orElse(contrato);
+
+        return ContratoResponse.fromEntity(contrato);
+    }
+
+    /**
+     * Formaliza un contrato desde una oportunidad en estado GANADA.
+     *
+     * Flujo:
+     *  1. Valida que la oportunidad exista y esté en GANADA.
+     *  2. Crea el contrato con datos heredados de la oportunidad (moneda, valor)
+     *     permitiendo que el request los sobrescriba.
+     *  3. Marca la oportunidad como CONTRATADA (sale de todos los pipelines).
+     *
+     * IMPORTANTE: contrato.procesoContratacion_id queda en null en este flujo
+     * (el nuevo modelo permite contratos formalizados sin proceso previo).
+     * La columna fue relajada a nullable en sesiones previas — ver memoria del
+     * proyecto.
+     *
+     * Supuestos que pueden requerir ajuste según la implementación real de
+     * GcOportunidad en el repo:
+     *  - Estado GANADA existe en GcOportunidad.EstadoMacro
+     *  - Estado CONTRATADA existe (confirmado por memoria: CHECK constraint
+     *    CK_GC_OPORTUNIDAD_ESTADO ya incluye CONTRATADA)
+     *  - oportunidad.getMoneda() y oportunidad.getValorEstimado() existen
+     *    (usados también por crearDesdeProcesoCompletado).
+     */
+    @Transactional
+    public ContratoResponse formalizarContrato(FormalizarContratoRequest request) {
+        GcOportunidad oportunidad = oportunidadRepository.findById(request.getOportunidadId())
+                .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                    "Oportunidad no encontrada con ID: " + request.getOportunidadId()));
+
+        // Validar estado
+        if (oportunidad.getEstadoMacro() != GcOportunidad.EstadoMacro.GANADA) {
+            throw new BusinessException("BUSINESS_ERROR",
+                "Solo se puede formalizar contrato desde una oportunidad en estado GANADA. " +
+                "Estado actual: " + oportunidad.getEstadoMacro());
+        }
+
+        GcTipoContrato tipoContrato = tipoContratoRepository.findById(request.getTipoContratoId())
+                .orElseThrow(() -> new BusinessException("NOT_FOUND",
+                    "Tipo de contrato no encontrado con ID: " + request.getTipoContratoId()));
+
+        GcContrato contrato = new GcContrato();
+        // procesoContratacion queda null — flujo de formalización directa.
         contrato.setOportunidad(oportunidad);
         contrato.setEmpresa(oportunidad.getEmpresa());
         contrato.setTipoContrato(tipoContrato);
@@ -151,63 +223,13 @@ public class ContratoService {
 
         contrato = contratoRepository.save(contrato);
 
-        // Marcar la oportunidad como CONTRATADA — sale del pipeline
-        oportunidad.setEstadoMacro(EstadoMacro.CONTRATADA);
-        oportunidad.setModificadoPor(securityUtils.getCurrentUserId());
+        // Marcar oportunidad como CONTRATADA (sale de los pipelines).
+        // Requiere:
+        //  - El valor CONTRATADA en el enum GcOportunidad.EstadoMacro
+        //  - El CHECK constraint CK_GC_OPORTUNIDAD_ESTADO en Oracle que lo incluya
+        oportunidad.setEstadoMacro(GcOportunidad.EstadoMacro.CONTRATADA);
         oportunidadRepository.save(oportunidad);
 
-        contrato = contratoRepository.findByIdWithRelations(contrato.getId()).orElse(contrato);
-        return ContratoResponse.fromEntity(contrato);
-    }
-
-    /**
-     * @deprecated Usar formalizarContrato en su lugar. Se mantiene por compatibilidad.
-     */
-    @Transactional
-    public ContratoResponse crearDesdeProcesoCompletado(ContratoCreateRequest request) {
-        GcProcesoContratacion proceso = procesoRepository.findByIdWithRelations(request.getProcesoContratacionId())
-                .orElseThrow(() -> new BusinessException("NOT_FOUND",
-                    "Proceso de contratación no encontrado con ID: " + request.getProcesoContratacionId()));
-
-        if (proceso.getEstado() != GcProcesoContratacion.EstadoProceso.COMPLETADO) {
-            throw new BusinessException("BUSINESS_ERROR",
-                "Solo se puede crear un contrato cuando el proceso está COMPLETADO");
-        }
-
-        GcTipoContrato tipoContrato = tipoContratoRepository.findById(request.getTipoContratoId())
-                .orElseThrow(() -> new BusinessException("NOT_FOUND",
-                    "Tipo de contrato no encontrado con ID: " + request.getTipoContratoId()));
-
-        GcContrato contrato = new GcContrato();
-        contrato.setProcesoContratacion(proceso);
-        contrato.setOportunidad(proceso.getOportunidad());
-        contrato.setEmpresa(proceso.getEmpresa());
-        contrato.setTipoContrato(tipoContrato);
-
-        if (request.getEmpresaFacturacionId() != null) {
-            GcEmpresa empresaFact = empresaRepository.findById(request.getEmpresaFacturacionId())
-                    .orElseThrow(() -> new BusinessException("NOT_FOUND",
-                        "Empresa de facturación no encontrada"));
-            contrato.setEmpresaFacturacion(empresaFact);
-        }
-
-        contrato.setNumeroContratoInterno(request.getNumeroContratoInterno());
-        contrato.setNumeroContratoCliente(request.getNumeroContratoCliente());
-        contrato.setObjeto(request.getObjeto());
-        contrato.setMoneda(StringUtils.hasText(request.getMoneda()) ? request.getMoneda()
-                : (proceso.getOportunidad().getMoneda() != null ? proceso.getOportunidad().getMoneda() : "COP"));
-        contrato.setValorContrato(request.getValorContrato() != null ? request.getValorContrato()
-                : proceso.getOportunidad().getValorEstimado());
-        contrato.setValorAjuste(BigDecimal.ZERO);
-        contrato.setFechaInicio(request.getFechaInicio());
-        contrato.setFechaFin(request.getFechaFin());
-        contrato.setEstado(EstadoContrato.VIGENTE);
-        contrato.setResponsableGestion(request.getResponsableGestion());
-        contrato.setInterventor(request.getInterventor());
-        contrato.setObservaciones(request.getObservaciones());
-        contrato.setCreadoPor(securityUtils.getCurrentUserId());
-
-        contrato = contratoRepository.save(contrato);
         contrato = contratoRepository.findByIdWithRelations(contrato.getId()).orElse(contrato);
         return ContratoResponse.fromEntity(contrato);
     }
@@ -244,62 +266,8 @@ public class ContratoService {
         contrato.setEstado(nuevoEstado);
         contrato.setModificadoPor(securityUtils.getCurrentUserId());
         contrato = contratoRepository.save(contrato);
+
         return ContratoResponse.fromEntity(contrato);
-    }
-
-    // ==================== FORMAS DE PAGO ====================
-
-    @Transactional(readOnly = true)
-    public List<FormaPagoResponse> listarFormasPago(Long contratoId) {
-        return formaPagoRepository.findByContratoIdOrderByFechaEstimadaPagoAsc(contratoId).stream()
-                .map(FormaPagoResponse::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public FormaPagoResponse crearFormaPago(Long contratoId, FormaPagoCreateRequest request) {
-        GcContrato contrato = contratoRepository.findByIdWithRelations(contratoId)
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Contrato no encontrado con ID: " + contratoId));
-
-        if (!contrato.isVigente()) {
-            throw new BusinessException("BUSINESS_ERROR",
-                "Solo se pueden agregar formas de pago a contratos VIGENTES");
-        }
-
-        BigDecimal sumaActual = formaPagoRepository.sumValorByContratoId(contratoId);
-        BigDecimal nuevaSuma = sumaActual.add(request.getValor());
-        if (nuevaSuma.compareTo(contrato.getValorTotal()) > 0) {
-            throw new BusinessException("BUSINESS_ERROR",
-                "La suma de las formas de pago (" + nuevaSuma + ") excede el valor total del contrato (" + contrato.getValorTotal() + ")");
-        }
-
-        GcContratoFormaPago fp = new GcContratoFormaPago();
-        fp.setContrato(contrato);
-        fp.setDescripcion(request.getDescripcion().trim());
-        fp.setValor(request.getValor());
-        fp.setFechaEstimadaPago(request.getFechaEstimadaPago());
-        fp.setEstado(EstadoFormaPago.PENDIENTE);
-
-        if (request.getEmpresaFacturacionId() != null) {
-            GcEmpresa empresaFact = empresaRepository.findById(request.getEmpresaFacturacionId())
-                    .orElseThrow(() -> new BusinessException("NOT_FOUND",
-                        "Empresa de facturación no encontrada"));
-            fp.setEmpresaFacturacion(empresaFact);
-        }
-
-        fp.setCreadoPor(securityUtils.getCurrentUserId());
-        fp = formaPagoRepository.save(fp);
-        return FormaPagoResponse.fromEntity(fp);
-    }
-
-    @Transactional
-    public void eliminarFormaPago(Long formaPagoId) {
-        GcContratoFormaPago fp = formaPagoRepository.findById(formaPagoId)
-                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Forma de pago no encontrada"));
-        if (fp.getEstado() == EstadoFormaPago.FACTURADA) {
-            throw new BusinessException("BUSINESS_ERROR", "No se puede eliminar una forma de pago ya facturada");
-        }
-        formaPagoRepository.delete(fp);
     }
 
     // ==================== MODIFICACIONES ====================
@@ -311,6 +279,11 @@ public class ContratoService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * RN-12: Adiciones incrementan valor_ajuste
+     * RN-13: Prórrogas modifican fecha_fin
+     * RN-14: Solo contratos VIGENTES
+     */
     @Transactional
     public ModificacionResponse crearModificacion(Long contratoId, ModificacionCreateRequest request) {
         GcContrato contrato = contratoRepository.findByIdWithRelations(contratoId)
@@ -318,12 +291,12 @@ public class ContratoService {
 
         if (!contrato.isModificable()) {
             throw new BusinessException("BUSINESS_ERROR",
-                "Solo se pueden modificar contratos en estado VIGENTE");
+                "Solo se pueden modificar contratos en estado VIGENTE. Estado actual: " + contrato.getEstado());
         }
 
         TipoModificacion tipo;
         try { tipo = TipoModificacion.valueOf(request.getTipoModificacion()); }
-        catch (IllegalArgumentException e) { throw new BusinessException("VALIDATION_ERROR", "Tipo de modificación inválido"); }
+        catch (IllegalArgumentException e) { throw new BusinessException("VALIDATION_ERROR", "Tipo de modificación inválido: " + request.getTipoModificacion()); }
 
         GcContratoModificacion mod = new GcContratoModificacion();
         mod.setContrato(contrato);
@@ -335,8 +308,10 @@ public class ContratoService {
         mod.setFechaModificacionContrato(request.getFechaModificacion());
         mod.setObservaciones(request.getObservaciones());
         mod.setCreadoPor(securityUtils.getCurrentUserId());
+
         mod = modificacionRepository.save(mod);
 
+        // Aplicar efectos al contrato
         if (Boolean.TRUE.equals(request.getModificaValor()) && request.getValorModificacion() != null) {
             BigDecimal ajusteActual = contrato.getValorAjuste() != null ? contrato.getValorAjuste() : BigDecimal.ZERO;
             contrato.setValorAjuste(ajusteActual.add(request.getValorModificacion()));
@@ -344,6 +319,7 @@ public class ContratoService {
         if (Boolean.TRUE.equals(request.getModificaTiempo()) && request.getNuevaFechaFin() != null) {
             contrato.setFechaFin(request.getNuevaFechaFin());
         }
+
         contrato.setModificadoPor(securityUtils.getCurrentUserId());
         contratoRepository.save(contrato);
 

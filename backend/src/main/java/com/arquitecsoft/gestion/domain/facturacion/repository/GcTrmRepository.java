@@ -1,5 +1,3 @@
-// === FILE: GcTrmRepository.java ===
-// Path: domain/facturacion/repository/GcTrmRepository.java
 package com.arquitecsoft.gestion.domain.facturacion.repository;
 
 import com.arquitecsoft.gestion.domain.facturacion.entity.GcTrm;

@@ -74,21 +74,42 @@ public class GcOportunidad {
     @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
+    /**
+     * Estados macro del ciclo de vida de una oportunidad.
+     *
+     *  ABIERTA       — en gestión activa dentro del pipeline comercial
+     *  SEGUIMIENTO   — activa pero con reprogramaciones / en espera del cliente
+     *  GANADA        — el cliente aceptó; transitoria hasta que se formaliza el contrato
+     *  CONTRATADA    — existe un contrato formalizado; sale de todos los pipelines
+     *  PERDIDA       — no se concretó, cierre negativo
+     *  NO_CONCRETADA — se cayó por razones no competitivas (presupuesto cliente, timing, etc.)
+     */
     public enum EstadoMacro {
-        ABIERTA, SEGUIMIENTO, GANADA, CONTRATADA, PERDIDA, NO_CONCRETADA
+        ABIERTA,
+        SEGUIMIENTO,
+        GANADA,
+        CONTRATADA,
+        PERDIDA,
+        NO_CONCRETADA
     }
 
     public enum Moneda {
         COP, USD, EUR
     }
 
-    public GcOportunidad() {}
+    // Constructors
+    public GcOportunidad() {
+    }
 
     @PrePersist
     protected void onCreate() {
         this.fechaCreacion = LocalDateTime.now();
-        if (this.estadoMacro == null) this.estadoMacro = EstadoMacro.ABIERTA;
-        if (this.moneda == null) this.moneda = "COP";
+        if (this.estadoMacro == null) {
+            this.estadoMacro = EstadoMacro.ABIERTA;
+        }
+        if (this.moneda == null) {
+            this.moneda = "COP";
+        }
     }
 
     @PreUpdate
@@ -96,61 +117,183 @@ public class GcOportunidad {
         this.fechaModificacion = LocalDateTime.now();
     }
 
-    /** En proceso comercial activo */
+    // Helper methods
     public boolean isAbierta() {
         return this.estadoMacro == EstadoMacro.ABIERTA || this.estadoMacro == EstadoMacro.SEGUIMIENTO;
     }
 
-    /** Cerrada definitivamente — no se puede gestionar */
+    /**
+     * Una oportunidad se considera cerrada cuando ya no requiere gestión
+     * comercial activa, incluyendo los casos de éxito (GANADA/CONTRATADA)
+     * y de no concreción (PERDIDA/NO_CONCRETADA).
+     */
     public boolean isCerrada() {
-        return this.estadoMacro == EstadoMacro.PERDIDA || this.estadoMacro == EstadoMacro.NO_CONCRETADA;
+        return this.estadoMacro == EstadoMacro.GANADA ||
+               this.estadoMacro == EstadoMacro.CONTRATADA ||
+               this.estadoMacro == EstadoMacro.PERDIDA ||
+               this.estadoMacro == EstadoMacro.NO_CONCRETADA;
     }
 
-    /** En proceso contractual — se puede mover, editar, agregar actividades */
-    public boolean isEnProcesoContractual() {
-        return this.estadoMacro == EstadoMacro.GANADA;
-    }
-
-    /** Contrato formalizado — ya no está en ningún pipeline */
+    /**
+     * True si la oportunidad ya tiene un contrato formalizado.
+     * En este estado sale de los pipelines y no admite modificaciones
+     * comerciales.
+     */
     public boolean isContratada() {
         return this.estadoMacro == EstadoMacro.CONTRATADA;
     }
 
+    /**
+     * True si la oportunidad está en proceso contractual — ganada pero
+     * aún no formalizada. En este estado no debe moverse de etapa en el
+     * pipeline comercial (está esperando la formalización del contrato).
+     */
+    public boolean isEnProcesoContractual() {
+        return this.estadoMacro == EstadoMacro.GANADA;
+    }
+
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public GcEmpresa getEmpresa() { return empresa; }
-    public void setEmpresa(GcEmpresa empresa) { this.empresa = empresa; }
-    public GcPipeline getPipeline() { return pipeline; }
-    public void setPipeline(GcPipeline pipeline) { this.pipeline = pipeline; }
-    public GcEtapa getEtapa() { return etapa; }
-    public void setEtapa(GcEtapa etapa) { this.etapa = etapa; }
-    public EstadoMacro getEstadoMacro() { return estadoMacro; }
-    public void setEstadoMacro(EstadoMacro estadoMacro) { this.estadoMacro = estadoMacro; }
-    public BigDecimal getValorEstimado() { return valorEstimado; }
-    public void setValorEstimado(BigDecimal valorEstimado) { this.valorEstimado = valorEstimado; }
-    public String getMoneda() { return moneda; }
-    public void setMoneda(String moneda) { this.moneda = moneda; }
-    public Integer getProbabilidad() { return probabilidad; }
-    public void setProbabilidad(Integer probabilidad) { this.probabilidad = probabilidad; }
-    public LocalDate getFechaEstimadaCierre() { return fechaEstimadaCierre; }
-    public void setFechaEstimadaCierre(LocalDate fechaEstimadaCierre) { this.fechaEstimadaCierre = fechaEstimadaCierre; }
-    public String getFuente() { return fuente; }
-    public void setFuente(String fuente) { this.fuente = fuente; }
-    public String getTipoServicio() { return tipoServicio; }
-    public void setTipoServicio(String tipoServicio) { this.tipoServicio = tipoServicio; }
-    public Long getMotivoCierreId() { return motivoCierreId; }
-    public void setMotivoCierreId(Long motivoCierreId) { this.motivoCierreId = motivoCierreId; }
-    public String getComentarioCierre() { return comentarioCierre; }
-    public void setComentarioCierre(String comentarioCierre) { this.comentarioCierre = comentarioCierre; }
-    public LocalDateTime getFechaCierre() { return fechaCierre; }
-    public void setFechaCierre(LocalDateTime fechaCierre) { this.fechaCierre = fechaCierre; }
-    public Long getCreadoPor() { return creadoPor; }
-    public void setCreadoPor(Long creadoPor) { this.creadoPor = creadoPor; }
-    public Long getModificadoPor() { return modificadoPor; }
-    public void setModificadoPor(Long modificadoPor) { this.modificadoPor = modificadoPor; }
-    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    public LocalDateTime getFechaModificacion() { return fechaModificacion; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public GcEmpresa getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(GcEmpresa empresa) {
+        this.empresa = empresa;
+    }
+
+    public GcPipeline getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(GcPipeline pipeline) {
+        this.pipeline = pipeline;
+    }
+
+    public GcEtapa getEtapa() {
+        return etapa;
+    }
+
+    public void setEtapa(GcEtapa etapa) {
+        this.etapa = etapa;
+    }
+
+    public EstadoMacro getEstadoMacro() {
+        return estadoMacro;
+    }
+
+    public void setEstadoMacro(EstadoMacro estadoMacro) {
+        this.estadoMacro = estadoMacro;
+    }
+
+    public BigDecimal getValorEstimado() {
+        return valorEstimado;
+    }
+
+    public void setValorEstimado(BigDecimal valorEstimado) {
+        this.valorEstimado = valorEstimado;
+    }
+
+    public String getMoneda() {
+        return moneda;
+    }
+
+    public void setMoneda(String moneda) {
+        this.moneda = moneda;
+    }
+
+    public Integer getProbabilidad() {
+        return probabilidad;
+    }
+
+    public void setProbabilidad(Integer probabilidad) {
+        this.probabilidad = probabilidad;
+    }
+
+    public LocalDate getFechaEstimadaCierre() {
+        return fechaEstimadaCierre;
+    }
+
+    public void setFechaEstimadaCierre(LocalDate fechaEstimadaCierre) {
+        this.fechaEstimadaCierre = fechaEstimadaCierre;
+    }
+
+    public String getFuente() {
+        return fuente;
+    }
+
+    public void setFuente(String fuente) {
+        this.fuente = fuente;
+    }
+
+    public String getTipoServicio() {
+        return tipoServicio;
+    }
+
+    public void setTipoServicio(String tipoServicio) {
+        this.tipoServicio = tipoServicio;
+    }
+
+    public Long getMotivoCierreId() {
+        return motivoCierreId;
+    }
+
+    public void setMotivoCierreId(Long motivoCierreId) {
+        this.motivoCierreId = motivoCierreId;
+    }
+
+    public String getComentarioCierre() {
+        return comentarioCierre;
+    }
+
+    public void setComentarioCierre(String comentarioCierre) {
+        this.comentarioCierre = comentarioCierre;
+    }
+
+    public LocalDateTime getFechaCierre() {
+        return fechaCierre;
+    }
+
+    public void setFechaCierre(LocalDateTime fechaCierre) {
+        this.fechaCierre = fechaCierre;
+    }
+
+    public Long getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(Long creadoPor) {
+        this.creadoPor = creadoPor;
+    }
+
+    public Long getModificadoPor() {
+        return modificadoPor;
+    }
+
+    public void setModificadoPor(Long modificadoPor) {
+        this.modificadoPor = modificadoPor;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public LocalDateTime getFechaModificacion() {
+        return fechaModificacion;
+    }
 }

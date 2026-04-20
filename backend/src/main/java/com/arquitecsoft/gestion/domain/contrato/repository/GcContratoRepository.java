@@ -53,12 +53,16 @@ public interface GcContratoRepository extends JpaRepository<GcContrato, Long> {
     List<GcContrato> findVigentesByEmpresaId(@Param("empresaId") Long empresaId);
 
     /**
-     * Contratos vigentes con formas de pago cargadas (para facturación).
+     * Variante con JOIN FETCH a compromisos de ingreso del contrato.
+     * Reemplaza al antiguo findByEstadoWithFormasPago, que cargaba
+     * c.formasPago (campo renombrado a c.compromisos tras el rediseño del
+     * Mundo 3). Mantiene la misma semántica: traer contratos por estado
+     * con sus compromisos ya cargados.
      */
     @Query("SELECT DISTINCT c FROM GcContrato c " +
            "JOIN FETCH c.empresa " +
            "LEFT JOIN FETCH c.tipoContrato " +
-           "LEFT JOIN FETCH c.formasPago " +
+           "LEFT JOIN FETCH c.compromisos " +
            "WHERE c.estado = :estado")
-    List<GcContrato> findByEstadoWithFormasPago(@Param("estado") EstadoContrato estado);
+    List<GcContrato> findByEstadoWithCompromisos(@Param("estado") EstadoContrato estado);
 }

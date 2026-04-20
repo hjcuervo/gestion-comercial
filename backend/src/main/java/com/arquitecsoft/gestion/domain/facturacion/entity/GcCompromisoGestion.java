@@ -1,21 +1,34 @@
 package com.arquitecsoft.gestion.domain.facturacion.entity;
 
-import com.arquitecsoft.gestion.domain.contrato.entity.GcContratoFormaPago;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Notas / bitácora libre del usuario sobre un compromiso de ingreso.
+ *
+ * IMPORTANTE — distinción con GcCompromisoEvento:
+ *  - GcCompromisoEvento: eventos de sistema que mueven la máquina de estados
+ *    (FacturaRegistrada, FechaReprogramada, CompromisoPerdido...). Estructurado,
+ *    inmutable, disparado por transiciones.
+ *  - GcCompromisoGestion (esta entidad): interacción comercial registrada
+ *    manualmente por el responsable (llamadas, correos, validaciones, soportes,
+ *    novedades informativas). Texto libre.
+ *
+ * Antes: GcFormaPagoGestion apuntaba a GcContratoFormaPago.
+ * Ahora:  GcCompromisoGestion apunta a GcCompromisoIngreso.
+ */
 @Entity
-@Table(name = "GC_FORMA_PAGO_GESTION")
-public class GcFormaPagoGestion {
+@Table(name = "GC_COMPROMISO_GESTION")
+public class GcCompromisoGestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "forma_pago_id", nullable = false)
-    private GcContratoFormaPago formaPago;
+    @JoinColumn(name = "compromiso_id", nullable = false)
+    private GcCompromisoIngreso compromiso;
 
     @Column(name = "tipo_gestion", nullable = false, length = 30)
     @Enumerated(EnumType.STRING)
@@ -33,6 +46,11 @@ public class GcFormaPagoGestion {
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
+    /**
+     * Tipos de gestión comercial preservados del enum original (Mundo 3 previo).
+     * Son notas que el usuario registra — NO disparan transiciones de estado.
+     * Para eventos con efecto en la máquina de estados, ver GcCompromisoEvento.
+     */
     public enum TipoGestion {
         VALIDACION_SERVICIO,
         SOPORTE_OBTENIDO,
@@ -46,7 +64,7 @@ public class GcFormaPagoGestion {
         OBSERVACION
     }
 
-    public GcFormaPagoGestion() {}
+    public GcCompromisoGestion() {}
 
     @PrePersist
     protected void onCreate() { this.fechaCreacion = LocalDateTime.now(); }
@@ -54,15 +72,21 @@ public class GcFormaPagoGestion {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public GcContratoFormaPago getFormaPago() { return formaPago; }
-    public void setFormaPago(GcContratoFormaPago formaPago) { this.formaPago = formaPago; }
+
+    public GcCompromisoIngreso getCompromiso() { return compromiso; }
+    public void setCompromiso(GcCompromisoIngreso compromiso) { this.compromiso = compromiso; }
+
     public TipoGestion getTipoGestion() { return tipoGestion; }
     public void setTipoGestion(TipoGestion tipoGestion) { this.tipoGestion = tipoGestion; }
+
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
     public LocalDate getFechaGestion() { return fechaGestion; }
     public void setFechaGestion(LocalDate fechaGestion) { this.fechaGestion = fechaGestion; }
+
     public Long getCreadoPor() { return creadoPor; }
     public void setCreadoPor(Long creadoPor) { this.creadoPor = creadoPor; }
+
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
 }

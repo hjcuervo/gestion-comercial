@@ -6,6 +6,17 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Factura emitida.
+ *
+ * Relación con compromisos de ingreso: N:N a través de GcCompromisoFactura.
+ * Una factura puede aplicar contra múltiples compromisos (consolidada) y un
+ * compromiso puede recibir múltiples facturas (facturación parcial).
+ *
+ * NOTA: No se elimina directamente. Si una factura se anula, se marca como
+ * anulada y sus aplicaciones (GcCompromisoFactura) se revierten generando
+ * eventos FacturaRevertida en los compromisos afectados.
+ */
 @Entity
 @Table(name = "GC_FACTURA", uniqueConstraints = @UniqueConstraint(columnNames = {"numero_factura", "prefijo"}))
 public class GcFactura {
@@ -52,6 +63,19 @@ public class GcFactura {
     @Column(name = "observaciones", length = 500)
     private String observaciones;
 
+    /**
+     * Flag de anulación. Al anular, cada GcCompromisoFactura asociado
+     * debe generar un evento FacturaRevertida en su compromiso.
+     */
+    @Column(name = "anulada", nullable = false)
+    private Boolean anulada = false;
+
+    @Column(name = "fecha_anulacion")
+    private LocalDateTime fechaAnulacion;
+
+    @Column(name = "motivo_anulacion", length = 500)
+    private String motivoAnulacion;
+
     @Column(name = "creado_por", nullable = false)
     private Long creadoPor;
 
@@ -90,6 +114,12 @@ public class GcFactura {
     public void setFactroId(String factroId) { this.factroId = factroId; }
     public String getObservaciones() { return observaciones; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+    public Boolean getAnulada() { return anulada; }
+    public void setAnulada(Boolean anulada) { this.anulada = anulada; }
+    public LocalDateTime getFechaAnulacion() { return fechaAnulacion; }
+    public void setFechaAnulacion(LocalDateTime fechaAnulacion) { this.fechaAnulacion = fechaAnulacion; }
+    public String getMotivoAnulacion() { return motivoAnulacion; }
+    public void setMotivoAnulacion(String motivoAnulacion) { this.motivoAnulacion = motivoAnulacion; }
     public Long getCreadoPor() { return creadoPor; }
     public void setCreadoPor(Long creadoPor) { this.creadoPor = creadoPor; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }

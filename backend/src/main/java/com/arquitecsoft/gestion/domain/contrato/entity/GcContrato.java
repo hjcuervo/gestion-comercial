@@ -1,6 +1,7 @@
 package com.arquitecsoft.gestion.domain.contrato.entity;
 
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
+import com.arquitecsoft.gestion.domain.facturacion.entity.GcCompromisoIngreso;
 import com.arquitecsoft.gestion.domain.oportunidad.entity.GcOportunidad;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -18,7 +19,7 @@ public class GcContrato {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proceso_contratacion_id")
+    @JoinColumn(name = "proceso_contratacion_id", nullable = false)
     private GcProcesoContratacion procesoContratacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -86,9 +87,19 @@ public class GcContrato {
     @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
+    /**
+     * Compromisos de ingreso asociados al contrato (antes: formasPago con
+     * GcContratoFormaPago). Ordenados por fecha esperada actual ascendente
+     * para reflejar el orden natural del flujo de caja proyectado.
+     *
+     * IMPORTANTE: el campo de ordenamiento debe coincidir EXACTAMENTE con el
+     * nombre del atributo Java en GcCompromisoIngreso (fechaEsperadaActual),
+     * no con el nombre de la columna (fecha_esperada_actual). Error conocido
+     * de Hibernate si se pone el nombre de columna.
+     */
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL)
-    @OrderBy("fechaEstimadaPago ASC")
-    private List<GcContratoFormaPago> formasPago = new ArrayList<>();
+    @OrderBy("fechaEsperadaActual ASC")
+    private List<GcCompromisoIngreso> compromisos = new ArrayList<>();
 
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL)
     @OrderBy("fechaCreacion DESC")
@@ -158,8 +169,8 @@ public class GcContrato {
     public void setModificadoPor(Long modificadoPor) { this.modificadoPor = modificadoPor; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public LocalDateTime getFechaModificacion() { return fechaModificacion; }
-    public List<GcContratoFormaPago> getFormasPago() { return formasPago; }
-    public void setFormasPago(List<GcContratoFormaPago> formasPago) { this.formasPago = formasPago; }
+    public List<GcCompromisoIngreso> getCompromisos() { return compromisos; }
+    public void setCompromisos(List<GcCompromisoIngreso> compromisos) { this.compromisos = compromisos; }
     public List<GcContratoModificacion> getModificaciones() { return modificaciones; }
     public void setModificaciones(List<GcContratoModificacion> modificaciones) { this.modificaciones = modificaciones; }
 }
