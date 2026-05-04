@@ -73,4 +73,34 @@ public interface GcCompromisoIngresoRepository extends JpaRepository<GcCompromis
            "WHERE c.enRiesgo = true " +
            "AND c.estado NOT IN ('CUMPLIDO', 'NO_LOGRADO')")
     List<GcCompromisoIngreso> findEnRiesgoActivos();
+
+    /**
+     * Compromisos pendientes (con saldo > 0) cuya fechaEsperadaActual es
+     * menor o igual a la fecha de corte. Filtros opcionales por contrato y
+     * empresa — pasar null para no filtrar por ese criterio.
+     *
+     * Usado por VistaPeriodoService para construir el dashboard de
+     * "Compromisos Pendientes" del mes objetivo: trae tanto los del mes
+     * como los arrastrados de meses anteriores, y el servicio los
+     * particiona en los 3 grupos (arrastre / vencidos / por vencer).
+     *
+     * La condición de "pendiente" se expresa como
+     * montoPresupuestado > COALESCE(montoFacturadoAcumulado, 0) para ser
+     * robusto cuando el acumulado aún es null en compromisos recién creados.
+     *
+     * Usa JOIN FETCH de contrato y empresa para que el service pueda leer
+     * contratoNumero y empresaNombre sin disparar lazy-loading por cada item.
+     */
+    @Query("SELECT c FROM GcCompromisoIngreso c " +
+           "JOIN FETCH c.contrato ct " +
+           "LEFT JOIN FETCH ct.empresa e " +
+           "WHERE c.montoPresupuestado > COALESCE(c.montoFacturadoAcumulado, 0) " +
+           "AND c.fechaEsperadaActual <= :fechaCorte " +
+           "AND (:contratoId IS NULL OR ct.id = :contratoId) " +
+           "AND (:empresaId IS NULL OR e.id = :empresaId) " +
+           "ORDER BY c.fechaEsperadaActual ASC")
+    List<GcCompromisoIngreso> findPendientesHastaFecha(
+            @Param("fechaCorte") LocalDate fechaCorte,
+            @Param("contratoId") Long contratoId,
+            @Param("empresaId") Long empresaId);
 }
