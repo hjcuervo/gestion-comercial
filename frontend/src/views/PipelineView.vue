@@ -264,7 +264,6 @@
       <OportunidadModal :visible="showOpModal" :oportunidad="editingOp" :empresas="opStore.empresasActivas" :pipelines="kanbanPipelinesFiltrados" :pipeline-preseleccionado="selectedPipelineId" :saving="opStore.saving" :error="modalError" @close="closeOpModal" @submit="handleOpSubmit" />
       <CerrarOportunidadModal :visible="showCerrarModal" :oportunidad-nombre="cerrandoOp?.nombre || ''" :saving="opStore.saving" :error="modalError" @close="showCerrarModal = false" @submit="handleCerrarSubmit" />
       <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="formalizandoOp?.id" :oportunidad-nombre="formalizandoOp?.nombre || ''" :moneda-default="formalizandoOp?.moneda || 'COP'" :valor-default="formalizandoOp?.valorEstimado" @close="showFormalizarModal = false" @created="onContratoFormalizado" />
-      <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="formalizandoOp?.id" :oportunidad-nombre="formalizandoOp?.nombre || ''" :moneda-default="formalizandoOp?.moneda || 'COP'" :valor-default="formalizandoOp?.valorEstimado" @close="showFormalizarModal = false" @created="onContratoCreated" />
 
       <!-- Modals: Pipeline Config -->
       <PipelineModal :visible="showPipModal" :pipeline="editingPip" :saving="pipStore.saving" :error="modalError" @close="closePipModal" @submit="handlePipSubmit" />
