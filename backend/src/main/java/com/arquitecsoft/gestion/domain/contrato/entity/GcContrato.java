@@ -19,7 +19,7 @@ public class GcContrato {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proceso_contratacion_id", nullable = false)
+    @JoinColumn(name = "proceso_contratacion_id")
     private GcProcesoContratacion procesoContratacion;
 
     @ManyToOne(fetch = FetchType.LAZY)

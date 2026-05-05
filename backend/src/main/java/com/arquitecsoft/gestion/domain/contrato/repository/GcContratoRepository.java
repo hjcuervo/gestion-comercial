@@ -19,6 +19,9 @@ public interface GcContratoRepository extends JpaRepository<GcContrato, Long> {
            "JOIN FETCH c.empresa " +
            "JOIN FETCH c.tipoContrato " +
            "LEFT JOIN FETCH c.empresaFacturacion " +
+           "LEFT JOIN FETCH c.oportunidad " +
+           "LEFT JOIN FETCH c.procesoContratacion " +
+           "LEFT JOIN FETCH c.modificaciones " +
            "WHERE c.id = :id")
     Optional<GcContrato> findByIdWithRelations(@Param("id") Long id);
 
