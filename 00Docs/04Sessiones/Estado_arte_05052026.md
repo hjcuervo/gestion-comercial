@@ -4,7 +4,7 @@
 **Producto:** GestCom — Plataforma de Gestión Comercial y Contractual
 **Repositorio:** https://github.com/hjcuervo/gestion-comercial
 **Stack:** Spring Boot 3.4 + Java 21 + Oracle 23c + Vue 3 + Vite + Pinia
-**Fecha del corte:** 5 de mayo de 2026
+**Fecha del corte:** 5 de mayo de 2026 (revisión 2 — post Bloque A)
 **Reemplaza a:** `Estado_arte_04052026.md` (desactualizado en alcance del Mundo 3 y deuda técnica)
 **Propósito del documento:** Servir como línea base de contexto para una nueva versión del proyecto, dejando claro qué está terminado, qué está en curso, qué falta por implementar y qué deuda técnica está abierta.
 
@@ -424,7 +424,7 @@ Los estados se almacenan como VARCHAR2 + `@Enumerated(EnumType.STRING)`. Cada `A
 | Mundo | Avance | Comentario |
 |-------|--------|------------|
 | 1 — Comercial | ~95% | Mejoras menores diferidas. |
-| 2 — Contractual | ~90% | Funcional, con 4 ítems de deuda técnica abierta + I-01. |
+| 2 — Contractual | ~95% | Funcional. Bloque A cerrado el 5-may-2026 (I-01, DT-01, DT-02, DT-03, DT-04). Resta DT-09 (baja prioridad) por revisar. |
 | 3 — Flujo de Facturación | ~55% | Backend ~85%, frontend ~25%. Especificación lista. |
 
 (El "Mundo 4" del documento anterior se eliminó del alcance.)
@@ -435,16 +435,17 @@ Los estados se almacenan como VARCHAR2 + `@Enumerated(EnumType.STRING)`. Cada `A
 
 | ID | Issue | Severidad | Estado |
 |----|-------|-----------|--------|
-| **I-01** | Error `ORA-00904: "M1_0"."FECHAMODIFICACION"` reportado en sesiones anteriores. Causa raíz cambió: NO está en `GcContratoModificacion` (esa entidad no tiene `@OrderBy`). El candidato más probable es un `@OrderBy` o JPQL apuntando a un field inexistente en otra entidad del Mundo 3. Requiere stack trace en runtime para diagnóstico definitivo. | 🟠 Alta | Abierto |
+| **I-01** | Error `ORA-00904: "M1_0"."FECHAMODIFICACION"` reportado en sesiones anteriores. Cerrado por arrastre al aplicar DT-02 y DT-03: el error era efecto secundario del lazy-load roto en `findByIdWithRelations`, no de un `@OrderBy` mal escrito. Validado en runtime con Postman el 5-may-2026 (sesión Bloque A). | ✅ Cerrado | Cerrado el 5-may-2026 |
 | **I-02** | "Repo desincronizado". | ✅ Cerrado | El repo sí está sincronizado; el problema era de percepción durante sesiones anteriores. |
-| **DT-01** | `GcContrato.proceso_contratacion_id` con `nullable = false` (debe quitarse). | 🟡 Media | Abierto |
-| **DT-02** | `findByIdWithRelations` sin `JOIN FETCH c.oportunidad`. | 🟠 Alta | Abierto |
-| **DT-03** | `findByIdWithRelations` sin `JOIN FETCH` de `compromisos` ni `modificaciones`. | 🟠 Alta | Abierto |
-| **DT-04** | `FormalizarContratoModal.vue` duplicado en frontend. | 🟢 Baja | Abierto |
+| **DT-01** | `GcContrato.proceso_contratacion_id` con `nullable = false`. | ✅ Cerrado | Aplicado el 5-may-2026 (Bloque A). |
+| **DT-02** | `findByIdWithRelations` sin `JOIN FETCH c.oportunidad`. | ✅ Cerrado | Aplicado el 5-may-2026 (Bloque A) — agregados `LEFT JOIN FETCH` de `oportunidad`, `procesoContratacion` y `modificaciones`. |
+| **DT-03** | `findByIdWithRelations` sin `JOIN FETCH` de `compromisos` ni `modificaciones`. | ✅ Cerrado parcial | `modificaciones` aplicado el 5-may-2026. `compromisos` deliberadamente NO incluido por riesgo de `MultipleBagFetchException` con dos colecciones a la vez. Si se necesita en el futuro, usar `EntityGraph` o cambiar el tipo de una colección a `Set`. |
+| **DT-04** | `FormalizarContratoModal.vue` duplicado en frontend. | ✅ Cerrado | Borrado `frontend/src/components/oportunidad/contrato/FormalizarContratoModal.vue` el 5-may-2026 (era byte-a-byte idéntico al canónico en `components/contrato/`, sin consumidores). Los 2 consumidores reales (`OportunidadDetalleView.vue` y `PipelineView.vue`) ya importaban la ruta canónica. |
 | **DT-05** | Convivencia de 3 generaciones de UI components (Md*, Aurora*, genéricos). | 🟡 Media | Abierto |
 | **DT-06** | Inconsistencia entre skills y código real (estructura `infrastructure/` vs `config/+security/`, prefijo `CAT_` no usado, auditoría con FK a usuario en vez de string). | 🟡 Media | Las skills deben actualizarse. |
 | **DT-07** | Implementación de Mundo 3 generaliza factura↔compromiso a N:M, contradiciendo RN-01 de la spec v3. Decidir y reflejar en spec v4. | 🟡 Media | Abierto |
 | **DT-08** | Sólo 1 archivo Flyway (`V1__initial_schema.sql`). Cambios de esquema posteriores (Mundo 2, Mundo 3) **no parecen versionados** como migraciones. Riesgo de divergencia ambiente↔código. | 🟠 Alta | Abierto |
+| **DT-09** | `PipelineView.vue` líneas 266-267 invoca `<FormalizarContratoModal>` **dos veces consecutivas** con el mismo `v-if="showFormalizarModal"`. Detectado el 5-may-2026 al auditar consumidores para DT-04. Posible duplicación accidental por copy-paste, refactor incompleto o dos modales con `v-if` distintos que el grep no distingue. No tocar sin entender el flujo del Kanban. Requiere revisión visual en runtime y lectura completa del archivo. | 🟢 Baja | Abierto |
 
 ---
 
@@ -452,11 +453,12 @@ Los estados se almacenan como VARCHAR2 + `@Enumerated(EnumType.STRING)`. Cada `A
 
 Las realidades descubiertas el 5-may-2026 reorientan el plan:
 
-### Bloque A — Estabilización del Mundo 2 (corto plazo, 1-2 días)
+### Bloque A — Estabilización del Mundo 2 ✅ Cerrado el 5-may-2026
 
-1. **Resolver I-01 con diagnóstico real:** ejecutar la app, capturar el stack trace exacto del `ORA-00904`, identificar la entidad/query culpable, fixear.
-2. **Aplicar DT-01 a DT-03:** quitar `nullable = false` en `proceso_contratacion_id`, completar `findByIdWithRelations` con todas las relaciones serializadas.
-3. **Aplicar DT-04:** consolidar `FormalizarContratoModal.vue` (decidir cuál se queda y borrar el otro).
+1. ✅ **I-01 cerrado por arrastre.** Validado en runtime con Postman después de aplicar DT-02 y DT-03.
+2. ✅ **DT-01, DT-02, DT-03 aplicados.** `nullable=false` quitado en `proceso_contratacion_id`; `findByIdWithRelations` ahora hace `LEFT JOIN FETCH` de `oportunidad`, `procesoContratacion` y `modificaciones`.
+3. ✅ **DT-04 aplicado.** Borrada la copia huérfana `frontend/src/components/oportunidad/contrato/FormalizarContratoModal.vue` (era idéntica al canónico, sin consumidores).
+4. 🟢 **DT-09 detectado** durante la auditoría de DT-04. Se anota como deuda baja para sesión futura.
 
 ### Bloque B — Cierre del Mundo 3 (mediano plazo, 2-3 semanas)
 
@@ -501,7 +503,8 @@ Decisiones arquitectónicas que no se vuelven a discutir salvo cambio mayor:
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
 | 1.0 | 04-may-2026 | `Estado_arte_04052026.md` — base inicial. |
-| 2.0 | 05-may-2026 | **Este documento.** Reescrito tras inspección directa del repo: alcance del Mundo 3 documentado, Mundo 4 eliminado, deuda técnica enumerada (DT-01 a DT-08), I-01 redefinido, I-02 cerrado, plan reorientado. |
+| 2.0 | 05-may-2026 | Reescrito tras inspección directa del repo: alcance del Mundo 3 documentado, Mundo 4 eliminado, deuda técnica enumerada (DT-01 a DT-08), I-01 redefinido, I-02 cerrado, plan reorientado. |
+| 2.1 | 05-may-2026 | **Este documento.** Cierre del Bloque A: I-01, DT-01, DT-02, DT-03, DT-04 marcados como cerrados con fechas y referencias. Agregado DT-09 (duplicación de modal en `PipelineView.vue` 266-267) detectado durante la auditoría de DT-04. |
 
 ---
 
