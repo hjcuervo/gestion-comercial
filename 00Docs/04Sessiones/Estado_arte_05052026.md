@@ -4,7 +4,7 @@
 **Producto:** GestCom — Plataforma de Gestión Comercial y Contractual
 **Repositorio:** https://github.com/hjcuervo/gestion-comercial
 **Stack:** Spring Boot 3.4 + Java 21 + Oracle 23c + Vue 3 + Vite + Pinia
-**Fecha del corte:** 5 de mayo de 2026 (revisión 2 — post Bloque A)
+**Fecha del corte:** 5 de mayo de 2026 (revisión 2.2 — post DT-09)
 **Reemplaza a:** `Estado_arte_04052026.md` (desactualizado en alcance del Mundo 3 y deuda técnica)
 **Propósito del documento:** Servir como línea base de contexto para una nueva versión del proyecto, dejando claro qué está terminado, qué está en curso, qué falta por implementar y qué deuda técnica está abierta.
 
@@ -424,7 +424,7 @@ Los estados se almacenan como VARCHAR2 + `@Enumerated(EnumType.STRING)`. Cada `A
 | Mundo | Avance | Comentario |
 |-------|--------|------------|
 | 1 — Comercial | ~95% | Mejoras menores diferidas. |
-| 2 — Contractual | ~95% | Funcional. Bloque A cerrado el 5-may-2026 (I-01, DT-01, DT-02, DT-03, DT-04). Resta DT-09 (baja prioridad) por revisar. |
+| 2 — Contractual | ~96% | Funcional. Bloque A cerrado el 5-may-2026 (I-01, DT-01..DT-04, DT-09). Sin deuda técnica pendiente específica del Mundo 2. |
 | 3 — Flujo de Facturación | ~55% | Backend ~85%, frontend ~25%. Especificación lista. |
 
 (El "Mundo 4" del documento anterior se eliminó del alcance.)
@@ -445,7 +445,7 @@ Los estados se almacenan como VARCHAR2 + `@Enumerated(EnumType.STRING)`. Cada `A
 | **DT-06** | Inconsistencia entre skills y código real (estructura `infrastructure/` vs `config/+security/`, prefijo `CAT_` no usado, auditoría con FK a usuario en vez de string). | 🟡 Media | Las skills deben actualizarse. |
 | **DT-07** | Implementación de Mundo 3 generaliza factura↔compromiso a N:M, contradiciendo RN-01 de la spec v3. Decidir y reflejar en spec v4. | 🟡 Media | Abierto |
 | **DT-08** | Sólo 1 archivo Flyway (`V1__initial_schema.sql`). Cambios de esquema posteriores (Mundo 2, Mundo 3) **no parecen versionados** como migraciones. Riesgo de divergencia ambiente↔código. | 🟠 Alta | Abierto |
-| **DT-09** | `PipelineView.vue` líneas 266-267 invoca `<FormalizarContratoModal>` **dos veces consecutivas** con el mismo `v-if="showFormalizarModal"`. Detectado el 5-may-2026 al auditar consumidores para DT-04. Posible duplicación accidental por copy-paste, refactor incompleto o dos modales con `v-if` distintos que el grep no distingue. No tocar sin entender el flujo del Kanban. Requiere revisión visual en runtime y lectura completa del archivo. | 🟢 Baja | Abierto |
+| **DT-09** | `PipelineView.vue` líneas 266-267 invocaba `<FormalizarContratoModal>` **dos veces consecutivas** con el mismo `v-if`. Diagnóstico definitivo: la línea 267 referenciaba un handler inexistente (`onContratoCreated`) — código muerto proveniente del patrón de `OportunidadDetalleView.vue`. Vue toleraba la referencia sin error explícito pero ambos modales se renderizaban superpuestos al activarse el `v-if`. | ✅ Cerrado | Borrada la línea 267 el 5-may-2026. Tamaño del archivo pasó de 40200 a 39888 bytes (−312 = línea + `\n`). Conservado el handler correcto `onContratoFormalizado`. |
 
 ---
 
@@ -458,7 +458,7 @@ Las realidades descubiertas el 5-may-2026 reorientan el plan:
 1. ✅ **I-01 cerrado por arrastre.** Validado en runtime con Postman después de aplicar DT-02 y DT-03.
 2. ✅ **DT-01, DT-02, DT-03 aplicados.** `nullable=false` quitado en `proceso_contratacion_id`; `findByIdWithRelations` ahora hace `LEFT JOIN FETCH` de `oportunidad`, `procesoContratacion` y `modificaciones`.
 3. ✅ **DT-04 aplicado.** Borrada la copia huérfana `frontend/src/components/oportunidad/contrato/FormalizarContratoModal.vue` (era idéntica al canónico, sin consumidores).
-4. 🟢 **DT-09 detectado** durante la auditoría de DT-04. Se anota como deuda baja para sesión futura.
+4. ✅ **DT-09 aplicado.** Borrada la línea 267 de `PipelineView.vue` que invocaba el modal duplicado con un handler inexistente.
 
 ### Bloque B — Cierre del Mundo 3 (mediano plazo, 2-3 semanas)
 
@@ -504,7 +504,8 @@ Decisiones arquitectónicas que no se vuelven a discutir salvo cambio mayor:
 |---------|-------|--------|
 | 1.0 | 04-may-2026 | `Estado_arte_04052026.md` — base inicial. |
 | 2.0 | 05-may-2026 | Reescrito tras inspección directa del repo: alcance del Mundo 3 documentado, Mundo 4 eliminado, deuda técnica enumerada (DT-01 a DT-08), I-01 redefinido, I-02 cerrado, plan reorientado. |
-| 2.1 | 05-may-2026 | **Este documento.** Cierre del Bloque A: I-01, DT-01, DT-02, DT-03, DT-04 marcados como cerrados con fechas y referencias. Agregado DT-09 (duplicación de modal en `PipelineView.vue` 266-267) detectado durante la auditoría de DT-04. |
+| 2.1 | 05-may-2026 | Cierre del Bloque A: I-01, DT-01, DT-02, DT-03, DT-04 marcados como cerrados con fechas y referencias. Agregado DT-09 (duplicación de modal en `PipelineView.vue` 266-267) detectado durante la auditoría de DT-04. |
+| 2.2 | 05-may-2026 | **Este documento.** DT-09 cerrado: borrada la línea 267 de `PipelineView.vue`. Bloque A 100% terminado, Mundo 2 sin deuda técnica abierta. Avance del Mundo 2 ajustado a ~96%. |
 
 ---
 

@@ -1,21 +1,24 @@
 ---
 name: gestcom-context
-description: Provides foundational context for the GestCom platform — Arquitecsoft's commercial and contract management system built with Spring Boot 3.4 + Java 21 + Oracle 23c + Vue 3. Use this skill at the start of ANY task related to GestCom, the gestion-comercial repository, the 4 functional "Mundos" (Comercial, Contractual, Flujo de Facturación, Facturación), or when the user mentions GestCom-specific concepts like oportunidad, pipeline contractual, GcContrato, formas de pago, or Hector's Arquitecsoft project. This is the ROOT skill — load it before gestcom-backend or gestcom-frontend so all domain decisions are made with full project context.
+description: Provides foundational context for the GestCom platform — Arquitecsoft's commercial, contractual and billing-flow management system built with Spring Boot 3.4 + Java 21 + Oracle 23c + Vue 3. Use this skill at the start of ANY task related to GestCom, the gestion-comercial repository, the 3 functional "Mundos" (Comercial, Contractual, Flujo de Facturación), or when the user mentions GestCom-specific concepts like oportunidad, pipeline contractual, GcContrato, GcCompromisoIngreso, FACTRO, TRM, or Hector's Arquitecsoft project. This is the ROOT skill — load it before gestcom-backend or gestcom-frontend so all domain decisions are made with full project context.
 ---
 
 # GestCom — Contexto del Proyecto
 
 Esta skill establece el contexto base de la plataforma GestCom. **Cárgala primero** en cualquier tarea relacionada con el proyecto antes de pasar a las skills de backend o frontend.
 
+> **Fuente de verdad:** este documento se mantiene alineado con `00Docs/04Sessiones/Estado_arte_05052026.md` (v2.1 o superior). Si esta skill entra en conflicto con el Estado del Arte más reciente del repo, **gana el Estado del Arte**. Reportar la divergencia para actualizar la skill.
+
 ---
 
 ## 1. Identidad del proyecto
 
-- **Producto:** GestCom — Plataforma de Gestión Comercial y Contractual.
+- **Producto:** GestCom — Plataforma de Gestión Comercial, Contractual y Flujo de Facturación.
 - **Empresa:** Arquitecsoft SAS.
 - **Desarrollador principal:** Hector.
 - **Repositorio:** `https://github.com/hjcuervo/gestion-comercial`.
-- **Idioma del dominio:** Español. Los nombres de entidades, campos, mensajes de UI y comentarios están en español. El código (clases Java, métodos, variables) sigue convenciones técnicas estándar pero los nombres del dominio se mantienen en español (ej. `GcOportunidad`, `etapa`, `formaPago`).
+- **Idioma del dominio:** Español. Nombres de entidades, campos, mensajes de UI y comentarios están en español. El código técnico (clases Java, métodos, variables) sigue convenciones estándar pero los nombres del dominio se mantienen en español (ej. `GcOportunidad`, `etapa`, `GcCompromisoIngreso`).
+- **Sistema externo crítico:** **FACTRO** — sistema de facturación electrónica (DIAN) externo a GestCom. GestCom **no emite facturas**, solo cruza las que FACTRO emite.
 
 ---
 
@@ -27,53 +30,72 @@ Esta skill establece el contexto base de la plataforma GestCom. **Cárgala prime
 | Lenguaje backend | Java | 21 |
 | Base de datos | Oracle | 23c |
 | ORM | Hibernate / JPA | (incluido en Spring Boot 3.4) |
+| Migraciones | Flyway | (actualmente con deuda — ver DT-08) |
 | Frontend | Vue | 3 (Composition API) |
 | Build frontend | Vite | — |
 | Estado frontend | Pinia | — |
-| Autenticación | JWT | — |
+| Sistema de diseño | **Aurora Dark** | (legacy "Luxury Tech" deprecado, ver §3) |
+| Autenticación | JWT + Spring Security | — |
+| RBAC | Admin / Comercial / Lectura-KPI | — |
 | Infraestructura objetivo | OCI (Oracle Cloud Infrastructure) | — |
 
-**Cuando trabajes en GestCom:** nunca propongas cambiar de stack, ni introducir librerías que no encajen con este (ej. nada de MyBatis, Quasar, Vuex, MySQL, etc.).
+**Cuando trabajes en GestCom:** nunca propongas cambiar de stack, ni introducir librerías que no encajen con este (nada de MyBatis, Quasar, Vuex, MySQL, Tailwind, etc.).
 
 ---
 
 ## 3. Arquitectura
 
-- **Monolito modular por dominios.** El backend organiza el código en paquetes por dominio funcional, no por capa técnica.
-- **API-only en el backend.** El backend nunca renderiza HTML; expone REST y el frontend SPA consume.
-- **Pipelines dinámicos parametrizables.** El motor de pipelines es genérico y se diferencia por `ambito` (`COMERCIAL` o `CONTRATACION`).
+- **Monolito modular por dominios.** El backend organiza el código en paquetes por dominio funcional (`domain/{empresa,contrato,facturacion,...}`), no por capa técnica.
+- **Infraestructura transversal en `infrastructure/`:** `config/`, `dto/` (PageResponse), `exception/` (BusinessException, ErrorResponse, GlobalExceptionHandler), `security/` (JWT + Spring Security). **No existe paquete `audit/` separado** — la auditoría son 4 columnas en cada entidad.
+- **API-only.** Backend nunca renderiza HTML; expone REST y el frontend SPA consume.
+- **Pipelines dinámicos parametrizables.** Motor genérico, se diferencia por `ambito` (`COMERCIAL` o `CONTRATACION`).
 - **Auditoría obligatoria** en transiciones y cambios relevantes.
-- **RBAC** con tres roles base: Admin / Comercial / Lectura-KPI.
+- **Sistema visual "Aurora Dark":** decisión congelada (reemplazó a "Luxury Tech"). Los componentes ya están renombrados a `Aurora*` (`AuroraLayout`, `AuroraCard`, etc.), **pero las variables CSS aún se llaman con la nomenclatura legacy** (`--primary`, `--bg-deep`, `--text-primary`, etc.). El archivo `tokens.css` todavía rotula "Luxury Tech Aesthetic". Migrar los tokens es deuda DT-05.
 
 ---
 
-## 4. Los 4 Mundos
+## 4. Los 3 Mundos
 
-GestCom se organiza en 4 mundos funcionales integrados:
+GestCom se organiza en **3 mundos funcionales** integrados:
 
 | # | Mundo | Alcance | Estado actual |
 |---|-------|---------|----------------|
-| 1 | **Gestión Comercial** | Identificación de oportunidad → adjudicación. Pipeline comercial, actividades, compromisos, documentos. | ✅ Implementado (~95%) |
-| 2 | **Gestión Contractual** | Oportunidad GANADA → contrato VIGENTE. Pipeline contractual, contratos, formas de pago, modificaciones. | 🟡 En ejecución (~70%, falta F6 Dashboard) |
-| 3 | **Flujo de Facturación** | Proyección y emisión de facturas desde formas de pago. | 🔲 Sin especificar |
-| 4 | **Facturación** | Registro y análisis de facturas reales emitidas. No las emite, las recibe. | 🔲 Sin especificar |
+| 1 | **Gestión Comercial** | Identificación de oportunidad → adjudicación. Pipeline comercial, actividades, compromisos, documentos. | ✅ Completo (~95%) |
+| 2 | **Gestión Contractual** | Oportunidad GANADA → contrato VIGENTE. Pipeline contractual, contratos, modificaciones. | ✅ Funcional (~95%, deuda menor abierta) |
+| 3 | **Flujo de Facturación** | Indicar qué facturar, registrar gestión por compromiso, cruzar con facturas FACTRO, KPIs, Excel EMI con conversión TRM. | 🟡 Backend ~85%, Frontend ~25% |
+
+> **Histórico:** existió un "Mundo 4" (registro y análisis de facturas reales) que fue **fusionado dentro del Mundo 3** durante el rediseño de Mundo 3 v3. Si alguna sesión vieja lo menciona, ya no aplica.
 
 ---
 
 ## 5. Flujo de negocio crítico
 
 ```
-Pipeline Comercial (ABIERTA → SEGUIMIENTO → GANADA)
+Mundo 1 — Pipeline Comercial (ABIERTA → SEGUIMIENTO → GANADA)
         │
         └── al marcar GANADA
                 ▼
-        Pipeline Contractual (etapas dinámicas)
+Mundo 2 — Pipeline Contractual (etapas dinámicas)
                 │
                 └── botón "Formalizar Contrato" (visible mientras no exista contrato)
                         ▼
-                GC_CONTRATO en estado VIGENTE
+                GC_CONTRATO nace en estado VIGENTE
                         │
                         └── Oportunidad pasa a CONTRATADA → sale de los pipelines
+                                │
+Mundo 3 — Flujo de Facturación
+                                ▼
+        Compromisos de Ingreso (presupuestados al crear el contrato)
+                │
+                ├── llega su mes → entra al tablero de pendientes
+                │
+                ├── Gestiones: VALIDACION_SERVICIO, SOPORTE_OBTENIDO, SOLICITUD_EMISION,
+                │              FACTURA_CRUZADA, NOVEDAD_*, OBSERVACION
+                │
+                ├── FACTRO emite factura → se registra en GestCom
+                │
+                └── Cruce factura ↔ compromiso → estado FACTURADA
+                        + se actualiza valor_facturado (puede diferir del presupuestado)
 ```
 
 **Reglas críticas que nunca se rompen:**
@@ -84,6 +106,9 @@ Pipeline Comercial (ABIERTA → SEGUIMIENTO → GANADA)
 4. En el pipeline comercial: GANADA dispara formalización; PERDIDA / NO_CONCRETADA solo cierran.
 5. Una oportunidad en estado CONTRATADA o cerrada (PERDIDA / NO_CONCRETADA) es **inmutable**.
 6. Estados válidos del contrato: VIGENTE → SUSPENDIDO ↔ VIGENTE → TERMINADO → LIQUIDADO.
+7. **GestCom no emite facturas.** FACTRO sí. GestCom solo cruza.
+8. Una entrada de bitácora (gestión) es **inmutable** una vez creada.
+9. Conversión USD → COP usa la TRM del mes del compromiso. Si no hay TRM para ese mes, se usa la del mes anterior más reciente.
 
 ---
 
@@ -95,14 +120,20 @@ Pipeline Comercial (ABIERTA → SEGUIMIENTO → GANADA)
 | **Pipeline** | Flujo configurable de etapas. Tiene `ambito` (COMERCIAL / CONTRATACION). |
 | **Etapa** | Fase dentro de un pipeline. Las etapas son ordenadas. |
 | **Empresa** | Organización. Puede ser prospecto, cliente o aliado comercial. |
-| **Persona** | Contacto individual con relación multi-empresa. |
+| **Persona** | Contacto individual con relación multi-empresa (N:M vía `GcPersonaEmpresa`). |
 | **Actividad** | Interacción registrada (reunión, llamada, envío de propuesta). |
-| **Compromiso** | Tarea derivada de una actividad. |
-| **Proceso de Contratación** | Etapa intermedia entre oportunidad ganada y contrato. Es un pipeline. |
+| **Compromiso (comercial)** | Tarea derivada de una actividad. **No confundir con Compromiso de Ingreso.** |
+| **Proceso de Contratación** | Pipeline intermedio entre oportunidad GANADA y contrato VIGENTE. |
 | **Contrato** | Documento formal que regula la relación. Tipos: Contrato Formal, Orden de Compra, Orden de Servicio, etc. |
-| **Forma de Pago** | Cuota o hito de facturación dentro de un contrato. |
-| **Modificación** | Adición, prórroga o suspensión sobre un contrato. |
+| **Modificación** | Adición, prórroga, suspensión, reinicio sobre un contrato. Evento atómico (no tiene estado abierto/cerrado). |
 | **Empresa de facturación** | Filial específica que factura, distinta a la empresa cliente principal. |
+| **Compromiso de Ingreso** | Cuota o hito de facturación de un contrato. **Renombrado** desde "Forma de Pago" durante el rediseño Mundo 3. Tiene `valor` presupuestado y `valor_facturado` real. |
+| **Gestión** | Entrada de bitácora sobre un compromiso. Tipos: `VALIDACION_SERVICIO`, `SOPORTE_OBTENIDO`, `SOLICITUD_EMISION`, `FACTURA_CRUZADA`, `NOVEDAD_*`, `OBSERVACION`. Inmutable. |
+| **Factura** | Factura registrada en GestCom (no emitida). El número viene de FACTRO. Identificada por `numero_factura + prefijo` (UNIQUE). |
+| **Cruce** | Vínculo factura ↔ compromiso. Al cruzar: estado del compromiso → FACTURADA, se actualiza `valor_facturado`. Es reversible. |
+| **TRM** | Tasa Representativa del Mercado mensual (USD → COP). Una tasa por par de monedas por año-mes. |
+| **FACTRO** | Sistema externo que emite facturas electrónicas a la DIAN. GestCom solo se integra con él vía registro de las facturas emitidas. |
+| **Excel EMI** | Export consolidado con 5 hojas (Tabla COP, Tabla USD, COL pivot, PERU pivot, Resumen Facturado), con conversión a COP usando TRM. |
 
 ---
 
@@ -110,29 +141,33 @@ Pipeline Comercial (ABIERTA → SEGUIMIENTO → GANADA)
 
 ### 7.1 Nombres de tablas y prefijos
 
-- Tablas de negocio: prefijo `GC_` (ej. `GC_OPORTUNIDAD`, `GC_CONTRATO`).
-- Catálogos transversales: prefijo `CAT_` (ej. `CAT_TIPO_ACTIVIDAD`).
-- Catálogos específicos del módulo: pueden ir con `GC_TIPO_*` (ej. `GC_TIPO_CONTRATO`).
+- Tablas de negocio: prefijo `GC_` (ej. `GC_OPORTUNIDAD`, `GC_CONTRATO`, `GC_COMPROMISO_INGRESO`).
+- **Catálogos transversales también usan `GC_*`**, no `CAT_*`. Ejemplos reales: `GC_PAIS`, `GC_DEPARTAMENTO`, `GC_MUNICIPIO`, `GC_DOCUMENT_TYPE`, `GC_TIPO_CONTRATO`. **Si una skill o doc viejo menciona `CAT_*`, es histórico — la convención vigente es `GC_*` para todo.**
 
 ### 7.2 Nombres de entidades JPA
 
-- Prefijo `Gc` + nombre en singular CamelCase: `GcOportunidad`, `GcContrato`, `GcContratoFormaPago`.
-- Catálogos transversales: prefijo `Cat`: `CatTipoActividad`.
+- Prefijo `Gc` + nombre en singular CamelCase: `GcOportunidad`, `GcContrato`, `GcCompromisoIngreso`, `GcTrm`.
 
 ### 7.3 Nombres de campos de auditoría
 
-Todas las entidades de negocio incluyen:
-- `fechaCreacion` (Timestamp, NOT NULL)
-- `fechaModificacion` (Timestamp, nullable)
-- `usuarioCreacion` (String, NOT NULL)
-- `usuarioModificacion` (String, nullable)
+Patrón observado en entidades nuevas (no uniforme):
+
+- `fechaCreacion` (`LocalDateTime`, NOT NULL, `updatable = false`).
+- `fechaModificacion` (`LocalDateTime`, nullable) — **no todas las entidades nuevas lo tienen**.
+- `creadoPor` (`Long`, NOT NULL) — **FK al usuario por ID**, no string.
+- `modificadoPor` (`Long`, nullable) — no todas las entidades nuevas lo tienen.
+
+`@PrePersist` setea `fechaCreacion`. `@PreUpdate` setea `fechaModificacion`. El `creadoPor`/`modificadoPor` se setea explícitamente desde el service usando el usuario autenticado.
 
 ### 7.4 Nombres de enums
 
-Los enums se almacenan como VARCHAR2 con CHECK constraint en Oracle. Ejemplos:
-- Estado de oportunidad: `ABIERTA`, `SEGUIMIENTO`, `GANADA`, `PERDIDA`, `NO_CONCRETADA`, `CONTRATADA`.
-- Estado de contrato: `VIGENTE`, `SUSPENDIDO`, `TERMINADO`, `LIQUIDADO`.
-- Ámbito de pipeline: `COMERCIAL`, `CONTRATACION`.
+Los enums se declaran como **enums anidados dentro de la entidad** y se persisten como VARCHAR2 con `@Enumerated(EnumType.STRING)` + CHECK constraint en Oracle. Ejemplos reales:
+
+- `GcContrato.EstadoContrato`: `VIGENTE`, `SUSPENDIDO`, `TERMINADO`, `LIQUIDADO`.
+- `GcProcesoContratacion.EstadoProceso`: `EN_CURSO`, `COMPLETADO`, `CANCELADO`.
+- `GcContratoModificacion.TipoModificacion`: `ADICION`, `PRORROGA`, `SUSPENSION`, `REINICIO`, `OTRO`.
+- Estado de oportunidad (en `GcOportunidad`): `ABIERTA`, `SEGUIMIENTO`, `GANADA`, `PERDIDA`, `NO_CONCRETADA`, `CONTRATADA`.
+- Ámbito de pipeline (en `GcPipeline`): `COMERCIAL`, `CONTRATACION`.
 
 ---
 
@@ -142,71 +177,135 @@ Los enums se almacenan como VARCHAR2 con CHECK constraint en Oracle. Ejemplos:
 gestion-comercial/
 ├── backend/
 │   └── src/main/java/com/arquitecsoft/gestion/
+│       ├── GestionApplication.java
+│       ├── config/
+│       │   └── HealthController.java
 │       ├── domain/
-│       │   ├── empresa/         (entity, repository, service, controller, dto)
-│       │   ├── persona/
-│       │   ├── oportunidad/
-│       │   ├── pipeline/
-│       │   ├── actividad/
-│       │   ├── documento/
-│       │   ├── contrato/        (incluye proceso de contratación)
-│       │   └── catalogo/
-│       ├── security/            (JWT, RBAC)
-│       ├── audit/               (entidad y service de auditoría)
-│       └── config/              (config global, exception handler)
+│       │   ├── auth/
+│       │   ├── empresa/         (Empresa + catálogos Pais, Departamento, Municipio, DocumentType)
+│       │   ├── persona/         (Persona + PersonaEmpresa N:M)
+│       │   ├── pipeline/        (Pipeline + Etapa)
+│       │   ├── oportunidad/     (Oportunidad + Stats)
+│       │   ├── actividad/       (Actividad + Compromiso comercial + TipoActividad)
+│       │   ├── documento/       (Documento + TipoDocumentoOpp)
+│       │   ├── contrato/        (Mundo 2: Contrato, ProcesoContratacion, Modificacion, TipoContrato)
+│       │   ├── facturacion/     (Mundo 3: 6 entidades — ver §9.3)
+│       │   └── usuario/
+│       └── infrastructure/
+│           ├── config/          (CorsFilter)
+│           ├── dto/             (PageResponse)
+│           ├── exception/       (BusinessException, ErrorResponse, GlobalExceptionHandler)
+│           └── security/        (JwtAuthenticationFilter, JwtService, SecurityConfig, SecurityUtils, AuthenticatedUser)
 ├── frontend/
 │   └── src/
-│       ├── views/               (vistas por dominio)
-│       ├── components/          (componentes reutilizables)
+│       ├── views/               (DashboardView, LoginView, EmpresasView, PersonasView, PipelineView, Oportunidades*, Contratos*, FacturacionView)
+│       ├── components/
+│       │   ├── actividad/       (ActividadModal, CompromisoModal)
+│       │   ├── contrato/        (FormalizarContratoModal, IniciarProcesoModal)
+│       │   ├── documento/       (DocumentoModal)
+│       │   ├── empresa/         (EmpresaModal)
+│       │   ├── facturacion/     (GestionPanel — único componente Mundo 3 por ahora)
+│       │   ├── layout/          (AuroraLayout, AuroraHeader, AuroraSidebar, NavRail, TopAppBar)
+│       │   ├── oportunidad/
+│       │   ├── persona/
+│       │   ├── pipeline/
+│       │   └── ui/              (Aurora* + Md* + genéricos — convivencia de 3 generaciones, deuda DT-05)
 │       ├── services/            (clientes HTTP)
 │       ├── stores/              (Pinia)
 │       ├── router/
-│       └── layouts/             (AppLayout con NavRail)
-├── docs/                        (especificaciones, alcance, backlog)
-└── .claude/
-    └── skills/                  (estas skills)
+│       ├── layouts/
+│       └── assets/styles/       (tokens.css, global.css, style.css)
+├── 00Docs/                      (especificaciones, alcance, sesiones)
+└── .claude/skills/              (estas skills)
 ```
 
 ---
 
-## 9. Estado actual al congelar (Mayo 2026)
+## 9. Estado actual (corte: 5 de mayo de 2026, post Bloque A)
 
-### 9.1 Lo que está funcionando
+### 9.1 Mundo 1 — Comercial ✅
 
-- **Mundo 1 completo:** CRUD de Empresas / Personas / Oportunidades, Pipeline Kanban, actividades, compromisos, documentos, dashboard comercial, alertas, login, RBAC, 42 endpoints REST.
-- **Mundo 2 (F1–F5):**
-  - Modelo de datos contractual (5 tablas nuevas + ajuste a `GC_PIPELINE`).
-  - Backend del proceso de contratación.
-  - Backend de contratos (CRUD, formas de pago, modificaciones, cambios de estado).
-  - `ContratosListView.vue` y `ContratoDetalleView.vue`.
-  - Rutas `/contratos` y `/contratos/:id`, ítem en NavRail.
+CRUD completo de Empresas / Personas / Oportunidades / Pipelines / Actividades / Compromisos / Documentos. Pipeline Kanban, dashboard, login, RBAC. ~42 endpoints REST. Matriz RB-01 a RB-19 aplicada. Pendientes menores: reportes exportables, filtros persistentes, mejoras de paginación. **No bloquea nada.**
 
-### 9.2 Lo pendiente del Mundo 2
+### 9.2 Mundo 2 — Contractual ✅ (con deuda)
 
-- **F6 Dashboard contractual:** T6.1 (endpoint stats), T6.2 (vista dashboard), T6.3 (integración con dashboard general).
+Backend y frontend funcionales. "Formalizar Contrato" desde oportunidad GANADA opera. Listado y detalle de contratos, modificaciones, cambios de estado (suspender, reiniciar, terminar, liquidar).
 
-### 9.3 Issues técnicos abiertos
+**Nota crítica:** la antigua `GcContratoFormaPago` **ya no existe en el código activo**. Fue renombrada y movida a `GcCompromisoIngreso` en `domain/facturacion/` durante el rediseño Mundo 3. La relación `GcContrato.compromisos` navega a esa entidad.
 
-- **I-01:** Error `ORA-00904: "M1_0"."FECHAMODIFICACION"` por caché stale de Hibernate. Causa raíz: `@OrderBy` apuntaba a un campo que no existe (el campo correcto en `GcContratoModificacion` es `fechaCreacion`, no `fechaModificacion`). Acción: `mvn clean package -DskipTests` y verificar entidad.
-- **I-02:** El repositorio en GitHub puede estar desincronizado respecto a las correcciones más recientes. Verificar antes de modificar archivos del Mundo 2.
+**F6 "Dashboard contractual" no aplica.** Fue reemplazada por la F5 del Mundo 3 (Dashboard integrado).
 
-### 9.4 Mundos 3 y 4
+### 9.3 Mundo 3 — Flujo de Facturación 🟡
 
-Sin especificación funcional formal. Cualquier trabajo aquí debe arrancar por una sesión de definición de alcance, no por código.
+**Documento base:** `00Docs/02Especificacion/GestCom_Mundo3_Especificacion_1.md` (spec v3).
+
+**Entidades en `domain/facturacion/` (6):**
+
+| Entidad | Rol |
+|---------|-----|
+| `GcCompromisoIngreso` | Compromiso de ingreso (antes `GcContratoFormaPago`). |
+| `GcCompromisoFactura` | Relación N:M compromiso ↔ factura (la spec dice 1:1, la implementación generaliza — DT-07). |
+| `GcCompromisoEvento` | Eventos del compromiso (event sourcing ligero, extra de la implementación). |
+| `GcCompromisoGestion` | Gestiones registradas (bitácora). |
+| `GcFactura` | Factura registrada (no emitida). |
+| `GcTrm` | TRM mensual por par de monedas. |
+
+**Backend ~85%:** 3 controllers (`CompromisoIngresoController` con 14 endpoints, `FacturaController`, `VistaPeriodoController`), 5 services (incluye `CompromisoEstadoMachine`), 6 repositorios, 17 DTOs.
+
+**Frontend ~25%:** solo `FacturacionView.vue` y `components/facturacion/GestionPanel.vue`. Faltan: lista de facturas, modales de registrar/cruzar factura, modal de registrar gestión, sección TRM editable, botón export Excel EMI, integración al dashboard.
+
+**Fases del Mundo 3:**
+
+| Fase | Descripción | Estado |
+|------|-------------|--------|
+| F1 | Modelo de datos y backend base | ✅ ~95% |
+| F2 | Frontend tablero de facturación | 🟡 Parcial |
+| F3 | Frontend facturas y cruce | 🔲 No iniciado |
+| F4 | TRM y Excel EMI | 🔲 No iniciado |
+| F5 | Dashboard integrado | 🔲 No iniciado |
+
+### 9.4 Reglas de negocio del Mundo 3 (resumen RN-01..RN-13)
+
+Definidas en la spec v3. **Falta matriz formal RN-XX → endpoints** (equivalente a B-04 del Mundo 1).
+
+Las críticas:
+
+- RN-01: Una forma de pago solo puede cruzarse con UNA factura. **Implementación lo extiende a N:M — DT-07 abierta.**
+- RN-02: Una factura puede cruzarse con MÚLTIPLES formas de pago.
+- RN-03: Al cruzar: estado → FACTURADA, se actualiza `valor_facturado`.
+- RN-04: Solo se cruzan compromisos PENDIENTES.
+- RN-05: Cruce es reversible (descruzar → PENDIENTE, `valor_facturado = null`).
+- RN-08: Facturas identificadas por `numero_factura + prefijo` (UNIQUE).
+- RN-09: Entradas de bitácora inmutables.
+- RN-10 / RN-11: Conversión USD→COP usa TRM del mes; si no hay, la del mes anterior.
+
+### 9.5 Issues y deuda técnica abierta al 5-may-2026
+
+**Cerrados en Bloque A (5-may-2026):** I-01, I-02, DT-01, DT-02, DT-03 (parcial), DT-04.
+
+**Abiertos:**
+
+| ID | Asunto | Severidad |
+|----|--------|-----------|
+| DT-03 (parcial) | `findByIdWithRelations` deliberadamente no fetcha `compromisos` (riesgo `MultipleBagFetchException`). Si se necesita, usar `EntityGraph` o `Set`. | 🟢 Baja |
+| DT-05 | Convivencia de 3 generaciones de UI (`Md*`, `Aurora*`, genéricos) + tokens CSS aún con nomenclatura "Luxury Tech". | 🟡 Media |
+| DT-06 | Skills desactualizadas vs código real (esta misma actualización ataca esto). | 🟡 Media |
+| DT-07 | Implementación generaliza factura↔compromiso a N:M, contradice RN-01 spec v3. Decidir y reflejar en spec v4. | 🟡 Media |
+| DT-08 | Sólo 1 archivo Flyway (`V1__initial_schema.sql`). Cambios M2/M3 no versionados. | 🟠 Alta |
+| DT-09 | `PipelineView.vue` líneas 266-267 invoca `<FormalizarContratoModal>` dos veces. No tocar sin entender el flujo Kanban. | 🟢 Baja |
 
 ---
 
 ## 10. Cómo trabajamos juntos (preferencias del desarrollador)
 
-Estas preferencias son parte del contrato de trabajo con Hector:
-
 1. **Cambios mínimos.** Cuando se pide una corrección, aplicarla aislada, sin reescribir archivos completos.
-2. **Archivos descargables, no inline.** Cuando se generen archivos, presentarlos con `present_files`, no pegarlos como bloques de código en el chat (salvo que sean fragmentos cortos).
-3. **Verificar el repo antes de modificar.** Si una sesión reciente cambió archivos, confirmar el estado actual del repo antes de proponer cambios sobre archivos del Mundo 2.
+2. **Archivos descargables, no inline.** Cuando se generen archivos, presentarlos con `present_files`, no pegarlos como bloques de código en el chat (salvo fragmentos cortos).
+3. **Verificar el repo antes de modificar.** Cuando hay duda sobre el estado actual, `git clone` o `git pull` antes de proponer cambios. Las skills pueden estar desactualizadas; el Estado del Arte más reciente y el código `main` ganan.
 4. **Especificar antes de codificar.** Para nuevos mundos o features grandes, primero generar documento de alcance + backlog de tareas; nunca saltar a código directamente.
 5. **Errores con causa raíz.** El `GlobalExceptionHandler` está configurado para mostrar la causa raíz en desarrollo. Mantener ese comportamiento; no envolver excepciones en mensajes genéricos durante debugging.
-6. **Backlog formato Fx.y.** Las tareas se numeran como `T1.1`, `T1.2`, etc. dentro de fases `F1`, `F2`...
-7. **Reglas de negocio formato RB-XX.** Las reglas se identifican como `RB-01`, `RB-02`, etc. y se documentan en una matriz que las cruza con los endpoints donde aplican.
+6. **Backlog formato Fx.y / Tx.y.** Las tareas se numeran como `T1.1`, `T1.2`, etc. dentro de fases `F1`, `F2`...
+7. **Reglas de negocio formato RB-XX (M1) / RN-XX (M3).** M1 ya tiene matriz; M3 está pendiente.
+8. **Deuda técnica formato DT-XX.** Ver §9.5.
 
 ---
 
@@ -214,22 +313,56 @@ Estas preferencias son parte del contrato de trabajo con Hector:
 
 | Documento | Propósito |
 |-----------|-----------|
-| `docs/GestCom_Estado_del_Arte.md` | Línea base de avance para nueva versión. |
-| `docs/GestCom_Alcance_Contratacion_v1.md` | Especificación del Mundo 2. |
-| `docs/GestCom_Tareas_Mundo2.md` | Backlog detallado de las 26 tareas del Mundo 2. |
-| `docs/B-04-Matriz-Reglas-Negocio.md` | Matriz RB-XXX → endpoints (Mundo 1). |
+| `00Docs/04Sessiones/Estado_arte_05052026.md` | **Fuente de verdad del estado del proyecto.** Esta skill se alinea con él. |
+| `00Docs/01Infraestructura/01-STACK-SIMPLIFICADO.md` | Stack y decisiones de infra. |
+| `00Docs/01Infraestructura/02-CHECKLIST-SETUP.md` | Setup local. |
+| `00Docs/01Infraestructura/03-ARCHIVOS-CONFIGURACION.md` | Configuración (application.yml, etc.). |
+| `00Docs/02Especificacion/B-01-Modelo-Logico-Datos.md` | Modelo lógico. |
+| `00Docs/02Especificacion/B-02-Modelo-Fisico-DDL.md` | DDL Oracle. |
+| `00Docs/02Especificacion/B-03-Contrato-API-OpenAPI.md` | Contrato API. |
+| `00Docs/02Especificacion/B-04-Matriz-Reglas-Negocio.md` | Matriz RB-XX → endpoints (solo Mundo 1). |
+| `00Docs/02Especificacion/Especificacion Funcional 1.md` | Espec Mundo 1. |
+| `00Docs/02Especificacion/GestCom_Alcance_Contratacion_v1.md` | Espec Mundo 2. |
+| `00Docs/02Especificacion/GestCom_Mundo3_Especificacion_1.md` | Espec Mundo 3 v3. |
+| `00Docs/03Estandar Visual/A-01..A-05` | Estándar visual MD3 (puede estar desfasado vs Aurora). |
+| `00Docs/04Sessiones/SESION-*.md` | Histórico de sesiones. |
+| `00Docs/04Sessiones/Estado_arte_04052026.md` | ⚠️ Reemplazado por `Estado_arte_05052026.md`. |
+
+**Documentos pendientes:**
+
+- Matriz RN-01..RN-13 del Mundo 3 mapeada a endpoints.
+- Spec v4 del Mundo 3 reconciliando 1:1 vs N:M (resolución de DT-07).
+- Documento que oficialice "no hay Mundo 4".
 
 ---
 
 ## 12. Lecciones aprendidas (deuda anti-patrones)
 
-Estas son lecciones costosas de sesiones pasadas. **Tenlas presentes siempre:**
+Lecciones costosas de sesiones pasadas. **Tenlas presentes siempre:**
 
-1. **`@OrderBy` debe apuntar a un campo existente en la entidad** (no en la tabla). Hibernate no valida esto en tiempo de compilación; un error aquí provoca `ORA-00904` con campos en alias `M1_0` que despistan.
+1. **`@OrderBy` debe apuntar a un campo Java existente en la entidad** (no al nombre de columna). Hibernate no valida en tiempo de compilación; un error aquí provoca `ORA-00904` con alias `M1_0` que despistan.
 2. **`nullable = false` en FKs bloquea inserts cuando la FK no siempre se popula.** Caso real: `proceso_contratacion_id` en `GcContrato` se quitó `nullable = false` porque el contrato puede crearse sin proceso intermedio en escenarios especiales.
 3. **Constraints CHECK de Oracle deben sincronizarse con los enums de Java.** Cuando se agrega un valor al enum (ej. `CONTRATADA`), hay que `ALTER` el constraint o el insert falla.
-4. **Lazy-load fuera de transacción explota.** Cualquier consulta que se serializa después de cerrar la transacción debe usar `JOIN FETCH` explícito en JPQL. Caso real: `GcContratoRepository.findByIdWithRelations` faltaba `JOIN FETCH c.oportunidad`.
+4. **Lazy-load fuera de transacción explota.** Consultas que se serializan después de cerrar la transacción deben usar `JOIN FETCH` explícito en JPQL.
 5. **Caché de Hibernate puede enmascarar correcciones.** Después de cambios en anotaciones JPA críticas (`@OrderBy`, `@JoinColumn`), correr `mvn clean package -DskipTests` antes de probar.
+6. **`MultipleBagFetchException` con dos colecciones a la vez.** Hibernate no permite `JOIN FETCH` de dos `List` (bags) simultáneamente. Soluciones: (a) usar `EntityGraph` con `LOAD` graph, (b) cambiar el tipo de una colección a `Set`, (c) hacer dos queries separadas. Caso real: `GcContrato` tiene `modificaciones` y `compromisos` como listas; `findByIdWithRelations` solo fetcha una de las dos.
+7. **Las skills pueden quedar desactualizadas.** Si una skill entra en conflicto con el `Estado_arte_*.md` más reciente o con el código en `main`, **gana la realidad del repo**. Reportar la divergencia para sincronizar la skill.
+8. **Nombre de sistema visual ≠ nomenclatura de tokens.** En transiciones de design system, los archivos CSS pueden seguir titulados con el sistema viejo aunque la decisión esté tomada. Caso real: `tokens.css` rotula "Luxury Tech" pero la decisión congelada es "Aurora Dark". Esto es deuda, no error — documentar al actualizar tokens.
+
+---
+
+## 13. Decisiones congeladas
+
+Decisiones arquitectónicas que no se vuelven a discutir salvo cambio mayor:
+
+1. **3 Mundos, no 4.** El registro de facturas reales se fusionó en el Mundo 3.
+2. **GestCom no emite facturas.** FACTRO sí.
+3. **Diseño visual: Aurora Dark.** "Luxury Tech" deprecado (tokens pendientes de renombrar).
+4. **Estructura de paquetes: `domain/{dominio}/` + `infrastructure/`.** No usar `config/`, `security/`, `audit/` raíz.
+5. **Auditoría con FK a usuario (`creadoPor: Long`)**, no string de usuario.
+6. **Migraciones via Flyway** (actualmente con deuda DT-08).
+7. **Una sola rama de trabajo: `main`.**
+8. **Catálogos transversales con prefijo `GC_`**, no `CAT_`.
 
 ---
 
