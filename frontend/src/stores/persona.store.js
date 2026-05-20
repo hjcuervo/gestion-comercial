@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { personaService } from '@/services/persona.service';
 import { empresaService } from '@/services/empresa.service';
+import { extractPagination } from '@/utils/pagination';
 
 export const usePersonaStore = defineStore('persona', {
   state: () => ({
@@ -32,10 +33,7 @@ export const usePersonaStore = defineStore('persona', {
         };
         const response = await personaService.listar(params);
         this.personas = response.data || [];
-        this.pagination = {
-          page: response.page || 1, pageSize: response.pageSize || 20,
-          totalItems: response.totalItems || 0, totalPages: response.totalPages || 0,
-        };
+        this.pagination = extractPagination(response);
       } catch (err) {
         this.error = err.response?.data?.message || 'Error al cargar contactos';
       } finally {

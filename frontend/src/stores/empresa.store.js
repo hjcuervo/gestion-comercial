@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { empresaService } from '@/services/empresa.service';
+import { extractPagination } from '@/utils/pagination';
 
 export const useEmpresaStore = defineStore('empresa', {
   state: () => ({
@@ -67,12 +68,7 @@ export const useEmpresaStore = defineStore('empresa', {
           page_size: this.pagination.pageSize,
         });
         this.empresas = response.data || [];
-        this.pagination = {
-          page: response.page || 1,
-          pageSize: response.pageSize || 20,
-          totalItems: response.totalItems || 0,
-          totalPages: response.totalPages || 0,
-        };
+        this.pagination = extractPagination(response);
       } catch (err) {
         this.error = err.response?.data?.message || 'Error al cargar empresas';
       } finally {

@@ -93,6 +93,7 @@ import AppLayout from '@/components/layout/AppLayout.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { contratoService } from '@/services/contrato.service';
 import { formatCurrency } from '@/utils/currency';
+import { extractPagination } from '@/utils/pagination';
 
 const router = useRouter();
 const contratos = ref([]);
@@ -113,8 +114,9 @@ async function loadContratos(page = 1) {
     if (filtroEstado.value) params.estado = filtroEstado.value;
     const res = await contratoService.listar(params);
     contratos.value = res.data || [];
-    currentPage.value = res.page || 1;
-    totalPages.value = res.totalPages || 1;
+    const pag = extractPagination(res);
+    currentPage.value = pag.page;
+    totalPages.value = pag.totalPages;
   } catch (err) { console.error('Error cargando contratos:', err); }
   finally { loading.value = false; }
 }

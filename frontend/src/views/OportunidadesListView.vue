@@ -133,6 +133,7 @@ import { oportunidadService } from '@/services/oportunidad.service';
 import { pipelineService } from '@/services/pipeline.service';
 import { empresaService } from '@/services/empresa.service';
 import { formatCurrency } from '@/utils/currency';
+import { extractPagination } from '@/utils/pagination';
 
 const router = useRouter();
 const oportunidades = ref([]);
@@ -168,8 +169,9 @@ async function loadOportunidades(page = 1) {
 
     const res = await oportunidadService.listar(params);
     oportunidades.value = res.data || [];
-    currentPage.value = res.page || 1;
-    totalPages.value = res.totalPages || 1;
+    const pag = extractPagination(res);
+    currentPage.value = pag.page;
+    totalPages.value = pag.totalPages;
   } catch (err) {
     console.error('Error cargando oportunidades:', err);
   } finally {
