@@ -30,8 +30,8 @@ export const pipelineService = {
     return data;
   },
 
-  async listarEtapas(pipelineId) {
-    const { data } = await api.get(`${BASE}/${pipelineId}/etapas`);
+  async listarEtapas(pipelineId, params = {}) {
+    const { data } = await api.get(`${BASE}/${pipelineId}/etapas`, { params });
     return data;
   },
 

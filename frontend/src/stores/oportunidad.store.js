@@ -63,7 +63,11 @@ export const useOportunidadStore = defineStore('oportunidad', {
       try {
         const pipeline = await pipelineService.obtenerPorId(pipelineId);
         this.pipelineActivo = pipeline;
-        this.etapasDelPipeline = (pipeline.etapas || []).sort((a, b) => a.orden - b.orden);
+        // RB-EI-1: el Kanban solo muestra etapas activas. Las inactivas existen
+        // en BD pero quedan ocultas del flujo operativo (se administran en Configuración).
+        this.etapasDelPipeline = (pipeline.etapas || [])
+          .filter(e => e.estado === 'ACTIVA')
+          .sort((a, b) => a.orden - b.orden);
         await this.cargarOportunidades();
       } catch (err) {
         this.error = err.response?.data?.message || 'Error al cargar pipeline';

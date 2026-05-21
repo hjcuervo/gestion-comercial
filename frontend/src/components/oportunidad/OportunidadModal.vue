@@ -173,8 +173,10 @@ async function onPipelineChange() {
 }
 
 async function loadEtapas(pipelineId) {
-  try { etapasDisponibles.value = await pipelineService.listarEtapas(pipelineId); }
-  catch { etapasDisponibles.value = []; }
+  try {
+    // RB-EI-2: al crear/editar oportunidad solo se pueden seleccionar etapas activas
+    etapasDisponibles.value = await pipelineService.listarEtapas(pipelineId, { estado: 'ACTIVA' });
+  } catch { etapasDisponibles.value = []; }
 }
 
 function validate() {

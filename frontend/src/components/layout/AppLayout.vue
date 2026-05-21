@@ -63,11 +63,14 @@ const handleLogout = () => {
   margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .app-layout__content {
   flex: 1;
   padding: var(--space-6);
   background-color: var(--bg-base);
+  min-width: 0;
 }
 </style>

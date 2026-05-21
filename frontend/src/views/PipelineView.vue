@@ -15,7 +15,7 @@
 
       <!-- Tabs -->
       <div class="tabs animate-slideUp delay-1">
-        <button class="tab" :class="{ 'tab--active': activeTab === 'kanban' }" @click="activeTab = 'kanban'">
+        <button class="tab" :class="{ 'tab--active': activeTab === 'kanban' }" @click="goToKanban">
           <Icon name="pipeline" :size="16" /> Kanban
         </button>
         <button class="tab" :class="{ 'tab--active': activeTab === 'config' }" @click="activeTab = 'config'">
@@ -291,6 +291,19 @@ const opStore = useOportunidadStore();
 const pipStore = usePipelineStore();
 
 const activeTab = ref('kanban');
+
+/**
+ * Cambia al tab Kanban y recarga el pipeline activo desde el backend.
+ * Esto garantiza que cambios hechos en Configuración (etapas activadas/desactivadas,
+ * renombradas, recoloreadas, etc.) se reflejen al instante en el Kanban,
+ * sin necesidad de refresh manual.
+ */
+async function goToKanban() {
+  activeTab.value = 'kanban';
+  if (opStore.pipelineActivo?.id) {
+    await opStore.seleccionarPipeline(opStore.pipelineActivo.id);
+  }
+}
 
 // ==================== KANBAN STATE ====================
 const selectedPipelineId = ref(null);
