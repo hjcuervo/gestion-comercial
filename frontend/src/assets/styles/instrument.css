@@ -1,0 +1,175 @@
+/* ============================================================================
+   GestCom — instrument.css
+   Identidad "Instrumento" (rediseño RF). Tokens semánticos globales --gc-*.
+   Fundación CLARA por defecto. Scaffold de tema oscuro suave bajo
+   [data-theme="dark"] (activación diferida a RF8.4).
+
+   Reglas de la identidad:
+   - El color SOLO significa estado (success/warning/danger/info/accent).
+   - Primario = grafito (casi negro), no un color de marca.
+   - Datos en monoespaciado (DM Mono); UI en sans (DM Sans).
+   - Renglones con líneas finas, sin sombras de tarjeta.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  /* --- Tipografía --- */
+  --gc-font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --gc-font-mono: 'DM Mono', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+
+  --gc-fw-regular: 400;
+  --gc-fw-medium: 500;
+
+  --gc-fs-xs: 11px;
+  --gc-fs-sm: 12px;
+  --gc-fs-base: 13px;
+  --gc-fs-md: 14px;
+  --gc-fs-lg: 16px;
+  --gc-fs-xl: 20px;
+  --gc-fs-2xl: 26px;
+
+  --gc-lh-tight: 1.25;
+  --gc-lh-normal: 1.45;
+
+  /* --- Neutros (fundación clara) --- */
+  --gc-bg: #f5f4f1;          /* papel tibio: fondo de la app */
+  --gc-surface: #ffffff;     /* superficie: paneles, renglones */
+  --gc-surface-2: #f0eee9;   /* superficie alterna / hover */
+  --gc-border: rgba(0, 0, 0, 0.08);        /* línea fina por defecto */
+  --gc-border-strong: rgba(0, 0, 0, 0.14); /* línea de énfasis */
+
+  --gc-text: #1a1917;        /* texto principal */
+  --gc-text-2: #6b6860;      /* texto secundario */
+  --gc-text-3: #9e9c96;      /* texto terciario / pistas */
+
+  /* --- Primario / marca: grafito --- */
+  --gc-primary: #1a1917;
+  --gc-primary-hover: #322f2b;
+  --gc-primary-text: #ffffff;     /* texto sobre primario */
+
+  /* --- Estado (semántico, único uso del color) --- */
+  --gc-success: #1d9e75;
+  --gc-warning: #ef9f27;
+  --gc-danger: #e24b4a;
+  --gc-info: #185fa5;
+  --gc-accent: #534ab7;
+
+  /* Tintes muy sutiles para fondos de marca de estado (uso discreto) */
+  --gc-success-soft: rgba(29, 158, 117, 0.10);
+  --gc-warning-soft: rgba(239, 159, 39, 0.12);
+  --gc-danger-soft: rgba(226, 75, 74, 0.10);
+  --gc-info-soft: rgba(24, 95, 165, 0.10);
+  --gc-accent-soft: rgba(83, 74, 183, 0.10);
+  --gc-neutral-soft: rgba(0, 0, 0, 0.05);
+
+  /* --- Espaciado (múltiplos de 4px) --- */
+  --gc-space-1: 4px;
+  --gc-space-2: 8px;
+  --gc-space-3: 12px;
+  --gc-space-4: 16px;
+  --gc-space-5: 20px;
+  --gc-space-6: 24px;
+  --gc-space-8: 32px;
+  --gc-space-10: 40px;
+  --gc-space-12: 48px;
+
+  /* --- Radios (sobrios, de instrumento) --- */
+  --gc-radius-sm: 4px;
+  --gc-radius-md: 6px;
+  --gc-radius-lg: 10px;
+  --gc-radius-full: 9999px;
+
+  /* --- Sombras (mínimas; solo para capas flotantes) --- */
+  --gc-shadow-pop: 0 8px 28px rgba(0, 0, 0, 0.16);
+  --gc-shadow-drawer: -12px 0 32px rgba(0, 0, 0, 0.14);
+
+  /* --- Layout del shell --- */
+  --gc-topbar-h: 50px;
+  --gc-master-w: 280px;
+  --gc-aside-w: 340px;
+  --gc-content-max: 1440px;
+
+  /* --- Z-index --- */
+  --gc-z-topbar: 100;
+  --gc-z-drawer: 200;
+  --gc-z-modal: 300;
+  --gc-z-toast: 400;
+
+  /* --- Transición base --- */
+  --gc-t-fast: 120ms ease;
+  --gc-t-normal: 200ms ease;
+}
+
+/* ----------------------------------------------------------------------------
+   Tema oscuro suave (scaffold). Mismos tokens, valores invertidos a un slate
+   de bajo contraste — NUNCA negro puro. Activación diferida (RF8.4) vía
+   <html data-theme="dark">. Los estados se mantienen legibles sobre slate.
+   -------------------------------------------------------------------------- */
+[data-theme='dark'] {
+  --gc-bg: #16171a;
+  --gc-surface: #1d1f23;
+  --gc-surface-2: #25282d;
+  --gc-border: rgba(255, 255, 255, 0.09);
+  --gc-border-strong: rgba(255, 255, 255, 0.16);
+
+  --gc-text: #ececea;
+  --gc-text-2: #a7a59f;
+  --gc-text-3: #74726c;
+
+  --gc-primary: #ececea;        /* en oscuro el primario invierte a claro */
+  --gc-primary-hover: #ffffff;
+  --gc-primary-text: #16171a;
+
+  --gc-success: #34b88a;
+  --gc-warning: #f3b251;
+  --gc-danger: #ef6b6a;
+  --gc-info: #4b8fd6;
+  --gc-accent: #8079e0;
+
+  --gc-success-soft: rgba(52, 184, 138, 0.16);
+  --gc-warning-soft: rgba(243, 178, 81, 0.16);
+  --gc-danger-soft: rgba(239, 107, 106, 0.16);
+  --gc-info-soft: rgba(75, 143, 214, 0.16);
+  --gc-accent-soft: rgba(128, 121, 224, 0.16);
+  --gc-neutral-soft: rgba(255, 255, 255, 0.06);
+
+  --gc-shadow-pop: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --gc-shadow-drawer: -12px 0 32px rgba(0, 0, 0, 0.45);
+}
+
+/* ----------------------------------------------------------------------------
+   Base "instrumento" SCOPED (convivencia con el sistema legacy)
+   Durante la transición conviven dos hojas: la legacy (tokens.css + global.css
+   "Luxury Tech") da tema a las pantallas aún no migradas; estas reglas aplican
+   la tipografía/encabezados del rediseño SOLO a las pantallas nuevas, sin pisar
+   el tema legacy. Las pantallas nuevas pintan su propio fondo (.gc-shell/.login),
+   por lo que el body oscuro legacy queda cubierto.
+   -------------------------------------------------------------------------- */
+.gc-shell,
+.login,
+.gc-modal,
+.gc-drawer {
+  font-family: var(--gc-font-sans);
+  font-weight: var(--gc-fw-regular);
+  color: var(--gc-text);
+}
+.gc-shell :is(h1, h2, h3, h4, h5, h6),
+.login :is(h1, h2, h3, h4, h5, h6),
+.gc-modal :is(h1, h2, h3, h4, h5, h6),
+.gc-drawer :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--gc-font-sans);
+  font-weight: var(--gc-fw-medium);
+  line-height: var(--gc-lh-tight);
+  letter-spacing: -0.01em;
+  color: var(--gc-text);
+}
+
+/* Utilidades del rediseño (antes en el global nuevo; aquí para no colisionar
+   con el global.css legacy que se restaura) */
+.gc-mono {
+  font-family: var(--gc-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.gc-hairline { border-bottom: 1px solid var(--gc-border); }
