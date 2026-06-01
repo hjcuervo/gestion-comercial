@@ -7,6 +7,7 @@ import com.arquitecsoft.gestion.domain.pipeline.entity.GcPipeline;
 import com.arquitecsoft.gestion.domain.pipeline.entity.GcPipeline.EstadoPipeline;
 import com.arquitecsoft.gestion.domain.pipeline.repository.GcEtapaRepository;
 import com.arquitecsoft.gestion.domain.pipeline.repository.GcPipelineRepository;
+import com.arquitecsoft.gestion.domain.oportunidad.repository.GcOportunidadRepository;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
 import com.arquitecsoft.gestion.infrastructure.exception.BusinessException;
 import com.arquitecsoft.gestion.infrastructure.security.SecurityUtils;
@@ -26,13 +27,16 @@ public class PipelineService {
 
     private final GcPipelineRepository pipelineRepository;
     private final GcEtapaRepository etapaRepository;
+    private final GcOportunidadRepository oportunidadRepository;
     private final SecurityUtils securityUtils;
 
     public PipelineService(GcPipelineRepository pipelineRepository,
                            GcEtapaRepository etapaRepository,
+                           GcOportunidadRepository oportunidadRepository,
                            SecurityUtils securityUtils) {
         this.pipelineRepository = pipelineRepository;
         this.etapaRepository = etapaRepository;
+        this.oportunidadRepository = oportunidadRepository;
         this.securityUtils = securityUtils;
     }
 
@@ -124,12 +128,19 @@ public class PipelineService {
     // ==================== ETAPA ====================
 
     @Transactional(readOnly = true)
-    public List<EtapaResponse> listarEtapasPorPipeline(Long pipelineId) {
+    public List<EtapaResponse> listarEtapasPorPipeline(Long pipelineId, String estado) {
         if (!pipelineRepository.existsById(pipelineId)) {
             throw new BusinessException("NOT_FOUND", "Pipeline no encontrado con ID: " + pipelineId);
         }
 
-        return etapaRepository.findByPipelineIdOrderByOrden(pipelineId).stream()
+        List<GcEtapa> etapas;
+        if (StringUtils.hasText(estado) && "ACTIVA".equalsIgnoreCase(estado)) {
+            etapas = etapaRepository.findActivasByPipelineId(pipelineId);
+        } else {
+            etapas = etapaRepository.findByPipelineIdOrderByOrden(pipelineId);
+        }
+
+        return etapas.stream()
                 .map(EtapaResponse::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -193,7 +204,18 @@ public class PipelineService {
 
         if (StringUtils.hasText(request.getEstado())) {
             try {
-                etapa.setEstado(EstadoEtapa.valueOf(request.getEstado()));
+                EstadoEtapa nuevoEstado = EstadoEtapa.valueOf(request.getEstado());
+                // RB-EI-4: no permitir desactivar una etapa con oportunidades abiertas
+                if (nuevoEstado == EstadoEtapa.INACTIVA && etapa.getEstado() == EstadoEtapa.ACTIVA) {
+                    long abiertas = oportunidadRepository.countOportunidadesActivasByEtapa(etapaId);
+                    if (abiertas > 0) {
+                        throw new BusinessException(
+                            "ETAPA_CON_OPORTUNIDADES",
+                            "No se puede desactivar la etapa: tiene " + abiertas +
+                            " oportunidad(es) abierta(s). Mueva o cierre las oportunidades primero.");
+                    }
+                }
+                etapa.setEstado(nuevoEstado);
             } catch (IllegalArgumentException e) {
                 throw new BusinessException("VALIDATION_ERROR", "Estado de etapa invalido: " + request.getEstado());
             }

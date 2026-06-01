@@ -1,0 +1,35 @@
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.0)
+
+2026-05-21T10:58:26.383-05:00  INFO 45656 --- [           main] c.a.gestion.GestionApplication           : Starting GestionApplication v0.1.0 using Java 21.0.9 with PID 45656 (D:\Proyectos\gestion-comercial\backend\target\gestion-comercial-0.1.0.jar started by HéctorJavierCuervoRa in D:\Proyectos\gestion-comercial\backend)
+2026-05-21T10:58:26.385-05:00  INFO 45656 --- [           main] c.a.gestion.GestionApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-05-21T10:58:27.822-05:00  INFO 45656 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-21T10:58:27.923-05:00  INFO 45656 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 93 ms. Found 26 JPA repository interfaces.
+2026-05-21T10:58:29.038-05:00  INFO 45656 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-05-21T10:58:29.050-05:00  INFO 45656 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-21T10:58:29.050-05:00  INFO 45656 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.24]
+2026-05-21T10:58:29.092-05:00  INFO 45656 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-21T10:58:29.093-05:00  INFO 45656 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2616 ms
+2026-05-21T10:58:29.767-05:00  INFO 45656 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-21T10:58:31.988-05:00  INFO 45656 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@48ccbb32
+2026-05-21T10:58:31.990-05:00  INFO 45656 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-21T10:58:32.044-05:00  INFO 45656 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-21T10:58:32.146-05:00  INFO 45656 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-05-21T10:58:32.178-05:00  INFO 45656 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-21T10:58:32.423-05:00  INFO 45656 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-21T10:58:35.559-05:00  INFO 45656 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-21T10:58:35.562-05:00  INFO 45656 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-21T10:58:35.855-05:00  INFO 45656 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-21T10:58:37.085-05:00  WARN 45656 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-21T10:58:38.847-05:00  INFO 45656 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@637a665a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6917b034, org.springframework.security.web.context.SecurityContextHolderFilter@6b993d8b, org.springframework.security.web.header.HeaderWriterFilter@ac7b35f, org.springframework.web.filter.CorsFilter@549f11e0, org.springframework.security.web.authentication.logout.LogoutFilter@2c0e24c7, com.arquitecsoft.gestion.infrastructure.security.JwtAuthenticationFilter@3b7c58e7, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@e50c1f6, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@95ad3af, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1dd6812a, org.springframework.security.web.session.SessionManagementFilter@f76dae9, org.springframework.security.web.access.ExceptionTranslationFilter@17e8e8d6, org.springframework.security.web.access.intercept.AuthorizationFilter@5c0acdac]
+2026-05-21T10:58:39.188-05:00  INFO 45656 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-05-21T10:58:39.199-05:00  INFO 45656 --- [           main] c.a.gestion.GestionApplication           : Started GestionApplication in 13.408 seconds (process running for 14.288)
+2026-05-21T10:59:15.987-05:00  INFO 45656 --- [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-21T10:59:15.990-05:00  INFO 45656 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-05-21T10:59:17.761-05:00  INFO 45656 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

@@ -30,10 +30,11 @@ public class FacturaController {
     public ResponseEntity<PageResponse<FacturaResponse>> listar(
             @RequestParam(required = false, name = "empresa_id") Long empresaId,
             @RequestParam(required = false) String moneda,
+            @RequestParam(required = false) Boolean disponibles,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20", name = "page_size") int pageSize) {
         if (pageSize > 100) pageSize = 100;
-        return ResponseEntity.ok(facturaService.listar(empresaId, moneda, page, pageSize));
+        return ResponseEntity.ok(facturaService.listar(empresaId, moneda, disponibles, page, pageSize));
     }
 
     @GetMapping("/{id}")

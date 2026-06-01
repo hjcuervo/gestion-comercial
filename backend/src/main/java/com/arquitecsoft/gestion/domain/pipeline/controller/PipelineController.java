@@ -66,8 +66,10 @@ public class PipelineController {
     // ==================== ETAPAS ====================
 
     @GetMapping("/{pipelineId}/etapas")
-    public ResponseEntity<List<EtapaResponse>> listarEtapas(@PathVariable Long pipelineId) {
-        List<EtapaResponse> response = pipelineService.listarEtapasPorPipeline(pipelineId);
+    public ResponseEntity<List<EtapaResponse>> listarEtapas(
+            @PathVariable Long pipelineId,
+            @RequestParam(required = false) String estado) {
+        List<EtapaResponse> response = pipelineService.listarEtapasPorPipeline(pipelineId, estado);
         return ResponseEntity.ok(response);
     }
 

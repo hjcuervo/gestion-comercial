@@ -95,27 +95,47 @@
 
           <!-- Acciones según estado -->
           <div class="panel__actions">
-            <!-- Aplicar factura (cualquier estado no final) -->
+            <!-- Acción principal: Aplicar factura -->
             <button
               v-if="!detalle.estadoFinal"
-              class="btn btn--accent btn--full"
+              class="btn btn--accent btn--full btn--lg"
               @click="showCruceModal = true"
             >
-              <Icon name="check-circle" :size="16" /> Aplicar factura
+              <Icon name="check-circle" :size="18" /> Aplicar factura
             </button>
 
-            <!-- Botones de transición agrupados -->
-            <div v-if="transicionesDisponibles.length" class="action-row">
-              <button
-                v-for="t in transicionesDisponibles"
-                :key="t.action"
-                :class="['btn', 'btn--sm', t.variant || 'btn--ghost']"
-                :title="t.title"
-                @click="ejecutarTransicion(t)"
-              >
-                <Icon :name="t.icon" :size="14" />
-                {{ t.label }}
-              </button>
+            <!-- Reactivar: solo cuando el compromiso está en estado final -->
+            <button
+              v-if="detalle.estadoFinal"
+              class="btn btn--ghost btn--full"
+              @click="ejecutarTransicion({ action: 'reactivar' })"
+            >
+              <Icon name="rotate-ccw" :size="16" /> Reactivar compromiso
+            </button>
+
+            <!-- Ajustes secundarios: reprogramar fecha y ajustar monto.
+                 Se agrupan bajo un subtítulo discreto para que se entienda
+                 que son acciones excepcionales, no parte del flujo normal. -->
+            <div v-if="!detalle.estadoFinal && (puedeReprogramar || puedeAjustarMonto)" class="ajustes-group">
+              <span class="ajustes-label">Ajustes excepcionales</span>
+              <div class="ajustes-row">
+                <button
+                  v-if="puedeReprogramar"
+                  class="btn-text"
+                  title="Cambiar la fecha esperada de pago"
+                  @click="abrirComando('reprogramar')"
+                >
+                  <Icon name="calendar" :size="14" /> Reprogramar fecha
+                </button>
+                <button
+                  v-if="puedeAjustarMonto"
+                  class="btn-text"
+                  title="Cambiar el monto esperado (sin tocar el presupuestado)"
+                  @click="abrirComando('ajustarMonto')"
+                >
+                  <Icon name="edit" :size="14" /> Ajustar monto
+                </button>
+              </div>
             </div>
           </div>
 
@@ -336,9 +356,17 @@
                     {{ f.empresaNombre }} · {{ fmtFecha(f.fechaEmision) }}
                   </span>
                 </div>
-                <span class="factura-option__valor">
-                  {{ fmtMoneda(f.valorTotal, f.moneda) }}
-                </span>
+                <div class="factura-option__right">
+                  <span class="factura-option__valor">
+                    {{ fmtMoneda(f.valorTotal, f.moneda) }}
+                  </span>
+                  <span
+                    v-if="f.saldoDisponible != null && Number(f.saldoDisponible) !== Number(f.valorTotal)"
+                    class="factura-option__saldo"
+                  >
+                    Saldo: {{ fmtMoneda(f.saldoDisponible, f.moneda) }}
+                  </span>
+                </div>
               </div>
             </div>
             <div v-if="selectedFacturaId" class="field" style="margin-top:var(--space-3)">
@@ -570,28 +598,25 @@ const aplicacionesActivas = computed(() => {
 });
 
 // Botones de transición según estado actual
-const transicionesDisponibles = computed(() => {
-  if (!detalle.value) return [];
-  const estado = detalle.value.estado;
-  const acciones = [];
+// Decisión UX: el panel expone 2 ajustes excepcionales (reprogramar, ajustar monto)
+// y la acción "Reactivar" cuando el compromiso está en estado final. Otras transiciones
+// que la spec contempla (iniciar-gestion, confirmar, marcar-perdido) están deshabilitadas
+// en el UI por decisión del proyecto:
+//  - "iniciar-gestion" es implícito: se dispara al registrar primera gestión / aplicar factura.
+//  - "confirmar" es flujo interno; no añade valor manual al usuario.
+//  - "marcar-perdido" no aplica porque los compromisos no facturados se acumulan como
+//    Arrastre mes tras mes, no se cierran.
+// Los endpoints del backend siguen disponibles por si más adelante se requiere exponerlos.
 
-  if (estado === 'PENDIENTE_GESTION') {
-    acciones.push({ action: 'iniciarGestion', label: 'Iniciar gestión', icon: 'play', title: 'Pasa a EN_GESTION' });
-  }
-  if (['EN_GESTION', 'COMPROMETIDO', 'PARCIALMENTE_CUMPLIDO', 'REPROGRAMADO'].includes(estado)) {
-    acciones.push({ action: 'confirmar', label: 'Confirmar', icon: 'check', title: 'Marca como COMPROMETIDO' });
-  }
-  if (['EN_GESTION', 'COMPROMETIDO', 'PARCIALMENTE_CUMPLIDO', 'PENDIENTE_GESTION'].includes(estado)) {
-    acciones.push({ action: 'reprogramar', label: 'Reprogramar', icon: 'calendar', title: 'Cambiar fecha esperada' });
-  }
-  if (!detalle.value.estadoFinal) {
-    acciones.push({ action: 'ajustarMonto', label: 'Ajustar monto', icon: 'edit', title: 'Cambiar monto esperado actual' });
-    acciones.push({ action: 'marcarPerdido', label: 'No logrado', icon: 'x-circle', variant: 'btn--danger', title: 'Cierra como NO_LOGRADO' });
-  }
-  if (detalle.value.estadoFinal) {
-    acciones.push({ action: 'reactivar', label: 'Reactivar', icon: 'rotate-ccw', title: 'Vuelve a EN_GESTION' });
-  }
-  return acciones;
+const puedeReprogramar = computed(() => {
+  if (!detalle.value) return false;
+  return ['PENDIENTE_GESTION', 'EN_GESTION', 'COMPROMETIDO', 'PARCIALMENTE_CUMPLIDO', 'REPROGRAMADO']
+    .includes(detalle.value.estado);
+});
+
+const puedeAjustarMonto = computed(() => {
+  if (!detalle.value) return false;
+  return !detalle.value.estadoFinal;
 });
 
 // ============================================================
@@ -651,7 +676,7 @@ watch(showCruceModal, async (v) => {
 async function cargarFacturas() {
   loadingFacturas.value = true;
   try {
-    const res = await facturacionService.listarFacturas({ page_size: 50 });
+    const res = await facturacionService.listarFacturas({ page_size: 50, disponibles: true });
     facturas.value = res.data || [];
   } catch (err) { console.error(err); facturas.value = []; }
   finally { loadingFacturas.value = false; }
@@ -720,13 +745,14 @@ async function submitNuevaYAplicar() {
 }
 
 function ejecutarTransicion(t) {
+  // En el UI actual solo se invoca para 'reactivar' (botón cuando estado final).
+  // Las otras acciones expuestas (reprogramar, ajustarMonto) se llaman vía abrirComando directamente.
+  // Las endpoints iniciar-gestion, confirmar, marcar-perdido siguen disponibles en el service
+  // por si más adelante se decide exponerlas en UI.
   switch (t.action) {
-    case 'iniciarGestion': return invokeSimple('iniciarGestion');
-    case 'confirmar':      return invokeSimple('confirmar');
-    case 'reactivar':      return invokeSimple('reactivar');
-    case 'reprogramar':    return abrirComando('reprogramar');
-    case 'ajustarMonto':   return abrirComando('ajustarMonto');
-    case 'marcarPerdido':  return abrirComando('marcarPerdido');
+    case 'reactivar':   return invokeSimple('reactivar');
+    case 'reprogramar': return abrirComando('reprogramar');
+    case 'ajustarMonto':return abrirComando('ajustarMonto');
   }
 }
 
@@ -1059,12 +1085,49 @@ function tipoEventoLabel(tipo) {
 .panel__actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
-.action-row {
+
+/* Ajustes excepcionales (reprogramar, ajustar monto) */
+.ajustes-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  border-left: 2px solid var(--glass-border);
+}
+.ajustes-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-semibold);
+}
+.ajustes-row {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* Botón estilo "texto" — discreto, sin fondo */
+.btn-text {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-2);
+  background: transparent;
+  border: none;
+  padding: var(--space-1) 0;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.btn-text:hover {
+  color: var(--primary);
 }
 
 /* Tabs */
@@ -1367,6 +1430,17 @@ function tipoEventoLabel(tipo) {
   color: var(--primary);
   font-family: var(--font-mono, monospace);
 }
+.factura-option__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.factura-option__saldo {
+  font-size: 10px;
+  color: var(--warning);
+  font-family: var(--font-mono, monospace);
+}
 
 /* Loading / empty inline */
 .mini-loading {
@@ -1403,6 +1477,7 @@ function tipoEventoLabel(tipo) {
 }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn--sm { padding: var(--space-1) var(--space-3); font-size: 11px; }
+.btn--lg { padding: var(--space-3) var(--space-5); font-size: var(--text-sm); }
 .btn--full { width: 100%; justify-content: center; }
 .btn--ghost { border-color: var(--glass-border); }
 .btn--ghost:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }

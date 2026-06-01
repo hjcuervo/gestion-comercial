@@ -28,7 +28,22 @@ public class FacturaResponse {
     private String motivoAnulacion;
     private LocalDateTime fechaCreacion;
 
+    /** Monto total aplicado (suma de aplicaciones N:M vigentes contra compromisos). */
+    private BigDecimal montoAplicadoAcumulado;
+
+    /** Saldo disponible para aplicar (valorTotal - montoAplicadoAcumulado). */
+    private BigDecimal saldoDisponible;
+
     public static FacturaResponse fromEntity(GcFactura f) {
+        return fromEntity(f, null);
+    }
+
+    /**
+     * Variante que incluye el monto aplicado acumulado y calcula el saldo disponible.
+     * Si {@code montoAplicado} es null, los campos quedan en null (el frontend puede
+     * pedirlos por separado o asumir que no aplica).
+     */
+    public static FacturaResponse fromEntity(GcFactura f, BigDecimal montoAplicado) {
         FacturaResponse r = new FacturaResponse();
         r.setId(f.getId());
         if (f.getEmpresa() != null) {
@@ -53,6 +68,11 @@ public class FacturaResponse {
         r.setFechaAnulacion(f.getFechaAnulacion());
         r.setMotivoAnulacion(f.getMotivoAnulacion());
         r.setFechaCreacion(f.getFechaCreacion());
+        if (montoAplicado != null) {
+            r.setMontoAplicadoAcumulado(montoAplicado);
+            BigDecimal total = f.getValorTotal() != null ? f.getValorTotal() : BigDecimal.ZERO;
+            r.setSaldoDisponible(total.subtract(montoAplicado));
+        }
         return r;
     }
 
@@ -94,4 +114,8 @@ public class FacturaResponse {
     public void setMotivoAnulacion(String motivoAnulacion) { this.motivoAnulacion = motivoAnulacion; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public BigDecimal getMontoAplicadoAcumulado() { return montoAplicadoAcumulado; }
+    public void setMontoAplicadoAcumulado(BigDecimal montoAplicadoAcumulado) { this.montoAplicadoAcumulado = montoAplicadoAcumulado; }
+    public BigDecimal getSaldoDisponible() { return saldoDisponible; }
+    public void setSaldoDisponible(BigDecimal saldoDisponible) { this.saldoDisponible = saldoDisponible; }
 }

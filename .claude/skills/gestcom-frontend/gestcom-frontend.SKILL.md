@@ -598,7 +598,60 @@ export const formatDateTime = (iso) =>
 
 ---
 
-## 10. Checklist al crear / modificar una vista
+## 10. Frescura de datos (Política 1)
+
+### 10.1 El problema
+
+Cuando una vista mantiene datos en un **store de Pinia** (`empresa.store`, `oportunidad.store`, `pipeline.store`), esos datos viven más allá del ciclo de vida de la vista. Si el usuario edita algo en otra vista, otro tab, o vuelve después de un tiempo, lo que ve puede estar **obsoleto** respecto al backend.
+
+### 10.2 La regla (convención del proyecto)
+
+**Toda vista que consume un store o tiene tabs internos debe garantizar datos frescos cada vez que se vuelve a ella.** Esto se logra por dos vías:
+
+#### Vía A — Recargar al montar (cubre el 95% de casos)
+
+Cada vista hace su `onMounted` invocando los `cargar*()` de los stores que consume. Como Vue Router **desmonta y vuelve a montar** las vistas al cambiar de ruta, esto garantiza frescura al navegar entre módulos sin trabajo extra.
+
+```javascript
+onMounted(() => {
+  store.cargarEmpresas();
+});
+```
+
+Casi todas las vistas del proyecto ya cumplen esto (Empresas, Personas, Contratos, Oportunidades, etc.). Si creás una vista nueva, este `onMounted` es obligatorio.
+
+#### Vía B — Handler al cambiar de tab interno (cuando la vista tiene tabs)
+
+Si la vista tiene **tabs internos** (no rutas), cambiar de tab NO desmonta la vista, así que `onMounted` no se vuelve a disparar. En estos casos, el handler del tab debe recargar los datos antes de activarlo:
+
+```javascript
+async function goToKanban() {
+  activeTab.value = 'kanban';
+  if (opStore.pipelineActivo?.id) {
+    await opStore.seleccionarPipeline(opStore.pipelineActivo.id);
+  }
+}
+```
+
+**Caso real:** `PipelineView.vue` tiene tabs "Kanban" / "Configuración". Sin el handler, modificar etapas en Configuración no se reflejaba en el Kanban hasta refrescar el navegador.
+
+### 10.3 Cuándo NO aplica
+
+- **Cambios dentro del mismo componente** (modal abre, guarda, cierra): el componente padre suele emitir `@updated` y el padre invalida su cache. No es Política 1.
+- **Vistas puramente estáticas** (login, vistas que no consumen stores): no aplica.
+- **Datos que rara vez cambian** (catálogos como tipos de documento, pipelines del Mundo 1) podrían cachearse más agresivamente. Para GestCom mantenemos el patrón simple: recarga al montar/cambiar tab.
+
+### 10.4 Antipatrón
+
+❌ **No** intentes invalidar caches cruzados ad-hoc por cada operación ("al guardar X, refrescar también Y"). Es frágil y se olvida en features nuevos. Si la vista respeta Política 1, el problema desaparece.
+
+### 10.5 Cuándo migrar a algo mejor
+
+Cuando el proyecto supere ~30 vistas con stores complejos, considerar migrar a **@tanstack/vue-query** (deuda DT-futuro). vue-query maneja invalidación, caché stale-while-revalidate y refetch automático. Hoy con la simpleza de GestCom, la Política 1 alcanza.
+
+---
+
+## 11. Checklist al crear / modificar una vista
 
 - [ ] Usa `<script setup>` (Composition API).
 - [ ] Envuelta en `<AppLayout>` (no AuroraLayout salvo decisión explícita).
@@ -613,10 +666,12 @@ export const formatDateTime = (iso) =>
 - [ ] Si va al NavRail: agregada en `AppLayout.vue` (array `navItems`) con icono Material y entrada en `pageTitle`.
 - [ ] Si lee paginación: accede a `res.pagination.page` / `res.pagination.totalPages`, no a `res.page` directo.
 - [ ] Modales en `components/{dominio}/`, emiten `@guardar` y `@cerrar`.
+- [ ] Si usa stores Pinia: `onMounted` invoca `cargar*()` para garantizar datos frescos (Política 1, §10).
+- [ ] Si tiene tabs internos: el handler de cada tab invoca recarga antes de activarlo (§10.2 Vía B).
 
 ---
 
-## 11. Cómo entregar archivos
+## 12. Cómo entregar archivos
 
 1. Cada vista en su `.vue` propio.
 2. Cada service en su `.js` propio.

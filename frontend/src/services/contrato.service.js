@@ -33,10 +33,22 @@ export const contratoService = {
   async terminar(id) { const { data } = await api.post(`${BASE}/${id}/terminar`); return data; },
   async liquidar(id) { const { data } = await api.post(`${BASE}/${id}/liquidar`); return data; },
 
-  // Formas de pago
-  async listarFormasPago(contratoId) { const { data } = await api.get(`${BASE}/${contratoId}/formas-pago`); return data; },
-  async crearFormaPago(contratoId, payload) { const { data } = await api.post(`${BASE}/${contratoId}/formas-pago`, payload); return data; },
-  async eliminarFormaPago(formaPagoId) { await api.delete(`${BASE}/formas-pago/${formaPagoId}`); },
+  // Formas de pago — internamente "compromisos de ingreso" (renombre Mundo 3)
+  // El frontend mantiene el nombre "FormaPago" en la UI; aquí solo se ajusta el endpoint.
+  async listarFormasPago(contratoId) {
+    const { data } = await api.get(`${BASE}/${contratoId}/compromisos`);
+    return data;
+  },
+  async crearFormaPago(contratoId, payload) {
+    const { data } = await api.post(`${BASE}/${contratoId}/compromisos`, payload);
+    return data;
+  },
+  // Nota: el backend nuevo no expone DELETE de compromiso; la "eliminación lógica"
+  // se hace vía POST /compromisos/{id}/marcar-perdido con motivo (RN-20).
+  // Esta función queda como stub que arroja error claro hasta que se decida flujo.
+  async eliminarFormaPago(formaPagoId) {
+    throw new Error('Eliminar forma de pago no soportado. Use "marcar-perdido" vía facturacionService.');
+  },
 
   // Modificaciones
   async listarModificaciones(contratoId) { const { data } = await api.get(`${BASE}/${contratoId}/modificaciones`); return data; },

@@ -133,16 +133,30 @@ public class OportunidadService {
         GcOportunidad oportunidad = oportunidadRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Oportunidad no encontrada con ID: " + id));
 
-        // Permitir mover ABIERTA, SEGUIMIENTO y GANADA (pipeline contractual)
-        if (oportunidad.isCerrada() || oportunidad.isContratada()) {
-            throw new BusinessException("BUSINESS_ERROR", "No se puede mover una oportunidad en estado " + oportunidad.getEstadoMacro());
-        }
-
         GcEtapa nuevaEtapa = etapaRepository.findById(request.getEtapaId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Etapa no encontrada con ID: " + request.getEtapaId()));
 
         if (!nuevaEtapa.getPipeline().getId().equals(oportunidad.getPipeline().getId())) {
             throw new BusinessException("VALIDATION_ERROR", "La etapa no pertenece al pipeline de la oportunidad");
+        }
+
+        // Reglas de movimiento por estado:
+        //   - CONTRATADA / PERDIDA / NO_CONCRETADA: inmutables, no se mueven nunca.
+        //   - GANADA: solo se mueve dentro de pipelines de ámbito CONTRATACION
+        //     (es lo que permite gestionar el flujo contractual post-adjudicación).
+        //   - ABIERTA / SEGUIMIENTO: se mueven libremente en pipelines COMERCIAL.
+        EstadoMacro estado = oportunidad.getEstadoMacro();
+        boolean ambitoContractual = "CONTRATACION".equals(nuevaEtapa.getPipeline().getAmbito());
+
+        if (estado == EstadoMacro.CONTRATADA ||
+            estado == EstadoMacro.PERDIDA ||
+            estado == EstadoMacro.NO_CONCRETADA) {
+            throw new BusinessException("BUSINESS_ERROR",
+                    "No se puede mover una oportunidad en estado " + estado);
+        }
+        if (estado == EstadoMacro.GANADA && !ambitoContractual) {
+            throw new BusinessException("BUSINESS_ERROR",
+                    "Una oportunidad GANADA solo se puede mover dentro de un pipeline de contratación");
         }
 
         oportunidad.setEtapa(nuevaEtapa);

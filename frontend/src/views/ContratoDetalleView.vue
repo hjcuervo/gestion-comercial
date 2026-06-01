@@ -82,9 +82,9 @@
               <tbody>
                 <tr v-for="fp in formasPago" :key="fp.id">
                   <td><span class="cell-name">{{ fp.descripcion }}</span></td>
-                  <td class="text-right"><span class="cell-valor">{{ fmtCurrency(fp.valor) }}</span></td>
-                  <td><span class="cell-fecha">{{ fmtDate(fp.fechaEstimadaPago) }}</span></td>
-                  <td><span :class="['estado-pill', `estado-pill--${fp.estado?.toLowerCase()}`]">{{ fp.estado }}</span></td>
+                  <td class="text-right"><span class="cell-valor">{{ fmtCurrency(fp.montoPresupuestado) }}</span></td>
+                  <td><span class="cell-fecha">{{ fmtDate(fp.fechaEsperadaActual || fp.fechaEsperadaOriginal) }}</span></td>
+                  <td><span :class="['estado-pill', `estado-pill--${(fp.estado || '').toLowerCase()}`]">{{ estadoCompromisoLabel(fp.estado) }}</span></td>
                 </tr>
               </tbody>
             </table>
@@ -236,14 +236,15 @@ const modSaving = ref(false);
 const estadoLabel = computed(() => ({ VIGENTE: 'Vigente', SUSPENDIDO: 'Suspendido', TERMINADO: 'Terminado', LIQUIDADO: 'Liquidado' }[contrato.value?.estado] || contrato.value?.estado));
 const diasRestantes = computed(() => { if (!contrato.value?.fechaFin) return 999; return Math.floor((new Date(contrato.value.fechaFin) - new Date()) / 86400000); });
 const diasRestantesLabel = computed(() => { if (!contrato.value?.fechaFin) return '—'; const d = diasRestantes.value; return d < 0 ? `${Math.abs(d)}d vencido` : `${d} días`; });
-const sumaFormasPago = computed(() => formasPago.value.reduce((sum, fp) => sum + (fp.valor || 0), 0));
+const sumaFormasPago = computed(() => formasPago.value.reduce((sum, fp) => sum + Number(fp.montoPresupuestado || 0), 0));
 
 onMounted(async () => {
   try {
     contrato.value = await contratoService.obtenerPorId(route.params.id);
-    formasPago.value = contrato.value.formasPago || [];
     modificaciones.value = contrato.value.modificaciones || [];
-    if (!formasPago.value.length) { try { formasPago.value = await contratoService.listarFormasPago(route.params.id); } catch {} }
+    // Las formas de pago (compromisos) NO vienen embebidas en ContratoResponse;
+    // se piden por separado al endpoint /contratos/{id}/compromisos.
+    try { formasPago.value = await contratoService.listarFormasPago(route.params.id); } catch { formasPago.value = []; }
     if (!modificaciones.value.length) { try { modificaciones.value = await contratoService.listarModificaciones(route.params.id); } catch {} }
   } catch (err) { console.error('Error cargando contrato:', err); }
   finally { loading.value = false; }
@@ -256,6 +257,20 @@ onMounted(async () => {
 function fmtCurrency(v) { return formatCurrency(v, contrato.value?.moneda || 'COP'); }
 function fmtDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }); }
 function getTipoDocNombre(tipoId) { const t = tiposDocumento.value.find(t => t.id === tipoId); return t ? t.nombre : 'Documento'; }
+
+// Etiqueta legible para los 7 estados del compromiso (forma de pago).
+// Nombre distinto a `estadoLabel` (computed) que se usa para el estado del contrato.
+function estadoCompromisoLabel(estado) {
+  return {
+    PENDIENTE_GESTION: 'Pendiente',
+    EN_GESTION: 'En gestión',
+    COMPROMETIDO: 'Comprometido',
+    PARCIALMENTE_CUMPLIDO: 'Parcial',
+    REPROGRAMADO: 'Reprogramado',
+    CUMPLIDO: 'Cumplido',
+    NO_LOGRADO: 'No logrado',
+  }[estado] || estado;
+}
 
 // Documentos del contrato
 async function loadDocumentos() {
@@ -302,7 +317,13 @@ async function cambiarEstado(accion) {
 async function submitFp() {
   fpError.value = null; fpSaving.value = true;
   try {
-    const created = await contratoService.crearFormaPago(contrato.value.id, { descripcion: fpForm.value.descripcion, valor: fpForm.value.valor, fechaEstimadaPago: fpForm.value.fechaEstimadaPago || null });
+    const created = await contratoService.crearFormaPago(contrato.value.id, {
+      descripcion: fpForm.value.descripcion,
+      montoPresupuestado: fpForm.value.valor,
+      fechaEsperada: fpForm.value.fechaEstimadaPago || null,
+      moneda: contrato.value.moneda || 'COP',
+      tipo: 'NUEVO',
+    });
     formasPago.value.push(created);
     showFpModal.value = false;
     fpForm.value = { descripcion: '', valor: null, fechaEstimadaPago: '' };
@@ -369,7 +390,17 @@ async function submitMod() {
 .data-table .text-right { text-align: right; }
 .data-table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid rgba(255,255,255,0.03); }
 .cell-name { font-size: var(--text-xs); color: var(--text-primary); } .cell-valor { font-family: var(--font-mono, monospace); font-size: var(--text-xs); font-weight: 600; color: var(--primary); } .cell-fecha { font-size: var(--text-xs); color: var(--text-tertiary); }
-.estado-pill { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font-size: 10px; font-weight: 600; } .estado-pill--pendiente { background: var(--warning-soft); color: var(--warning); } .estado-pill--facturada { background: var(--success-soft); color: var(--success); }
+.estado-pill { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font-size: 10px; font-weight: 600; }
+.estado-pill--pendiente_gestion    { background: var(--bg-surface);     color: var(--text-secondary); }
+.estado-pill--en_gestion           { background: var(--primary-soft);   color: var(--primary); }
+.estado-pill--comprometido         { background: var(--secondary-soft); color: var(--secondary); }
+.estado-pill--parcialmente_cumplido{ background: var(--warning-soft);   color: var(--warning); }
+.estado-pill--reprogramado         { background: var(--warning-soft);   color: var(--warning); opacity: 0.85; }
+.estado-pill--cumplido             { background: var(--success-soft);   color: var(--success); }
+.estado-pill--no_logrado           { background: var(--error-soft);     color: var(--error); }
+/* Compatibilidad con estados legacy (por si quedan compromisos viejos en BD) */
+.estado-pill--pendiente { background: var(--warning-soft); color: var(--warning); }
+.estado-pill--facturada { background: var(--success-soft); color: var(--success); }
 .fp-summary { display: flex; justify-content: space-between; padding: var(--space-3) var(--space-4); font-size: var(--text-xs); color: var(--text-muted); border-top: 1px solid var(--glass-border); } .fp-summary strong { color: var(--text-primary); font-family: var(--font-mono, monospace); }
 /* Modificaciones */
 .mod-list { display: flex; flex-direction: column; gap: var(--space-3); }

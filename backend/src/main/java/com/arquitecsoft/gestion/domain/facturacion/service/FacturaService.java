@@ -21,6 +21,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Servicio de facturas.
@@ -59,14 +61,43 @@ public class FacturaService {
         GcFactura factura = facturaRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND",
                     "Factura no encontrada con ID: " + id));
-        return FacturaResponse.fromEntity(factura);
+        BigDecimal aplicado = aplicacionRepository.sumAplicadoVigenteByFacturaId(factura.getId());
+        return FacturaResponse.fromEntity(factura, aplicado);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FacturaResponse> listar(Long empresaId, String moneda, int page, int pageSize) {
+    public PageResponse<FacturaResponse> listar(Long empresaId, String moneda, Boolean disponibles, int page, int pageSize) {
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("fechaEmision").descending());
         Page<GcFactura> pageResult = facturaRepository.findWithFilters(empresaId, moneda, pageable);
-        return PageResponse.from(pageResult, FacturaResponse::fromEntity);
+
+        // Mapear cada factura calculando su saldo disponible vigente (suma de aplicaciones no revertidas)
+        List<FacturaResponse> all = pageResult.getContent().stream()
+            .map(f -> {
+                BigDecimal aplicado = aplicacionRepository.sumAplicadoVigenteByFacturaId(f.getId());
+                return FacturaResponse.fromEntity(f, aplicado);
+            })
+            .collect(Collectors.toList());
+
+        // Filtro post-mapeo si se pidió "solo facturas con saldo": excluye anuladas y agotadas.
+        // Nota: el filtro se aplica DESPUÉS de paginar, por lo que la página puede quedar con
+        // menos elementos. Para volúmenes mayores conviene mover este filtro a JPQL (deuda futura).
+        if (Boolean.TRUE.equals(disponibles)) {
+            all = all.stream()
+                .filter(fr -> !Boolean.TRUE.equals(fr.getAnulada()))
+                .filter(fr -> fr.getSaldoDisponible() != null
+                        && fr.getSaldoDisponible().compareTo(BigDecimal.ZERO) > 0)
+                .collect(Collectors.toList());
+            // Como filtramos dentro de la página, ajustamos los metadatos: totalItems pasa a ser el
+            // filtrado de la página actual. No es preciso (en próximas páginas habrá más facturas
+            // disponibles que aquí no contabilizamos), pero es seguro para un modal de selección.
+            return new PageResponse<>(all, new PageResponse.PageInfo(
+                pageResult.getNumber() + 1, pageResult.getSize(), all.size(),
+                all.isEmpty() ? 0 : 1));
+        }
+
+        return new PageResponse<>(all, new PageResponse.PageInfo(
+            pageResult.getNumber() + 1, pageResult.getSize(),
+            pageResult.getTotalElements(), pageResult.getTotalPages()));
     }
 
     @Transactional
