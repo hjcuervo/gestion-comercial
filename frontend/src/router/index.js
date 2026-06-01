@@ -58,13 +58,14 @@ const routes = [
     meta: { requiresAuth: true, layout: 'app' },
   },
 
-  // --- Pantallas aún no migradas (layout legacy) ---
+  // --- RF4: Dashboard (Panel) ---
   {
     path: '/',
     name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
+    meta: { requiresAuth: true, layout: 'app' },
   },
+  // --- Pantallas aún no migradas (layout legacy) ---
   {
     path: '/empresas',
     name: 'Empresas',
