@@ -13,7 +13,7 @@
           :key="item.path"
           :to="item.path"
           class="gc-shell__nav-link"
-          active-class="gc-shell__nav-link--active"
+          :class="{ 'gc-shell__nav-link--active': isActive(item) }"
         >
           {{ item.label }}
         </RouterLink>
@@ -44,7 +44,7 @@
     <!-- Cuerpo: master (izq) + superficie (centro) + aside (der) -->
     <div class="gc-shell__body">
       <aside v-show="regions.master" class="gc-shell__master">
-        <!-- Zona maestra: las vistas Operativo inyectan aquí vía Teleport (RF2+) -->
+        <!-- Zona maestra: las vistas Operativo inyectan aquí vía Teleport -->
         <div id="gc-shell-master"></div>
       </aside>
 
@@ -53,7 +53,7 @@
       </main>
 
       <aside v-show="regions.aside" class="gc-shell__aside">
-        <!-- Zona contextual: captura/datos relacionados (RF2+) -->
+        <!-- Zona contextual: captura/datos relacionados -->
         <div id="gc-shell-aside"></div>
       </aside>
     </div>
@@ -61,25 +61,33 @@
 </template>
 
 <script setup>
-import { reactive, provide, ref, onMounted, onUnmounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
+import { useShell } from '@/composables/useShell';
 import GcIcon from '@/components/ui/GcIcon.vue';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+const { regions, reset } = useShell();
+
+// Al ENTRAR al mundo 'app' (AppShell se crea de nuevo) partimos sin zonas.
+// Se hace en setup (no en onMounted) para correr ANTES de que las vistas hijas
+// fijen sus zonas en sus hooks mounted (que se ejecutan de hijo a padre).
+reset();
 
 const userName = computed(() => authStore.userName || 'Usuario');
 const userRole = computed(() => authStore.userRole);
 
 /**
  * Navegación de módulos en la barra superior (reemplaza al NavRail vertical).
- * Solo destinos con ruta real hoy. "Oportunidades/Actividades" se agrega en
- * RF2 cuando exista /actividades (P-3: Oportunidad detalle como superficie
- * central del Operativo).
+ * "Oportunidades" → /actividades (consola Operativo, P-3: detalle de oportunidad
+ * como superficie central con Actividades de pestaña principal).
  */
 const navItems = [
-  { path: '/', label: 'Dashboard' },
+  { path: '/', label: 'Dashboard', exact: true },
+  { path: '/actividades', label: 'Oportunidades' },
   { path: '/pipeline', label: 'Pipeline' },
   { path: '/contratos', label: 'Contratos' },
   { path: '/facturacion', label: 'Facturación' },
@@ -87,22 +95,15 @@ const navItems = [
   { path: '/personas', label: 'Personas' },
 ];
 
-/* --- Plantillas por presencia de zonas (provide/inject) ---
-   Las vistas Operativo activan master/aside con useShell() en onMounted y
-   teletransportan su contenido a #gc-shell-master / #gc-shell-aside.
-   Tablero y Panel no activan zonas → superficie a todo el ancho. */
-const regions = reactive({ master: false, aside: false });
-function setRegions(next = {}) {
-  if ('master' in next) regions.master = !!next.master;
-  if ('aside' in next) regions.aside = !!next.aside;
+function isActive(item) {
+  if (item.exact) return route.path === item.path;
+  return route.path === item.path || route.path.startsWith(item.path + '/');
 }
-provide('gcShell', { regions, setRegions });
 
 /* --- Atajos / paleta de comandos (placeholder hasta RF8.2) --- */
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const cmdKeyLabel = computed(() => (isMac ? '⌘K' : 'Ctrl K'));
 function openCommandPalette() {
-  // RF8.2 — command palette. Por ahora, no-op visible.
   console.info('[AppShell] Command palette pendiente (RF8.2)');
 }
 function onKeydown(e) {
@@ -250,7 +251,6 @@ onUnmounted(() => {
   overflow-y: auto;
 }
 .gc-shell__surface { flex: 1; min-width: 0; overflow-y: auto; }
-/* En Panel/Tablero (sin zonas) acotamos el ancho del contenido para legibilidad */
 .gc-shell__surface--bounded > :deep(*) {
   max-width: var(--gc-content-max);
   margin-inline: auto;

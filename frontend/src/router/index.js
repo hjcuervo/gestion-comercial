@@ -6,11 +6,6 @@ import { useAuthStore } from '@/stores/auth.store';
  *  - 'blank'  → sin chasis (Login).
  *  - 'app'    → shell nuevo (AppShell). Pantallas ya migradas al rediseño.
  *  - 'legacy' → pantalla aún no migrada; conserva su propio <AppLayout> (transitorio).
- *
- * A medida que cada pantalla migre (RF2+), se cambia su layout de 'legacy' a 'app'
- * y se le retira el <AppLayout> interno.
- *
- * NOTA: borrar el archivo huérfano router/index.js.old del repo (RF1.8).
  */
 const routes = [
   {
@@ -20,7 +15,7 @@ const routes = [
     meta: { requiresAuth: false, layout: 'blank' },
   },
 
-  // --- Pantalla de verificación de la biblioteca base (temporal, quitar antes del merge) ---
+  // Verificación de la biblioteca base (temporal, quitar antes del merge)
   {
     path: '/_kit',
     name: 'ComponentsKit',
@@ -28,7 +23,42 @@ const routes = [
     meta: { requiresAuth: true, layout: 'app' },
   },
 
-  // --- Pantallas aún no migradas (transitorias, layout legacy) ---
+  // --- Consola Operativo: Oportunidades/Actividades (RF2 + RF3) ---
+  // Lista maestra persistente; el detalle (con pestañas Resumen/Actividades/Proceso)
+  // se pinta en la superficie. Absorbe la antigua lista huérfana (RF3.4).
+  {
+    path: '/actividades',
+    name: 'Actividades',
+    component: () => import('@/views/ActividadesView.vue'),
+    meta: { requiresAuth: true, layout: 'app' },
+    children: [
+      {
+        path: ':oportunidadId',
+        name: 'ActividadOportunidad',
+        component: () => import('@/views/OportunidadDetalleView.vue'),
+        meta: { requiresAuth: true, layout: 'app' },
+      },
+    ],
+  },
+
+  // --- RF3: Pipeline (Tablero) ---
+  {
+    path: '/pipeline',
+    name: 'Pipeline',
+    component: () => import('@/views/PipelineView.vue'),
+    meta: { requiresAuth: true, layout: 'app' },
+  },
+
+  // --- RF3: Detalle de oportunidad directo (sin lista maestra) ---
+  // El Kanban enlaza aquí. Reutiliza la misma vista de detalle.
+  {
+    path: '/oportunidades/:id',
+    name: 'OportunidadDetalle',
+    component: () => import('@/views/OportunidadDetalleView.vue'),
+    meta: { requiresAuth: true, layout: 'app' },
+  },
+
+  // --- Pantallas aún no migradas (layout legacy) ---
   {
     path: '/',
     name: 'Dashboard',
@@ -45,18 +75,6 @@ const routes = [
     path: '/personas',
     name: 'Personas',
     component: () => import('@/views/PersonasView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
-  },
-  {
-    path: '/pipeline',
-    name: 'Pipeline',
-    component: () => import('@/views/PipelineView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
-  },
-  {
-    path: '/oportunidades/:id',
-    name: 'OportunidadDetalle',
-    component: () => import('@/views/OportunidadDetalleView.vue'),
     meta: { requiresAuth: true, layout: 'legacy' },
   },
   {
@@ -91,7 +109,6 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'Login' });
   } else if (to.name === 'Login' && authStore.isAuthenticated) {
