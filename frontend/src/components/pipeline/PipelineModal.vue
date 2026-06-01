@@ -1,107 +1,41 @@
 <template>
-  <Teleport to="body">
-    <Transition name="modal">
-      <div v-if="visible" class="modal-overlay" @click.self="$emit('close')">
-        <div class="modal-container animate-scaleIn">
-          <div class="modal-header">
-            <h3 class="modal-title gradient-text">
-              {{ isEditing ? 'Editar Pipeline' : 'Nuevo Pipeline' }}
-            </h3>
-            <button class="modal-close" @click="$emit('close')">
-              <Icon name="x" :size="20" />
-            </button>
-          </div>
+  <GcModal :open="visible" :title="isEditing ? 'Editar pipeline' : 'Nuevo pipeline'" width="520px" @close="$emit('close')">
+    <div class="pipmodal">
+      <GcInput v-model="form.nombre" label="Nombre" placeholder="Ej: Pipeline Comercial" :error="errors.nombre" />
 
-          <div class="modal-body">
-            <div class="form-group">
-              <Input
-                v-model="form.nombre"
-                label="Nombre del Pipeline"
-                placeholder="Ej: Pipeline de Ventas B2B"
-                icon="pipeline"
-                :error="errors.nombre"
-                required
-              />
-            </div>
-
-            <!-- Ámbito (solo en creación) -->
-            <div v-if="!isEditing" class="form-group">
-              <label class="form-label">Ámbito <span class="required">*</span></label>
-              <div class="toggle-group">
-                <button
-                  class="toggle-btn"
-                  :class="{ active: form.ambito === 'COMERCIAL' }"
-                  @click="form.ambito = 'COMERCIAL'"
-                  type="button"
-                >
-                  <Icon name="handshake" :size="16" />
-                  Comercial
-                </button>
-                <button
-                  class="toggle-btn"
-                  :class="{ active: form.ambito === 'CONTRATACION' }"
-                  @click="form.ambito = 'CONTRATACION'"
-                  type="button"
-                >
-                  <Icon name="note-add" :size="16" />
-                  Contratación
-                </button>
-              </div>
-              <span class="form-hint">{{ form.ambito === 'COMERCIAL' ? 'Para gestión de oportunidades comerciales' : 'Para formalización de contratos después de adjudicación' }}</span>
-            </div>
-
-            <!-- Ámbito (solo lectura en edición) -->
-            <div v-if="isEditing" class="form-group">
-              <label class="form-label">Ámbito</label>
-              <span class="ambito-display">{{ form.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial' }}</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Descripción</label>
-              <textarea
-                v-model="form.descripcion"
-                class="form-textarea"
-                placeholder="Describe el propósito de este pipeline..."
-                rows="3"
-                maxlength="500"
-              ></textarea>
-              <span class="form-hint">{{ (form.descripcion || '').length }}/500</span>
-            </div>
-
-            <div v-if="isEditing" class="form-group">
-              <label class="form-label">Estado</label>
-              <div class="toggle-group">
-                <button class="toggle-btn" :class="{ active: form.activo }" @click="form.activo = true" type="button">
-                  <Icon name="check-circle" :size="16" /> Activo
-                </button>
-                <button class="toggle-btn" :class="{ active: !form.activo }" @click="form.activo = false" type="button">
-                  <Icon name="x" :size="16" /> Inactivo
-                </button>
-              </div>
-            </div>
-
-            <div v-if="error" class="form-error-banner">
-              <Icon name="alert-circle" :size="16" /> {{ error }}
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <Button variant="ghost" @click="$emit('close')">Cancelar</Button>
-            <Button variant="primary" icon="check" :loading="saving" @click="handleSubmit">
-              {{ isEditing ? 'Guardar Cambios' : 'Crear Pipeline' }}
-            </Button>
-          </div>
+      <div v-if="!isEditing" class="pipmodal__field">
+        <span class="pipmodal__label">Ámbito</span>
+        <div class="pipmodal__opts">
+          <button class="pipmodal__opt" :class="{ 'pipmodal__opt--on': form.ambito === 'COMERCIAL' }" @click="form.ambito = 'COMERCIAL'">Comercial</button>
+          <button class="pipmodal__opt" :class="{ 'pipmodal__opt--on': form.ambito === 'CONTRATACION' }" @click="form.ambito = 'CONTRATACION'">Contratación</button>
         </div>
+        <span class="pipmodal__hint">{{ form.ambito === 'COMERCIAL' ? 'Para gestión de oportunidades comerciales' : 'Para formalización de contratos después de adjudicación' }}</span>
       </div>
-    </Transition>
-  </Teleport>
+
+      <label v-if="isEditing" class="pipmodal__toggle">
+        <input type="checkbox" v-model="form.activo" />
+        <span>Pipeline activo</span>
+      </label>
+
+      <GcTextarea v-model="form.descripcion" label="Descripción" placeholder="Opcional" :rows="3" />
+
+      <div v-if="error" class="pipmodal__error"><GcIcon name="alert-circle" :size="16" /><span>{{ error }}</span></div>
+    </div>
+
+    <template #footer>
+      <GcButton variant="ghost" @click="$emit('close')">Cancelar</GcButton>
+      <GcButton variant="primary" :loading="saving" @click="handleSubmit">{{ isEditing ? 'Guardar' : 'Crear' }}</GcButton>
+    </template>
+  </GcModal>
 </template>
 
 <script setup>
-import { reactive, watch, computed } from 'vue';
-import Icon from '@/components/ui/Icon.vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
+import { reactive, computed, watch } from 'vue';
+import GcModal from '@/components/ui/GcModal.vue';
+import GcInput from '@/components/ui/GcInput.vue';
+import GcTextarea from '@/components/ui/GcTextarea.vue';
+import GcButton from '@/components/ui/GcButton.vue';
+import GcIcon from '@/components/ui/GcIcon.vue';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -109,28 +43,26 @@ const props = defineProps({
   saving: { type: Boolean, default: false },
   error: { type: String, default: null },
 });
-
 const emit = defineEmits(['close', 'submit']);
-const isEditing = computed(() => !!props.pipeline);
 
+const isEditing = computed(() => !!props.pipeline);
 const form = reactive({ nombre: '', descripcion: '', activo: true, ambito: 'COMERCIAL' });
 const errors = reactive({ nombre: '' });
 
 watch(() => props.visible, (val) => {
-  if (val) {
-    if (props.pipeline) {
-      form.nombre = props.pipeline.nombre || '';
-      form.descripcion = props.pipeline.descripcion || '';
-      form.activo = props.pipeline.estado === 'ACTIVO';
-      form.ambito = props.pipeline.ambito || 'COMERCIAL';
-    } else {
-      form.nombre = '';
-      form.descripcion = '';
-      form.activo = true;
-      form.ambito = 'COMERCIAL';
-    }
-    errors.nombre = '';
+  if (!val) return;
+  if (props.pipeline) {
+    form.nombre = props.pipeline.nombre || '';
+    form.descripcion = props.pipeline.descripcion || '';
+    form.activo = props.pipeline.estado === 'ACTIVO';
+    form.ambito = props.pipeline.ambito || 'COMERCIAL';
+  } else {
+    form.nombre = '';
+    form.descripcion = '';
+    form.activo = true;
+    form.ambito = 'COMERCIAL';
   }
+  errors.nombre = '';
 });
 
 function validate() {
@@ -142,10 +74,7 @@ function validate() {
 
 function handleSubmit() {
   if (!validate()) return;
-  const payload = {
-    nombre: form.nombre.trim(),
-    descripcion: form.descripcion?.trim() || undefined,
-  };
+  const payload = { nombre: form.nombre.trim(), descripcion: form.descripcion?.trim() || undefined };
   if (!isEditing.value) payload.ambito = form.ambito;
   if (isEditing.value) payload.activo = form.activo;
   emit('submit', payload);
@@ -153,32 +82,13 @@ function handleSubmit() {
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4); }
-.modal-container { background: var(--bg-elevated); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-6) var(--space-6) 0; }
-.modal-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; margin: 0; }
-.modal-close { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-secondary); padding: var(--space-2); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; }
-.modal-close:hover { color: var(--text-primary); background: rgba(255, 255, 255, 0.08); }
-.modal-body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
-.modal-footer { display: flex; justify-content: flex-end; gap: var(--space-3); padding: 0 var(--space-6) var(--space-6); }
-
-.form-label { display: block; font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2); }
-.required { color: var(--error); }
-.form-textarea { width: 100%; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-base); padding: var(--space-3) var(--space-4); resize: vertical; transition: border-color 0.2s; box-sizing: border-box; }
-.form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
-.form-textarea::placeholder { color: var(--text-muted); }
-.form-hint { font-size: var(--text-xs); color: var(--text-muted); margin-top: var(--space-1); display: block; }
-
-.toggle-group { display: flex; gap: var(--space-2); }
-.toggle-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-secondary); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; }
-.toggle-btn:hover { background: rgba(255, 255, 255, 0.05); }
-.toggle-btn.active { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
-
-.ambito-display { font-size: var(--text-sm); color: var(--text-primary); font-weight: 500; padding: var(--space-2) var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md); display: inline-block; }
-
-.form-error-banner { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: var(--radius-md); color: var(--error); font-size: var(--text-sm); }
-
-.modal-enter-active { transition: opacity 0.25s ease; }
-.modal-leave-active { transition: opacity 0.2s ease; }
-.modal-enter-from, .modal-leave-to { opacity: 0; }
+.pipmodal { display: flex; flex-direction: column; gap: var(--gc-space-4); }
+.pipmodal__field { display: flex; flex-direction: column; gap: var(--gc-space-2); }
+.pipmodal__label { font-size: var(--gc-fs-sm); font-weight: var(--gc-fw-medium); color: var(--gc-text-2); }
+.pipmodal__opts { display: flex; gap: var(--gc-space-2); }
+.pipmodal__opt { flex: 1; padding: var(--gc-space-2) var(--gc-space-3); background: var(--gc-surface-2); border: 1px solid var(--gc-border); border-radius: var(--gc-radius-md); color: var(--gc-text-2); font-size: var(--gc-fs-md); }
+.pipmodal__opt--on { border-color: var(--gc-primary); background: var(--gc-surface); color: var(--gc-text); font-weight: var(--gc-fw-medium); }
+.pipmodal__hint { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+.pipmodal__toggle { display: flex; align-items: center; gap: var(--gc-space-2); font-size: var(--gc-fs-md); color: var(--gc-text-2); cursor: pointer; }
+.pipmodal__error { display: flex; align-items: center; gap: var(--gc-space-2); padding: var(--gc-space-3); background: var(--gc-danger-soft); border: 1px solid var(--gc-danger); border-radius: var(--gc-radius-md); font-size: var(--gc-fs-sm); color: var(--gc-danger); }
 </style>
