@@ -15,14 +15,6 @@ const routes = [
     meta: { requiresAuth: false, layout: 'blank' },
   },
 
-  // Verificación de la biblioteca base (temporal, quitar antes del merge)
-  {
-    path: '/_kit',
-    name: 'ComponentsKit',
-    component: () => import('@/views/ComponentsKitView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
-  },
-
   // --- Consola Operativo: Oportunidades/Actividades (RF2 + RF3) ---
   // Lista maestra persistente; el detalle (con pestañas Resumen/Actividades/Proceso)
   // se pinta en la superficie. Absorbe la antigua lista huérfana (RF3.4).

@@ -4,7 +4,7 @@
       <div class="modal glass animate-slideUp">
         <div class="modal__header">
           <h2 class="modal__title">Formalizar Contrato</h2>
-          <button class="modal__close" @click="$emit('close')"><Icon name="x" :size="18" /></button>
+          <button class="modal__close" @click="$emit('close')"><GcIcon name="x" :size="18" /></button>
         </div>
 
         <form class="modal__body" @submit.prevent="handleSubmit">
@@ -13,7 +13,7 @@
           <div class="form-row">
             <div class="field">
               <label class="field__label">Tipo de Contrato <span class="req">*</span></label>
-              <div v-if="loadingTipos" class="loading-inline"><Icon name="loader" :size="14" class="animate-spin" /> Cargando...</div>
+              <div v-if="loadingTipos" class="loading-inline"><GcSpinner :size="14" /> Cargando...</div>
               <select v-else v-model="form.tipoContratoId" class="field__select" required>
                 <option :value="null" disabled>Seleccione</option>
                 <option v-for="t in tiposContrato" :key="t.id" :value="t.id">{{ t.nombre }}</option>
@@ -86,12 +86,12 @@
             <textarea v-model="form.observaciones" class="field__textarea" rows="2" maxlength="2000" placeholder="Observaciones del contrato (opcional)"></textarea>
           </div>
 
-          <div v-if="error" class="modal-error"><Icon name="alert-circle" :size="14" /> {{ error }}</div>
+          <div v-if="error" class="modal-error"><GcIcon name="alert-circle" :size="14" /> {{ error }}</div>
 
           <div class="modal__actions">
             <button type="button" class="btn btn--ghost" @click="$emit('close')">Cancelar</button>
             <button type="submit" class="btn btn--primary" :disabled="!isValid || submitting">
-              <Icon v-if="submitting" name="loader" :size="14" class="animate-spin" />
+              <GcSpinner v-if="submitting" :size="14" />
               Formalizar Contrato
             </button>
           </div>
@@ -103,7 +103,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import Icon from '@/components/ui/Icon.vue';
+import GcIcon from '@/components/ui/GcIcon.vue';
+import GcSpinner from '@/components/ui/GcSpinner.vue';
 import { contratoService } from '@/services/contrato.service';
 import { empresaService } from '@/services/empresa.service';
 
