@@ -63,6 +63,13 @@
         <div id="gc-shell-aside"></div>
       </aside>
     </div>
+
+    <GcCommandPalette
+      :open="cmdkOpen"
+      :items="cmdkItems"
+      @close="cmdkOpen = false"
+      @navigate="onCmdkNavigate"
+    />
   </div>
 </template>
 
@@ -74,6 +81,7 @@ import { useShell } from '@/composables/useShell';
 import { useTheme } from '@/composables/useTheme';
 import { useDensity } from '@/composables/useDensity';
 import GcIcon from '@/components/ui/GcIcon.vue';
+import GcCommandPalette from '@/components/ui/GcCommandPalette.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -113,8 +121,21 @@ function isActive(item) {
 /* --- Atajos / paleta de comandos (placeholder hasta RF8.2) --- */
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const cmdKeyLabel = computed(() => (isMac ? '⌘K' : 'Ctrl K'));
+const cmdkOpen = ref(false);
+const cmdkItems = [
+  { path: '/', label: 'Dashboard', icon: 'dashboard' },
+  { path: '/actividades', label: 'Oportunidades', icon: 'target' },
+  { path: '/pipeline', label: 'Pipeline', icon: 'layout-kanban' },
+  { path: '/contratos', label: 'Contratos', icon: 'file-text' },
+  { path: '/facturacion', label: 'Facturación', icon: 'receipt' },
+  { path: '/empresas', label: 'Empresas', icon: 'building' },
+  { path: '/personas', label: 'Personas', icon: 'users' },
+];
 function openCommandPalette() {
-  console.info('[AppShell] Command palette pendiente (RF8.2)');
+  cmdkOpen.value = !cmdkOpen.value;
+}
+function onCmdkNavigate(path) {
+  if (path && path !== route.path) router.push(path);
 }
 function onKeydown(e) {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
