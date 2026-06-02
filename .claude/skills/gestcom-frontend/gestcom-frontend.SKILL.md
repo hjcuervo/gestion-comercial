@@ -1,683 +1,266 @@
 ---
 name: gestcom-frontend
-description: Use this skill whenever creating, modifying, or reviewing frontend code for the GestCom platform — Vue 3 + Vite + Pinia. Triggers include writing or editing .vue views and components, Pinia stores, axios services, router routes, AppLayout/NavRail items, glassmorphism cards, gradient texts, animated entrances, or any UI work in the gestion-comercial project. The visual system is "Aurora Dark" (cyan #00d4ff + violet #a855f7 + coral #ff6b6b) implemented through legacy CSS variables. Always load gestcom-context first to align with the broader project conventions.
+description: Use this skill whenever creating, modifying, or reviewing frontend code for the GestCom platform — Vue 3 + Vite + Pinia. Triggers include writing or editing .vue views and components, Pinia stores, axios services, router routes, AppShell zones, list rows, status badges, the command palette, theme/density toggles, or any UI work in the gestion-comercial project. The visual system is "Instrumento": a LIGHT foundation (warm paper), graphite primary (color is reserved for state only), monospaced data, hairline rows instead of cards, and Tabler outline icons, implemented through --gc-* design tokens. Always load gestcom-context first to align with the broader project conventions.
 ---
 
-# GestCom — Convenciones Frontend
+# GestCom — Convenciones Frontend ("Instrumento")
 
-Esta skill define **cómo se construye el frontend de GestCom**. Aplica todas las reglas aquí descritas al generar vistas, componentes, services, stores y rutas.
+Esta skill define **cómo se construye el frontend de GestCom** tras el rediseño completo a la identidad **"Instrumento"** (rama `feature/rediseno-instrumento`, mergeada a `main`). Reemplaza por completo al sistema anterior "Aurora Dark" / "Luxury Tech", que fue **demolido** (componentes y estilos eliminados del repo).
 
 > **Prerequisito:** Cargar primero `gestcom-context`.
 >
-> **Fuente de verdad:** los patrones aquí descritos se validaron contra el código en `main` el 19-may-2026. Si el código real diverge de esta skill, **gana el código real** — actualizar la skill.
+> **Fuente de verdad:** los patrones aquí descritos se validaron contra el código en `main` tras el merge del rediseño. Si el código real diverge de esta skill, **gana el código real** — actualizar la skill.
 
 ---
 
-## 1. Stack y filosofía
+## 1. Identidad "Instrumento"
 
-- **Vue 3** con **Composition API** (`<script setup>`) — en vistas y componentes.
-- **Pinia** con **Options API** (`state`, `getters`, `actions`) — en stores. (Sí, hay disonancia con Vue Composition: es así en el repo).
-- **Vite** como bundler. Alias `@` apunta a `frontend/src/`.
+GestCom dejó de ser una "vitrina" oscura para ser una **consola operativa** clara. Principios:
+
+1. **La operación primero.** Si una decisión visual no ayuda a operar más rápido o ver más, no entra.
+2. **El color SOLO significa estado.** success/warning/danger/info/accent se reservan a estados de negocio. El color nunca es decorativo. El primario de marca es **grafito** (casi negro), no un color.
+3. **Los datos van en monoespaciado** (DM Mono): valores, fechas, IDs, conteos, códigos de estado. Alinea cifras y da carácter de instrumento. Clase utilitaria global: `.gc-mono`.
+4. **Renglones, no tarjetas.** Las listas son renglones (`GcListRow`) separados por líneas finas (hairline), sin sombras flotantes.
+5. **Densidad alta** con toggle cómodo/compacto.
+6. **Sin saltos de contexto.** Lista maestra + detalle en la misma pantalla (plantilla Operativo).
+
+Fundación **clara por defecto**; modo oscuro suave opcional (slate de bajo contraste, nunca negro puro) por toggle.
+
+---
+
+## 2. Stack y filosofía
+
+- **Vue 3** con **Composition API** (`<script setup>`) en vistas y componentes.
+- **Pinia** con **Options API** en stores (disonancia heredada; mantener la convención del repo).
+- **Vite** como bundler. Alias `@` → `frontend/src/`.
 - **Axios** para HTTP (interceptor JWT + redirección en 401).
-- **Sistema de diseño propio "Aurora Dark"** (tokens legacy nombrados como "Luxury Tech" — ver §3).
-- **No se usa Vuex.** No se usa Options API en código nuevo de vistas/componentes.
-- **No se usa Tailwind ni framework de UI prefabricado.** El styling combina CSS global (`global.css`) con `<style scoped>` por SFC, todo basado en tokens CSS de `tokens.css`.
+- **Iconos: Tabler outline** vía webfont (`@tabler/icons-webfont`), un solo set, expuesto por `GcIcon`.
+- **Tipografías:** DM Sans (UI) + DM Mono (datos), importadas en `instrument.css`.
+- **No Tailwind, no framework de UI prefabricado, no Vuex.** El styling combina `instrument.css` (tokens + reset global + base) con `<style scoped>` por SFC, basado en tokens `--gc-*`.
 
 ---
 
-## 2. Estructura de carpetas
+## 3. Sistema de diseño — tokens `--gc-*`
 
-```
-frontend/src/
-├── App.vue
-├── main.js
-├── style.css                       Punto de entrada que importa tokens + global
-├── assets/styles/
-│   ├── tokens.css                  Variables CSS (paleta, fuentes, espaciado, radios, sombras, z-index)
-│   ├── global.css                  Clases utilitarias: .glass, .gradient-text, .animate-*, etc.
-│   └── style.css
-├── router/
-│   └── index.js                    Routes + guard global
-├── stores/                         Pinia (Options API)
-│   ├── auth.store.js
-│   ├── empresa.store.js
-│   ├── oportunidad.store.js
-│   ├── persona.store.js
-│   └── pipeline.store.js
-├── services/                       Clientes HTTP (axios)
-│   ├── api.js                      Instance + interceptors
-│   ├── auth.service.js
-│   ├── contrato.service.js
-│   ├── empresa.service.js
-│   ├── facturacion.service.js
-│   ├── oportunidad.service.js
-│   └── persona.service.js
-├── views/                          Vistas conectadas al router
-│   ├── DashboardView.vue
-│   ├── LoginView.vue
-│   ├── EmpresasView.vue
-│   ├── PersonasView.vue
-│   ├── PipelineView.vue
-│   ├── OportunidadDetalleView.vue
-│   ├── ContratosListView.vue
-│   ├── ContratoDetalleView.vue
-│   └── FacturacionView.vue
-├── components/
-│   ├── layout/                     AppLayout, NavRail, TopAppBar (los activos)
-│   │                               AuroraLayout, AuroraHeader, AuroraSidebar (alternativos, no usados en vistas)
-│   ├── ui/                         Aurora* + Md* + genéricos (convivencia — deuda DT-05)
-│   │                               Icon.vue (componente de iconos centralizado)
-│   ├── actividad/                  Modales y componentes específicos
-│   ├── contrato/
-│   ├── documento/
-│   ├── empresa/
-│   ├── facturacion/                GestionPanel (único componente Mundo 3 hoy)
-│   ├── oportunidad/
-│   ├── persona/
-│   └── pipeline/
-└── utils/
-    └── currency.js                 formatCurrency, formatDate, etc.
-```
+Todos los tokens viven en `assets/styles/instrument.css`, en `:root` (tema claro) y `[data-theme="dark"]` (tema oscuro). **Nunca hardcodear colores ni medidas; usar siempre tokens `--gc-*`.**
 
-**Reglas:**
+### 3.1 Neutros (fundación clara)
 
-1. Un dominio nuevo crea sus vistas en `views/` y, si tiene componentes específicos, una carpeta nueva en `components/{dominio}/`.
-2. **No mezclar componentes de dominios diferentes.**
-3. Los componentes de UI puramente presentacionales (sin lógica de negocio) viven en `components/ui/`.
-4. Layout activo: **`AppLayout`**, no `AuroraLayout` (parte de DT-05).
+| Token | Rol | Claro |
+|-------|-----|-------|
+| `--gc-bg` | Fondo de la app (papel tibio) | `#f5f4f1` |
+| `--gc-surface` | Superficie: paneles, renglones | `#ffffff` |
+| `--gc-surface-2` | Superficie alterna / hover | `#f0eee9` |
+| `--gc-border` | Línea fina por defecto | `rgba(0,0,0,0.08)` |
+| `--gc-border-strong` | Línea de énfasis | `rgba(0,0,0,0.14)` |
+| `--gc-text` | Texto principal | `#1a1917` |
+| `--gc-text-2` | Texto secundario | `#6b6860` |
+| `--gc-text-3` | Texto terciario / pistas | `#9e9c96` |
+
+### 3.2 Primario (grafito) y estado
+
+| Token | Rol | Claro |
+|-------|-----|-------|
+| `--gc-primary` | Primario / marca (grafito) | `#1a1917` |
+| `--gc-primary-hover` | Hover del primario | `#322f2b` |
+| `--gc-primary-text` | Texto sobre primario | `#ffffff` |
+| `--gc-success` | Estado positivo (VIGENTE, GANADA, FACTURADA) | `#1d9e75` |
+| `--gc-warning` | Estado intermedio (SUSPENDIDO, SEGUIMIENTO) | `#ef9f27` |
+| `--gc-danger` | Estado negativo (PERDIDA, TERMINADO, error) | `#e24b4a` |
+| `--gc-info` | Estado informativo | `#185fa5` |
+| `--gc-accent` | Acento secundario | `#534ab7` |
+
+Cada estado tiene su variante `*-soft` (tinte sutil de fondo): `--gc-success-soft`, `--gc-warning-soft`, `--gc-danger-soft`, `--gc-info-soft`, `--gc-accent-soft`, `--gc-neutral-soft`.
+
+### 3.3 Espaciado, radios, tipografía, sombras, layout, z, transición
+
+- **Espaciado** (múltiplos de 4px): `--gc-space-1` (4px) … `--gc-space-12` (48px).
+- **Radios** (sobrios): `--gc-radius-sm` (4px), `--gc-radius-md` (6px), `--gc-radius-lg` (10px), `--gc-radius-full`.
+- **Fuente:** `--gc-font-sans` (DM Sans), `--gc-font-mono` (DM Mono). Pesos: `--gc-fw-regular` (400), `--gc-fw-medium` (500). Tamaños: `--gc-fs-xs` (11px) … `--gc-fs-2xl` (26px); base `--gc-fs-md` (14px).
+- **Line-height:** `--gc-lh-tight` (1.25), `--gc-lh-normal` (1.45).
+- **Sombras** (mínimas, solo capas flotantes): `--gc-shadow-pop`, `--gc-shadow-drawer`.
+- **Layout del shell:** `--gc-topbar-h` (50px), `--gc-master-w` (280px), `--gc-aside-w` (340px), `--gc-content-max` (1440px).
+- **Z-index:** `--gc-z-topbar` (100), `--gc-z-drawer` (200), `--gc-z-modal` (300), `--gc-z-toast` (400).
+- **Transición:** `--gc-t-fast` (120ms), `--gc-t-normal` (200ms).
+- **Densidad:** `--gc-row-pad-y` / `--gc-row-pad-x` / `--gc-row-gap` (ver §7).
+
+`instrument.css` también incluye el **reset global** (`*`, `html`, `body` con `--gc-bg`, headings, scrollbar sobrio, focus-visible) y `.animate-spin`. No hay otra hoja de estilos global.
 
 ---
 
-## 3. Sistema de diseño "Aurora Dark"
+## 4. Arquitectura: shell único + 3 plantillas
 
-### 3.1 Nota sobre nomenclatura
+### 4.1 `AppShell.vue` (único layout)
 
-El sistema visual se llama **"Aurora Dark"** (decisión congelada). Sin embargo, el archivo `tokens.css` todavía rotula "Luxury Tech Aesthetic" y las variables CSS no tienen prefijo de marca — son globales (`--primary`, `--bg-deep`). Migrar los nombres es deuda DT-05; mientras tanto, **usar los nombres de variables que ya existen**.
+Toda la app vive dentro de **`components/layout/AppShell.vue`**, montado desde `App.vue` según `route.meta.layout`:
 
-### 3.2 Paleta de colores
+- `'blank'` → login (sin chasis).
+- `'app'` → AppShell (todas las pantallas migradas; es el valor por defecto).
 
-Tokens reales en `tokens.css`:
+> Nota: el sistema soportó transitoriamente un layout `'legacy'`, pero **ya no quedan rutas legacy**. Todas usan `'app'` o `'blank'`. (Un comentario residual "pantallas no migradas" en `router/index.js` es cosmético, sin efecto.)
 
-| Variable | Valor | Uso |
-|----------|-------|-----|
-| `--primary` | `#00d4ff` | Electric cyan — acción primaria, brand, énfasis. |
-| `--primary-soft` | `rgba(0, 212, 255, 0.15)` | Fondos atenuados (pills, hovers). |
-| `--primary-glow` | `rgba(0, 212, 255, 0.4)` | Sombras de glow. |
-| `--secondary` | `#a855f7` | Vivid violet — acento, gradientes. |
-| `--secondary-soft` | `rgba(168, 85, 247, 0.15)` | Variante atenuada. |
-| `--accent` | `#ff6b6b` | Warm coral — destacar acciones secundarias. |
-| `--success` | `#10b981` | Mint — VIGENTE, GANADA, FACTURADA. |
-| `--warning` | `#f59e0b` | Amber — SUSPENDIDO, SEGUIMIENTO. |
-| `--error` | `#f43f5e` | Rose — PERDIDA, TERMINADO, errores. |
-| `--bg-deep` | `#08090d` | Fondo principal de la app. |
-| `--bg-base` | `#0d0f14` | Fondo de áreas planas. |
-| `--bg-elevated` | `#13161d` | Cards y paneles. |
-| `--bg-surface` | `#1a1d26` | Modales, dropdowns. |
-| `--bg-hover` | `#22262f` | Estados hover. |
-| `--glass-bg` | `rgba(255, 255, 255, 0.02)` | Fondo de `.glass`. |
-| `--glass-border` | `rgba(255, 255, 255, 0.06)` | Borde de `.glass`. |
-| `--text-primary` | `#ffffff` | Texto principal. |
-| `--text-secondary` | `rgba(255,255,255,0.7)` | Texto subordinado. |
-| `--text-tertiary` | `rgba(255,255,255,0.5)` | Etiquetas, headers de tabla. |
-| `--text-muted` | `rgba(255,255,255,0.3)` | Iconos secundarios, empty states. |
-| `--border` | `rgba(255,255,255,0.08)` | Borde por defecto. |
-| `--border-light` | `rgba(255,255,255,0.12)` | Hover de bordes. |
+El `AppShell` provee: barra superior (marca + navegación de módulos horizontal + Ctrl+K + toggles de densidad/tema + menú de usuario) y una región de contenido con tres zonas: **master** (izquierda), **surface** (centro), **aside** (derecha).
 
-**Gradientes:**
-- `--gradient-primary` — cyan → violet (135°). Para `.gradient-text` y CTAs principales.
-- `--gradient-surface` — sutil top-down. Realces de panel.
-- `--gradient-glow` — radial glow del primary.
-- `--aurora` — tres radials suaves (cyan + violet + coral). Para fondos atmosféricos.
+### 4.2 Las 3 plantillas (por zonas activas)
 
-### 3.3 Tipografía
+| Plantilla | Zonas | Pantallas |
+|-----------|-------|-----------|
+| **Operativo** | master + surface + aside | Oportunidades/Actividades, Contratos, Empresas, Personas |
+| **Tablero** | solo surface (full width) | Pipeline Kanban |
+| **Panel** | solo surface (grilla) | Dashboard |
 
-- Familia display y body: **Outfit** (Google Fonts, pesos 300-800). Importada en `tokens.css`.
-- Familia mono: **JetBrains Mono** (códigos, IDs).
-- Tamaños: `--text-xs` (0.75rem) hasta `--text-5xl` (3.5rem). Texto base = `1rem`.
-- Pesos: `--font-light` (300) hasta `--font-extrabold` (800).
+### 4.3 `useShell` — control de zonas
 
-### 3.4 Espaciado y radios
+Las zonas se controlan con el composable **`composables/useShell.js`** (singleton reactivo: `{ regions, setRegions, reset }`). Como el contenido de la vista se inyecta en el árbol de `App.vue` (no de `AppShell`), se usa un singleton de módulo en vez de provide/inject.
 
-- Escala de espaciado: `--space-1` (0.25rem) hasta `--space-16` (4rem). Múltiplos de 4px.
-- Radios: `--radius-sm` (8px), `--radius-md` (12px), `--radius-lg` (16px), `--radius-xl` (20px), `--radius-2xl` (28px), `--radius-full` (9999px).
-- Sombras: `--shadow-sm`, `--shadow-md`, `--shadow-lg` (oscuras), `--shadow-glow` (cyan), `--shadow-glow-sm`.
+**Convención obligatoria por vista 'app':**
+- En `onMounted`: fijar las zonas que usa con `setRegions({ master: true, aside: true })`.
+- En `onUnmounted`: `reset()`.
+- El `AppShell` llama `reset()` en su propio setup al entrar al mundo 'app'.
 
-### 3.5 Layout fijos
-
-- `--sidebar-width: 72px` (colapsada), `--sidebar-expanded: 260px`.
-- `--header-height: 64px`.
-- `--content-max-width: 1440px`.
-
-### 3.6 Clases globales en `global.css`
-
-Usar siempre que apliquen, en lugar de re-implementar el efecto:
-
-| Clase | Efecto |
-|-------|--------|
-| `.glass` | Glassmorphism: `--glass-bg` + `--glass-border` + `backdrop-filter: blur(20px)`. Hover incluido. |
-| `.gradient-text` | Texto con `--gradient-primary` (cyan → violet) como fill. |
-| `.animate-fadeIn` | Fade-in suave al cargar. |
-| `.animate-slideUp` | Slide-up de 20px al cargar. Variante con `.delay-1`, `.delay-2`, etc. |
-| `.animate-slideIn` | Slide lateral. |
-| `.animate-scaleIn` | Scale-in con spring. |
-| `.animate-pulse` | Pulse infinito (2s). Útil para skeletons. |
-| `.animate-spin` | Rotación infinita (1s). Para loaders. |
-
-### 3.7 Patrones visuales clave
-
-- **Botón primario:** fondo `--primary`, texto `--bg-deep`, hover con glow `--shadow-glow-sm`.
-- **Botón secundario:** `background: transparent`, borde `1px solid --primary`, texto `--primary`.
-- **Botón destructivo:** `--error` o variante outline.
-- **Cards:** clase `.glass` con `padding: var(--space-6)`, `border-radius: var(--radius-lg)`.
-- **Tablas (`.data-table`):** header con `--text-tertiary` en uppercase pequeño, filas con hover `--bg-hover`, celda numérica `text-align: right`.
-- **Estado pills (BEM):** `.estado-pill estado-pill--{estado}` — fondo del color soft, texto del color sólido.
+Para inyectar contenido en las zonas master/aside, las vistas usan **Teleport** a los contenedores del shell (`#gc-shell-master`, `#gc-shell-aside`). Patrón con cuidado de timing: activar la zona en setup y usar `:disabled` del Teleport hasta que el target exista (`nextTick`).
 
 ---
 
-## 4. Convenciones de vistas
+## 5. Biblioteca de componentes `Gc*`
 
-### 4.1 Plantilla canónica de vista de listado
+Una sola implementación por tipo, en `components/ui/`. **Reutilizar; no reinventar.**
 
-Basada en `ContratosListView.vue` real.
+| Componente | Rol / API resumida |
+|-----------|--------------------|
+| `GcButton` | Botón. Variantes por prop (`primary` grafito, `default`, `danger`); tamaños `sm`/`md`/`lg`. |
+| `GcInput`, `GcSelect`, `GcTextarea` | Campos de formulario (alto 34px, tokens `--gc-*`). |
+| `GcBadge` | Marca de estado. `tone`: success\|warning\|danger\|info\|accent\|neutral; `soft` para fondo tenue. |
+| `GcListRow` | **Renglón de lista/bitácora.** Marca de estado lateral 2px + línea fina inferior, sin sombra. Slots: `lead` (icono/avatar), default (contenido), `actions` (al final). Props: `tone`, `clickable`, `active`. Emite `click`. |
+| `GcStat`, `GcStatStrip` | Métrica individual / franja compacta de métricas (Dashboard). |
+| `GcModal` | Diálogo centrado. |
+| `GcDrawer` | Cajón lateral (props incluyen `title`, `subtitle`). |
+| `GcEmpty` | Estado vacío. Props: `icon` (Tabler, default `inbox`), `message`. |
+| `GcSpinner` | Loader. Prop `size`. Sustituye al icono girando del sistema viejo. |
+| `GcIcon` | Icono Tabler outline. Props: `name` (id Tabler SIN prefijo `ti-`), `size`, `color`. |
+| `GcCommandPalette` | Paleta de comandos (Ctrl+K). Props: `open`, `items` ([{path,label,icon}]). Emite `close`, `navigate`. Navegación por teclado ↑/↓/Enter/Esc + ratón. |
 
-```vue
-<template>
-  <AppLayout>
-    <div class="contratos-list">
-      <section class="list-header animate-slideUp">
-        <div>
-          <h1 class="page-title gradient-text">Contratos</h1>
-          <p class="page-subtitle">Gestión de contratos formalizados</p>
-        </div>
-      </section>
-
-      <section class="list-filters animate-slideUp delay-1">
-        <div class="filter-bar glass">
-          <div class="search-wrap">
-            <Icon name="search" :size="16" class="search-icon" />
-            <input v-model="searchQuery" type="text" class="search-input"
-                   placeholder="Buscar..." @input="debouncedSearch" />
-          </div>
-          <select v-model="filtroEstado" class="filter-select" @change="loadContratos(1)">
-            <option value="">Todos los estados</option>
-            <option value="VIGENTE">Vigentes</option>
-            <option value="SUSPENDIDO">Suspendidos</option>
-            <option value="TERMINADO">Terminados</option>
-            <option value="LIQUIDADO">Liquidados</option>
-          </select>
-        </div>
-      </section>
-
-      <div v-if="loading" class="loading-state">
-        <Icon name="loader" :size="32" class="animate-spin" />
-        <p>Cargando contratos...</p>
-      </div>
-
-      <section v-else class="list-table animate-slideUp delay-2">
-        <div v-if="!contratos.length" class="empty-state glass">
-          <Icon name="note-add" :size="40" color="var(--text-muted)" />
-          <p>No se encontraron contratos</p>
-        </div>
-        <div v-else class="table-wrap glass">
-          <table class="data-table">
-            <!-- ... -->
-            <tr v-for="c in contratos" :key="c.id" class="data-row" @click="goToDetalle(c.id)">
-              <td>{{ c.numeroContratoInterno || c.oportunidadNombre }}</td>
-              <td>
-                <span :class="['estado-pill', `estado-pill--${c.estado?.toLowerCase()}`]">
-                  {{ estadoLabel(c.estado) }}
-                </span>
-              </td>
-              <td class="text-right">{{ fmtCurrency(c.valorContrato, c.moneda) }}</td>
-            </tr>
-          </table>
-        </div>
-      </section>
-    </div>
-  </AppLayout>
-</template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import AppLayout from '@/components/layout/AppLayout.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { contratoService } from '@/services/contrato.service';
-import { formatCurrency as fmtCurrency, formatDate as fmtDate } from '@/utils/currency';
-
-const router = useRouter();
-const contratos = ref([]);
-const loading = ref(true);
-const searchQuery = ref('');
-const filtroEstado = ref('');
-let searchTimer = null;
-
-onMounted(() => loadContratos(1));
-
-async function loadContratos(page = 1) {
-  loading.value = true;
-  try {
-    const params = { page, page_size: 20 };
-    if (filtroEstado.value) params.estado = filtroEstado.value;
-    const res = await contratoService.listar(params);
-    contratos.value = res.data || [];
-    // OJO: paginación viene anidada en res.pagination.{page,totalPages,...}
-  } catch (err) {
-    console.error('Error cargando contratos:', err);
-  } finally {
-    loading.value = false;
-  }
-}
-
-function debouncedSearch() {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => loadContratos(1), 400);
-}
-
-function goToDetalle(id) { router.push(`/contratos/${id}`); }
-
-function estadoLabel(estado) {
-  return {
-    VIGENTE: 'Vigente', SUSPENDIDO: 'Suspendido',
-    TERMINADO: 'Terminado', LIQUIDADO: 'Liquidado'
-  }[estado] || estado;
-}
-</script>
-
-<style scoped>
-/* Tokens CSS — nunca hardcodear colores ni medidas */
-.contratos-list { padding: var(--space-6); max-width: var(--content-max-width); }
-.page-title { font-size: var(--text-3xl); font-weight: var(--font-bold); }
-.estado-pill { padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--text-xs); }
-.estado-pill--vigente { background: var(--success-soft); color: var(--success); }
-.estado-pill--suspendido { background: var(--warning-soft); color: var(--warning); }
-.estado-pill--terminado { background: var(--error-soft); color: var(--error); }
-.estado-pill--liquidado { background: var(--glass-bg); color: var(--text-muted); }
-</style>
-```
-
-### 4.2 Vista de detalle — Patrón
-
-Estructura típica:
-
-1. **Header** con `.gradient-text`, badge de estado, y botones de acción primarios.
-2. **KPIs / cards superiores** con clase `.glass`, métricas clave.
-3. **Grid de datos generales** (etiquetas + valores) en 2-3 columnas.
-4. **Tablas / secciones de relaciones** (compromisos, modificaciones, gestiones) con sus modales asociados.
-5. **Botones de cambio de estado** con confirmación inline (modal o `confirm`).
-
-### 4.3 Modales
-
-- Cada dominio tiene su carpeta `components/{dominio}/` con modales específicos (`EmpresaModal.vue`, `FormalizarContratoModal.vue`, etc.).
-- Se abren por estado local de la vista (`mostrarModal = ref(false)`), no por router.
-- Reciben datos por props, emiten `@guardar` y `@cerrar`.
-- Validación de campos antes de emitir `@guardar`.
-- Aplicar `.glass` al panel del modal + animación `animate-scaleIn`.
+**Iconos Tabler comunes usados:** `search`, `alert-circle`, `x`, `chevron-down`, `logout`, `dashboard`, `target`, `layout-kanban`, `file-text`, `receipt`, `building`, `users`, `layout-rows`, `layout-list`, `sun`, `moon`. El `name` es el id Tabler sin `ti-`. Ante duda de si un icono existe, preferir nombres básicos y estables.
 
 ---
 
-## 5. Services (clientes HTTP)
+## 6. Convenciones de vistas
 
-### 5.1 Plantilla canónica
+### 6.1 Vista de plantilla Operativo
 
-Basada en `contrato.service.js` real.
+1. `<script setup>` + `onMounted(() => setRegions({ master: true, aside: <bool> }))` y `onUnmounted(reset)`.
+2. Importa su `service` (no axios directo).
+3. `loading` / empty (`GcEmpty`) / error manejados visualmente.
+4. Lista maestra con `GcListRow` (no tablas con tarjetas). Estado por `tone` de la marca lateral.
+5. Detalle en la superficie; captura/relaciones en el aside.
+6. Formatters de `utils/` (ver §9). Iconos por `GcIcon`. Tokens `--gc-*`, nunca hardcodear.
 
-```javascript
-import api from './api';
+### 6.2 Vista de plantilla Tablero / Panel
 
-const BASE = '/contratos';
+- Tablero (Pipeline): no fija master/aside (`reset()` o no setear). Superficie full width.
+- Panel (Dashboard): grilla de `GcStat`/`GcStatStrip`; sin master/aside.
 
-export const contratoService = {
-  async listar(params = {}) {
-    const { data } = await api.get(BASE, { params });
-    return data;
-  },
+### 6.3 Modales y drawers
 
-  async obtenerPorId(id) {
-    const { data } = await api.get(`${BASE}/${id}`);
-    return data;
-  },
-
-  async formalizarContrato(payload) {
-    const { data } = await api.post(`${BASE}/formalizar`, payload);
-    return data;
-  },
-
-  async suspender(id) {
-    const { data } = await api.post(`${BASE}/${id}/suspender`);
-    return data;
-  },
-
-  async terminar(id) {
-    const { data } = await api.post(`${BASE}/${id}/terminar`);
-    return data;
-  },
-};
-
-export default contratoService;
-```
-
-### 5.2 `api.js` — axios instance común
-
-```javascript
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-// Token JWT en cada request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-// 401 → cerrar sesión y redirigir a /login
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
-```
-
-**Reglas:**
-
-1. Un service por dominio backend.
-2. Constante `BASE` al inicio para centralizar el path raíz del recurso.
-3. **`async/await` con destructuring `const { data } = await api.x(...)`** — no `.then(r => r.data)`.
-4. Exportar como **named export y default** (`export const xService = {...}` + `export default xService`).
-5. **No hacer try/catch dentro del service** — los errores burbujean a la vista, que decide cómo mostrarlos (toast, modal).
-6. Params para listados van como objeto: `api.get(BASE, { params: { page, page_size, estado } })`. Spring lee snake_case.
-7. **No tocar `api.js`** salvo para agregar interceptors transversales (logging, refresh token, etc.) — los nuevos services lo importan tal cual.
-
-### 5.3 Formato de respuesta paginada
-
-El backend devuelve `PageResponse<T>`:
-
-```json
-{
-  "data": [...],
-  "pagination": {
-    "page": 1,
-    "pageSize": 20,
-    "totalItems": 142,
-    "totalPages": 8
-  }
-}
-```
-
-**Importante:** acceder con `res.pagination.page`, `res.pagination.totalPages`, etc. Hay vistas en el repo que leen `res.page` y `res.totalPages` directos — eso es un bug (los controles de paginación nunca aparecen). No replicar el error.
+- En `components/{dominio}/`. Se abren por estado local (`ref(false)`), reciben props, emiten `@close`/`@guardar` (verbo según el caso).
+- Usar `GcModal` o `GcDrawer` como envoltura; estilos con tokens `--gc-*`. No usar `<form>` con submit nativo en componentes de artifact; en la app real Vue se usan handlers (`@click`).
 
 ---
 
-## 6. Stores Pinia (Options API)
+## 7. Tema oscuro y densidad
 
-Los stores del repo usan **Options API**, no Composition. Mantener la convención.
+Ambos siguen el mismo patrón: atributo en `<html>` + composable singleton + `localStorage`, inicializados en `App.vue` (setup) para aplicar desde el arranque (incluido login).
 
-```javascript
-// stores/auth.store.js
-import { defineStore } from 'pinia';
-import { authService } from '@/services/auth.service';
+### 7.1 Tema — `composables/useTheme.js`
 
-export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: authService.getUser(),
-    token: authService.getToken(),
-    loading: false,
-    error: null,
-  }),
+- API: `{ theme, setTheme, toggleTheme }`. Valores `'light'|'dark'`.
+- Aplica `data-theme="dark"` al `<html>`; los tokens oscuros viven bajo `[data-theme="dark"]` en `instrument.css`.
+- Persiste en `localStorage` (`gc-theme`); si no hay preferencia, respeta `prefers-color-scheme`. Default claro.
+- Toggle (icono sun/moon) en la barra superior del `AppShell`.
 
-  getters: {
-    isAuthenticated: (state) => !!state.token,
-    userName: (state) => state.user?.nombreCompleto || state.user?.username || '',
-    userRole: (state) => state.user?.rol || '',
-  },
+### 7.2 Densidad — `composables/useDensity.js`
 
-  actions: {
-    async login(username, password) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const data = await authService.login(username, password);
-        this.token = data.token;
-        this.user = data.user;
-        return true;
-      } catch (error) {
-        this.error = error.response?.data?.message || 'Error al iniciar sesión';
-        return false;
-      } finally {
-        this.loading = false;
-      }
-    },
+- API: `{ density, setDensity, toggleDensity }`. Valores `'comfortable'|'compact'`.
+- Aplica `data-density="compact"` al `<html>`. Persiste en `localStorage` (`gc-density`). Default cómodo.
+- Toggle (icono layout-rows/layout-list) en la barra superior.
 
-    logout() {
-      authService.logout();
-      this.user = null;
-      this.token = null;
-    },
-  },
-});
-```
-
-**Reglas:**
-
-1. **Stores solo para estado global persistente entre vistas** (sesión, configuración de usuario, alertas globales). Listas que se piden por API en cada vista NO van al store.
-2. `state` siempre es una función (`state: () => ({...})`).
-3. Stores activos hoy: `auth`, `empresa`, `oportunidad`, `persona`, `pipeline`.
-4. **Nombrar el archivo `*.store.js`** (singular) y la función `use{Nombre}Store`.
+**Cómo funciona la densidad (lección clave):** el modo compacto reduce variables `--gc-row-pad-y/x/gap` bajo `[data-density="compact"]`. `GcListRow` **consume esas variables** en vez de paddings fijos. Se usan **CSS variables y NO overrides de clase** porque las vars heredan por el árbol DOM y **atraviesan el `<style scoped>`** de los componentes — un selector de clase externo no puede, por el atributo `[data-v-*]` del scoping de Vue. La densidad afecta sobre todo a los renglones (que dominan la UI); celdas con `<style scoped>` propio de una vista no se compactan salvo que también usen las variables.
 
 ---
 
-## 7. Router y NavRail
+## 8. Services, stores, router
 
-### 7.1 Router (`router/index.js`)
+### 8.1 Services (`services/*.js`)
 
-```javascript
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '@/stores/auth.store';
+- Un service por dominio. Constante `BASE` al inicio. `async/await` con `const { data } = await api.x(...)`.
+- Named export + default. **No try/catch dentro del service** (los errores burbujean a la vista).
+- `api.js`: instancia axios con interceptor JWT y redirección a `/login` en 401. **No tocar** salvo interceptors transversales.
+- Respuesta paginada: `{ data, pagination: { page, pageSize, totalItems, totalPages } }`. Acceder a `res.pagination.*` (o usar `utils/pagination.js → extractPagination`).
 
-const routes = [
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { requiresAuth: false, layout: 'blank' }
-  },
-  {
-    path: '/contratos',
-    name: 'Contratos',
-    component: () => import('@/views/ContratosListView.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/contratos/:id',
-    name: 'ContratoDetalle',
-    component: () => import('@/views/ContratoDetalleView.vue'),
-    meta: { requiresAuth: true }
-  },
-  // ... resto
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/'
-  }
-];
+### 8.2 Stores Pinia (Options API)
 
-const router = createRouter({ history: createWebHistory(), routes });
+- Solo estado global persistente entre vistas (sesión, etc.). Listas pedidas por API en cada vista NO van al store.
+- `state` siempre función. Archivo `*.store.js`, función `use{Nombre}Store`.
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'Login' });
-  } else if (to.name === 'Login' && authStore.isAuthenticated) {
-    next({ name: 'Dashboard' });
-  } else {
-    next();
-  }
-});
+### 8.3 Router (`router/index.js`)
 
-export default router;
-```
-
-**Reglas:**
-
-1. **Componentes lazy-loaded**: `component: () => import('@/views/...')`.
-2. **`meta: { requiresAuth: true }` por defecto.** Solo `Login` lleva `requiresAuth: false` + `layout: 'blank'`.
-3. Path params siguen el dominio: `/contratos/:id`. No usar `props: true` salvo necesidad puntual; las vistas leen el id con `useRoute().params.id`.
-4. **Ruta wildcard** al final que redirige a `/`.
-
-### 7.2 NavRail (items en `AppLayout`)
-
-Los items del NavRail están **hardcoded en `AppLayout.vue`**, no en el componente `NavRail.vue`. Para agregar una entrada:
-
-```javascript
-// frontend/src/components/layout/AppLayout.vue
-const navItems = [
-  { path: '/',            label: 'Inicio',      icon: 'dashboard' },
-  { path: '/pipeline',    label: 'Pipeline',    icon: 'view_kanban' },
-  { path: '/contratos',   label: 'Contratos',   icon: 'description' },
-  { path: '/facturacion', label: 'Facturación', icon: 'receipt' },
-  { path: '/empresas',    label: 'Empresas',    icon: 'business' },
-  { path: '/personas',    label: 'Personas',    icon: 'people' },
-];
-```
-
-**Reglas:**
-
-1. `icon` es el nombre que entiende el componente `<Icon>` (estilo Material: `dashboard`, `view_kanban`, `description`, `receipt`, `business`, `people`, etc.).
-2. `label` en español, singular o plural según convenga al ítem.
-3. También agregar la entrada en `pageTitle` del mismo `AppLayout.vue` para que el `TopAppBar` muestre el título correcto.
+- Componentes lazy-loaded. `meta: { requiresAuth, layout }`. `layout: 'app'` por defecto, `'blank'` solo login.
+- Rutas anidadas para maestro-detalle (la lista persiste, el `:id` pinta el centro). Ej: `/actividades/:oportunidadId`, `/contratos/:id`. `/empresas/:id?` y `/personas/:id?` usan param opcional.
+- Guard global de auth. Wildcard final → `/`.
+- La navegación de módulos está en el **AppShell** (barra superior horizontal), no en un NavRail vertical.
 
 ---
 
-## 8. Utilidades y formatters
+## 9. Utilidades y formatters
 
-Funciones de formato en `utils/`:
+| Archivo | Exporta | Uso |
+|---------|---------|-----|
+| `utils/currency.js` | `formatCurrency`, `formatCurrencyFull`, `parseMoney`, `formatMoneyInput` | Dinero. **NO contiene funciones de fecha.** |
+| `utils/datetime.js` | `formatDate`, `formatDateTime` | Fechas. **Importar de aquí, no de currency.** |
+| `utils/pagination.js` | `extractPagination` | Normaliza la paginación de la respuesta. |
 
-```javascript
-// utils/currency.js (versión observada en el repo)
-export const formatCurrency = (valor, moneda = 'COP') =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: moneda }).format(valor || 0);
-
-export const formatDate = (iso) =>
-  iso ? new Date(iso).toLocaleDateString('es-CO') : '';
-
-export const formatDateTime = (iso) =>
-  iso ? new Date(iso).toLocaleString('es-CO') : '';
-```
-
-**Reglas:**
-
-1. **Nunca usar `toString()` crudo** ni `Number(x).toFixed(2)` para mostrar dinero — usar `formatCurrency`.
-2. **Nunca formatear fechas manualmente** — usar `formatDate` / `formatDateTime`.
-3. Si surge una utilidad transversal nueva, vive en `utils/` (no en `components/` ni en el SFC de la vista).
+**Nunca** formatear dinero con `toFixed`/`toString` ni fechas a mano: usar estos formatters.
 
 ---
 
-## 9. Reglas de UI vinculadas a reglas de negocio
+## 10. Lecciones aprendidas (rediseño)
 
-| Regla | Implementación UI |
-|-------|-------------------|
-| RB-04 — motivo obligatorio si PERDIDA / NO_CONCRETADA | Modal de cierre con `<select>` condicional. |
-| RB-14 — pipeline inmutable post-creación | Campo `disabled` en edición de oportunidad. |
-| RB-15 — etapa debe ser del mismo pipeline | Validar en drag & drop del Kanban. |
-| RB-19 — oportunidad cerrada inmutable | Vista de detalle en modo solo lectura (`disabled` global + ocultar botones de acción). |
-| Contrato VIGENTE → SUSPENDIDO solo desde VIGENTE | Botón "Suspender" deshabilitado fuera de VIGENTE. |
-| "Formalizar Contrato" desaparece si ya hay contrato | `v-if="!oportunidad.contratoId"`. |
-| RN-04 (M3) — solo se cruzan compromisos PENDIENTES | Botón "Cruzar" deshabilitado o ausente si estado != PENDIENTE. |
-| RN-09 (M3) — gestiones inmutables | Sin botón editar/borrar en filas de bitácora. |
+Lecciones que costaron tiempo durante el rediseño. **Tenerlas presentes:**
 
----
-
-## 10. Frescura de datos (Política 1)
-
-### 10.1 El problema
-
-Cuando una vista mantiene datos en un **store de Pinia** (`empresa.store`, `oportunidad.store`, `pipeline.store`), esos datos viven más allá del ciclo de vida de la vista. Si el usuario edita algo en otra vista, otro tab, o vuelve después de un tiempo, lo que ve puede estar **obsoleto** respecto al backend.
-
-### 10.2 La regla (convención del proyecto)
-
-**Toda vista que consume un store o tiene tabs internos debe garantizar datos frescos cada vez que se vuelve a ella.** Esto se logra por dos vías:
-
-#### Vía A — Recargar al montar (cubre el 95% de casos)
-
-Cada vista hace su `onMounted` invocando los `cargar*()` de los stores que consume. Como Vue Router **desmonta y vuelve a montar** las vistas al cambiar de ruta, esto garantiza frescura al navegar entre módulos sin trabajo extra.
-
-```javascript
-onMounted(() => {
-  store.cargarEmpresas();
-});
-```
-
-Casi todas las vistas del proyecto ya cumplen esto (Empresas, Personas, Contratos, Oportunidades, etc.). Si creás una vista nueva, este `onMounted` es obligatorio.
-
-#### Vía B — Handler al cambiar de tab interno (cuando la vista tiene tabs)
-
-Si la vista tiene **tabs internos** (no rutas), cambiar de tab NO desmonta la vista, así que `onMounted` no se vuelve a disparar. En estos casos, el handler del tab debe recargar los datos antes de activarlo:
-
-```javascript
-async function goToKanban() {
-  activeTab.value = 'kanban';
-  if (opStore.pipelineActivo?.id) {
-    await opStore.seleccionarPipeline(opStore.pipelineActivo.id);
-  }
-}
-```
-
-**Caso real:** `PipelineView.vue` tiene tabs "Kanban" / "Configuración". Sin el handler, modificar etapas en Configuración no se reflejaba en el Kanban hasta refrescar el navegador.
-
-### 10.3 Cuándo NO aplica
-
-- **Cambios dentro del mismo componente** (modal abre, guarda, cierra): el componente padre suele emitir `@updated` y el padre invalida su cache. No es Política 1.
-- **Vistas puramente estáticas** (login, vistas que no consumen stores): no aplica.
-- **Datos que rara vez cambian** (catálogos como tipos de documento, pipelines del Mundo 1) podrían cachearse más agresivamente. Para GestCom mantenemos el patrón simple: recarga al montar/cambiar tab.
-
-### 10.4 Antipatrón
-
-❌ **No** intentes invalidar caches cruzados ad-hoc por cada operación ("al guardar X, refrescar también Y"). Es frágil y se olvida en features nuevos. Si la vista respeta Política 1, el problema desaparece.
-
-### 10.5 Cuándo migrar a algo mejor
-
-Cuando el proyecto supere ~30 vistas con stores complejos, considerar migrar a **@tanstack/vue-query** (deuda DT-futuro). vue-query maneja invalidación, caché stale-while-revalidate y refetch automático. Hoy con la simpleza de GestCom, la Política 1 alcanza.
+1. **`utils/currency.js` NO exporta funciones de fecha.** Las fechas viven en `utils/datetime.js` (`formatDate`/`formatDateTime`). Importar `formatDate` desde `currency` rompe el build.
+2. **Catálogos no uniformes.** País usa `nombre`/`codigo` y TipoDocumento usa `nombre`, pero **Departamento y Municipio usan `descripcion`/`codigo`** (no `nombre`). Mapear el campo correcto en los `<select>` en cascada (país→depto→municipio).
+3. **Densidad vía CSS vars que atraviesan `scoped`.** Para que un toggle global afecte a componentes con `<style scoped>`, usar variables CSS heredadas (no overrides de clase). Ver §7.2.
+4. **Tema/densidad inicializados en `App.vue`** (setup), no solo en `AppShell`, para que apliquen también en login (que no monta el shell).
+5. **Teleport y timing.** Inyectar contenido en zonas master/aside del shell requiere que el target exista; activar la zona en setup y usar `:disabled` del Teleport hasta `nextTick`. Igual para enfocar el input de un overlay dentro de `<Transition>`: usar el hook `@after-enter` (o reintento por `requestAnimationFrame`), no solo `nextTick`.
+6. **El color del marcador de estado por defecto es grafito** (`neutral`), no un color; reservar color para estados reales.
+7. **Vite cachea componentes grandes.** Tras reemplazar un componente central (p. ej. `AppShell`), reiniciar `npm run dev` y hacer hard reload; si la consola muestra logs de una versión vieja, el archivo nuevo no se aplicó o el dev server no recargó.
+8. **El reset global vive en `instrument.css`** (no hay `global.css`). Si se añade base global, va ahí, con tokens `--gc-*`.
 
 ---
 
 ## 11. Checklist al crear / modificar una vista
 
-- [ ] Usa `<script setup>` (Composition API).
-- [ ] Envuelta en `<AppLayout>` (no AuroraLayout salvo decisión explícita).
-- [ ] Importa el service correspondiente, no hace `axios` directo.
-- [ ] Usa variables CSS (`--primary`, `--bg-elevated`, etc.), no hardcodea colores ni medidas.
-- [ ] Clases globales (`.glass`, `.gradient-text`, `.animate-slideUp`) cuando apliquen, en vez de re-implementar.
-- [ ] Estados de carga (`loading`), vacíos (empty-state) y error manejados visualmente.
-- [ ] Estado pills usan BEM: `.estado-pill estado-pill--{estado-en-minúscula}`.
-- [ ] Iconos vía `<Icon name="..." :size="..." />`, no `<svg>` inline.
-- [ ] Formatters de `utils/` para fechas y monedas.
-- [ ] Si es ruta nueva: registrada en `router/index.js` con `meta: { requiresAuth: true }`.
-- [ ] Si va al NavRail: agregada en `AppLayout.vue` (array `navItems`) con icono Material y entrada en `pageTitle`.
-- [ ] Si lee paginación: accede a `res.pagination.page` / `res.pagination.totalPages`, no a `res.page` directo.
-- [ ] Modales en `components/{dominio}/`, emiten `@guardar` y `@cerrar`.
-- [ ] Si usa stores Pinia: `onMounted` invoca `cargar*()` para garantizar datos frescos (Política 1, §10).
-- [ ] Si tiene tabs internos: el handler de cada tab invoca recarga antes de activarlo (§10.2 Vía B).
+- [ ] `<script setup>` (Composition API).
+- [ ] Si es 'app': `setRegions(...)` en `onMounted` y `reset()` en `onUnmounted` (§4.3).
+- [ ] Importa el service correspondiente, no axios directo.
+- [ ] Tokens `--gc-*`; nunca hardcodear colores ni medidas.
+- [ ] Renglones con `GcListRow` (no tarjetas). Estado por `tone`.
+- [ ] Estados loading / empty (`GcEmpty`) / error manejados.
+- [ ] Iconos vía `GcIcon name="..."` (id Tabler sin `ti-`), no `<svg>` ni icono legacy.
+- [ ] Formatters: dinero de `utils/currency`, fechas de `utils/datetime`.
+- [ ] Paginación: `res.pagination.*` o `extractPagination`.
+- [ ] Modales/drawers en `components/{dominio}/` con `GcModal`/`GcDrawer`.
+- [ ] Ruta nueva: registrada con `meta: { requiresAuth: true, layout: 'app' }` (o `'blank'`).
+- [ ] Módulo nuevo en barra superior: agregar a `navItems` del `AppShell` y a `cmdkItems` (Ctrl+K) con su icono Tabler.
 
 ---
 
 ## 12. Cómo entregar archivos
 
-1. Cada vista en su `.vue` propio.
-2. Cada service en su `.js` propio.
-3. Cuando se modifiquen archivos existentes (ej. `router/index.js`, `AppLayout.vue`), entregar el archivo completo modificado, no diffs.
-4. Presentar con `present_files`.
+1. Cada vista/componente en su `.vue`; cada service/composable en su `.js`.
+2. Al modificar archivos existentes (router, AppShell, instrument.css), entregar el archivo completo, no diffs.
+3. Presentar con `present_files`.
 
 ---
 
-*Esta skill garantiza que el frontend de GestCom mantenga consistencia visual, arquitectónica y de patrones con el código real del repo.*
+*Esta skill refleja el frontend de GestCom tras el rediseño "Instrumento" (RF1–RF8). El sistema "Aurora Dark"/"Luxury Tech" fue eliminado por completo del repo.*
