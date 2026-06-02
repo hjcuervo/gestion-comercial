@@ -173,3 +173,63 @@
   letter-spacing: -0.01em;
 }
 .gc-hairline { border-bottom: 1px solid var(--gc-border); }
+
+/* ============================================================================
+   RESET GLOBAL + BASE (RF8.2)
+   Reemplaza al global.css/tokens.css legacy (eliminados). Ahora que no quedan
+   pantallas legacy, el reset y el tema base viven aquí, con tokens --gc-*.
+   Fundación CLARA: el body usa --gc-bg (papel tibio), sin fondo atmosférico.
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--gc-font-sans);
+  font-size: var(--gc-fs-md);
+  font-weight: var(--gc-fw-regular);
+  line-height: var(--gc-lh-normal);
+  color: var(--gc-text);
+  background-color: var(--gc-bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#app { min-height: 100vh; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--gc-font-sans);
+  font-weight: var(--gc-fw-medium);
+  line-height: var(--gc-lh-tight);
+  letter-spacing: -0.01em;
+  color: var(--gc-text);
+}
+
+p { color: var(--gc-text-2); }
+
+a { color: var(--gc-info); text-decoration: none; transition: color var(--gc-t-fast); }
+a:hover { text-decoration: underline; }
+
+::selection { background: var(--gc-primary); color: var(--gc-primary-text); }
+
+/* Scrollbar sobrio */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gc-border-strong); border-radius: var(--gc-radius-full); border: 2px solid var(--gc-bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--gc-text-3); }
+
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--gc-primary); outline-offset: 2px; }
+
+/* Spinner del rediseño (algunas vistas usan .animate-spin como utilidad) */
+@keyframes gc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin { animation: gc-spin 1s linear infinite; }
