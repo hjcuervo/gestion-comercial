@@ -20,6 +20,9 @@
       </nav>
 
       <div class="gc-shell__tools">
+        <button class="gc-shell__icon-btn" type="button" @click="toggleTheme" :title="theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'" :aria-label="theme === 'dark' ? 'Tema claro' : 'Tema oscuro'">
+          <GcIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />
+        </button>
         <button class="gc-shell__cmdk" type="button" @click="openCommandPalette" title="Búsqueda y acciones (RF8.2)">
           <GcIcon name="search" :size="14" />
           <span class="gc-shell__cmdk-keys gc-mono">{{ cmdKeyLabel }}</span>
@@ -65,12 +68,14 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { useShell } from '@/composables/useShell';
+import { useTheme } from '@/composables/useTheme';
 import GcIcon from '@/components/ui/GcIcon.vue';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 const { regions, reset } = useShell();
+const { theme, toggleTheme } = useTheme();
 
 // Al ENTRAR al mundo 'app' (AppShell se crea de nuevo) partimos sin zonas.
 // Se hace en setup (no en onMounted) para correr ANTES de que las vistas hijas
@@ -193,6 +198,20 @@ onUnmounted(() => {
 }
 .gc-shell__cmdk:hover { border-color: var(--gc-border-strong); color: var(--gc-text-2); }
 .gc-shell__cmdk-keys { font-size: var(--gc-fs-xs); }
+.gc-shell__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--gc-surface-2);
+  border: 1px solid var(--gc-border);
+  border-radius: var(--gc-radius-md);
+  color: var(--gc-text-3);
+  cursor: pointer;
+  transition: border-color var(--gc-t-fast), color var(--gc-t-fast);
+}
+.gc-shell__icon-btn:hover { border-color: var(--gc-border-strong); color: var(--gc-text); }
 
 .gc-shell__user { position: relative; }
 .gc-shell__user-btn {

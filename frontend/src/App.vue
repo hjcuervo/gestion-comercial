@@ -10,8 +10,13 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppShell from '@/components/layout/AppShell.vue';
+import { useTheme } from '@/composables/useTheme';
 
 const route = useRoute();
+
+// Inicializa el tema (claro/oscuro) desde el arranque, en cualquier pantalla
+// (incluido el login, que no monta AppShell). Lee localStorage / sistema.
+useTheme();
 
 /**
  * meta.layout por ruta:
