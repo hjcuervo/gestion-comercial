@@ -1,6 +1,9 @@
 package com.arquitecsoft.gestion.domain.empresa.entity;
 
+import com.arquitecsoft.gestion.domain.catalogo.entity.GcOrigen;
+import com.arquitecsoft.gestion.domain.catalogo.entity.GcSector;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -42,6 +45,32 @@ public class GcEmpresa {
     @Enumerated(EnumType.STRING)
     private EstadoEmpresa estado = EstadoEmpresa.ACTIVA;
 
+    // --- Enriquecimiento CRM (F-RP4) ---
+    @Column(name = "clasificacion", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Clasificacion clasificacion = Clasificacion.PROSPECTO;
+
+    @Column(name = "propietario_id")
+    private Long propietarioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sector_codigo")
+    private GcSector sector;
+
+    @Column(name = "tamano", length = 20)
+    @Enumerated(EnumType.STRING)
+    private Tamano tamano;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origen_codigo")
+    private GcOrigen origen;
+
+    @Column(name = "ingresos_anuales", precision = 16, scale = 2)
+    private BigDecimal ingresosAnuales;
+
+    @Column(name = "descripcion", length = 1000)
+    private String descripcion;
+
     @Column(name = "creado_por", nullable = false)
     private Long creadoPor;
 
@@ -56,6 +85,14 @@ public class GcEmpresa {
 
     public enum EstadoEmpresa {
         ACTIVA, INACTIVA
+    }
+
+    public enum Clasificacion {
+        PROSPECTO, CLIENTE, ALIADO
+    }
+
+    public enum Tamano {
+        MICRO, PEQUENA, MEDIANA, GRANDE
     }
 
     public GcEmpresa() {}
@@ -103,6 +140,27 @@ public class GcEmpresa {
 
     public EstadoEmpresa getEstado() { return estado; }
     public void setEstado(EstadoEmpresa estado) { this.estado = estado; }
+
+    public Clasificacion getClasificacion() { return clasificacion; }
+    public void setClasificacion(Clasificacion clasificacion) { this.clasificacion = clasificacion; }
+
+    public Long getPropietarioId() { return propietarioId; }
+    public void setPropietarioId(Long propietarioId) { this.propietarioId = propietarioId; }
+
+    public GcSector getSector() { return sector; }
+    public void setSector(GcSector sector) { this.sector = sector; }
+
+    public Tamano getTamano() { return tamano; }
+    public void setTamano(Tamano tamano) { this.tamano = tamano; }
+
+    public GcOrigen getOrigen() { return origen; }
+    public void setOrigen(GcOrigen origen) { this.origen = origen; }
+
+    public BigDecimal getIngresosAnuales() { return ingresosAnuales; }
+    public void setIngresosAnuales(BigDecimal ingresosAnuales) { this.ingresosAnuales = ingresosAnuales; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
     public Long getCreadoPor() { return creadoPor; }
     public void setCreadoPor(Long creadoPor) { this.creadoPor = creadoPor; }

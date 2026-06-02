@@ -41,6 +41,19 @@ public class GcPersonaEmpresa {
     @Column(name = "es_contacto_principal", nullable = false)
     private Integer esContactoPrincipal = 0;
 
+    // --- Vigencia y empresa principal (F-RP6) ---
+    @Column(name = "activo", nullable = false)
+    private Integer activo = 1;
+
+    @Column(name = "fecha_inicio")
+    private java.time.LocalDate fechaInicio;
+
+    @Column(name = "fecha_fin")
+    private java.time.LocalDate fechaFin;
+
+    @Column(name = "es_empresa_principal", nullable = false)
+    private Integer esEmpresaPrincipal = 0;
+
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
@@ -139,6 +152,46 @@ public class GcPersonaEmpresa {
 
     public void setEsContactoPrincipal(Integer esContactoPrincipal) {
         this.esContactoPrincipal = esContactoPrincipal;
+    }
+
+    public boolean isActivo() {
+        return this.activo != null && this.activo == 1;
+    }
+
+    public boolean isEmpresaPrincipal() {
+        return this.esEmpresaPrincipal != null && this.esEmpresaPrincipal == 1;
+    }
+
+    public Integer getActivo() {
+        return activo;
+    }
+
+    public void setActivo(Integer activo) {
+        this.activo = activo;
+    }
+
+    public java.time.LocalDate getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(java.time.LocalDate fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public java.time.LocalDate getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(java.time.LocalDate fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public Integer getEsEmpresaPrincipal() {
+        return esEmpresaPrincipal;
+    }
+
+    public void setEsEmpresaPrincipal(Integer esEmpresaPrincipal) {
+        this.esEmpresaPrincipal = esEmpresaPrincipal;
     }
 
     public LocalDateTime getFechaCreacion() {

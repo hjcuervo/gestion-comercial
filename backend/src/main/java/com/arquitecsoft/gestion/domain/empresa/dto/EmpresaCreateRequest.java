@@ -4,6 +4,7 @@
 package com.arquitecsoft.gestion.domain.empresa.dto;
 
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
 public class EmpresaCreateRequest {
 
@@ -39,6 +40,19 @@ public class EmpresaCreateRequest {
     @Pattern(regexp = "^(https?://.*)?$", message = "El sitio web debe ser una URL válida (http:// o https://)")
     private String sitioWeb;
 
+    // --- Enriquecimiento CRM (F-RP4) ---
+    private String clasificacion;     // PROSPECTO | CLIENTE | ALIADO (default PROSPECTO en el service)
+    private Long propietarioId;
+    @Size(max = 20)
+    private String sectorCodigo;
+    private String tamano;            // MICRO | PEQUENA | MEDIANA | GRANDE
+    @Size(max = 20)
+    private String origenCodigo;
+    @PositiveOrZero(message = "Los ingresos anuales no pueden ser negativos")
+    private BigDecimal ingresosAnuales;
+    @Size(max = 1000)
+    private String descripcion;
+
     public EmpresaCreateRequest() {}
 
     // Getters and Setters
@@ -68,4 +82,25 @@ public class EmpresaCreateRequest {
 
     public String getSitioWeb() { return sitioWeb; }
     public void setSitioWeb(String sitioWeb) { this.sitioWeb = sitioWeb; }
+
+    public String getClasificacion() { return clasificacion; }
+    public void setClasificacion(String clasificacion) { this.clasificacion = clasificacion; }
+
+    public Long getPropietarioId() { return propietarioId; }
+    public void setPropietarioId(Long propietarioId) { this.propietarioId = propietarioId; }
+
+    public String getSectorCodigo() { return sectorCodigo; }
+    public void setSectorCodigo(String sectorCodigo) { this.sectorCodigo = sectorCodigo; }
+
+    public String getTamano() { return tamano; }
+    public void setTamano(String tamano) { this.tamano = tamano; }
+
+    public String getOrigenCodigo() { return origenCodigo; }
+    public void setOrigenCodigo(String origenCodigo) { this.origenCodigo = origenCodigo; }
+
+    public BigDecimal getIngresosAnuales() { return ingresosAnuales; }
+    public void setIngresosAnuales(BigDecimal ingresosAnuales) { this.ingresosAnuales = ingresosAnuales; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 }

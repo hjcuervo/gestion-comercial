@@ -26,6 +26,11 @@ public class PersonaEmpresaCreateRequest {
 
     private Boolean esContactoPrincipal = false;
 
+    // --- Vigencia y empresa principal (F-RP6) ---
+    private Boolean esEmpresaPrincipal = false;
+    private java.time.LocalDate fechaInicio;
+    private java.time.LocalDate fechaFin;
+
     public PersonaEmpresaCreateRequest() {
     }
 
@@ -85,4 +90,13 @@ public class PersonaEmpresaCreateRequest {
     public void setEsContactoPrincipal(Boolean esContactoPrincipal) {
         this.esContactoPrincipal = esContactoPrincipal;
     }
+
+    public Boolean getEsEmpresaPrincipal() { return esEmpresaPrincipal; }
+    public void setEsEmpresaPrincipal(Boolean esEmpresaPrincipal) { this.esEmpresaPrincipal = esEmpresaPrincipal; }
+
+    public java.time.LocalDate getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(java.time.LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
+
+    public java.time.LocalDate getFechaFin() { return fechaFin; }
+    public void setFechaFin(java.time.LocalDate fechaFin) { this.fechaFin = fechaFin; }
 }

@@ -5,6 +5,10 @@ import com.arquitecsoft.gestion.domain.empresa.dto.EmpresaResponse;
 import com.arquitecsoft.gestion.domain.empresa.dto.EmpresaUpdateRequest;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa.EstadoEmpresa;
+import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa.Clasificacion;
+import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa.Tamano;
+import com.arquitecsoft.gestion.domain.catalogo.repository.GcOrigenRepository;
+import com.arquitecsoft.gestion.domain.catalogo.repository.GcSectorRepository;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcDepartamentoRepository;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcEmpresaRepository;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcMunicipioRepository;
@@ -27,17 +31,23 @@ public class EmpresaService {
     private final GcPaisRepository paisRepository;
     private final GcDepartamentoRepository departamentoRepository;
     private final GcMunicipioRepository municipioRepository;
+    private final GcSectorRepository sectorRepository;
+    private final GcOrigenRepository origenRepository;
     private final SecurityUtils securityUtils;
 
     public EmpresaService(GcEmpresaRepository empresaRepository,
                           GcPaisRepository paisRepository,
                           GcDepartamentoRepository departamentoRepository,
                           GcMunicipioRepository municipioRepository,
+                          GcSectorRepository sectorRepository,
+                          GcOrigenRepository origenRepository,
                           SecurityUtils securityUtils) {
         this.empresaRepository = empresaRepository;
         this.paisRepository = paisRepository;
         this.departamentoRepository = departamentoRepository;
         this.municipioRepository = municipioRepository;
+        this.sectorRepository = sectorRepository;
+        this.origenRepository = origenRepository;
         this.securityUtils = securityUtils;
     }
 
@@ -105,6 +115,13 @@ public class EmpresaService {
         empresa.setDireccionFisica(request.getDireccionFisica());
         empresa.setSitioWeb(request.getSitioWeb());
         empresa.setEstado(EstadoEmpresa.ACTIVA);
+        empresa.setClasificacion(parseClasificacion(request.getClasificacion(), Clasificacion.PROSPECTO));
+        empresa.setTamano(parseTamano(request.getTamano()));
+        empresa.setPropietarioId(request.getPropietarioId());
+        empresa.setSector(resolverSector(request.getSectorCodigo()));
+        empresa.setOrigen(resolverOrigen(request.getOrigenCodigo()));
+        empresa.setIngresosAnuales(request.getIngresosAnuales());
+        empresa.setDescripcion(request.getDescripcion());
         empresa.setCreadoPor(securityUtils.getCurrentUserId());
 
         empresa = empresaRepository.save(empresa);
@@ -162,8 +179,62 @@ public class EmpresaService {
             empresa.setEstado(nuevoEstado);
         }
 
+        if (request.getClasificacion() != null) {
+            empresa.setClasificacion(parseClasificacion(request.getClasificacion(), empresa.getClasificacion()));
+        }
+        if (request.getTamano() != null) {
+            empresa.setTamano(request.getTamano().isBlank() ? null : parseTamano(request.getTamano()));
+        }
+        if (request.getPropietarioId() != null) {
+            empresa.setPropietarioId(request.getPropietarioId());
+        }
+        if (request.getSectorCodigo() != null) {
+            empresa.setSector(request.getSectorCodigo().isBlank() ? null : resolverSector(request.getSectorCodigo()));
+        }
+        if (request.getOrigenCodigo() != null) {
+            empresa.setOrigen(request.getOrigenCodigo().isBlank() ? null : resolverOrigen(request.getOrigenCodigo()));
+        }
+        if (request.getIngresosAnuales() != null) {
+            empresa.setIngresosAnuales(request.getIngresosAnuales());
+        }
+        if (request.getDescripcion() != null) {
+            empresa.setDescripcion(request.getDescripcion());
+        }
+
         empresa.setModificadoPor(securityUtils.getCurrentUserId());
         empresa = empresaRepository.save(empresa);
         return enriquecerResponse(empresa);
+    }
+
+    // --- Helpers de enriquecimiento (RB-34) ---
+
+    private Clasificacion parseClasificacion(String valor, Clasificacion porDefecto) {
+        if (!StringUtils.hasText(valor)) return porDefecto;
+        try {
+            return Clasificacion.valueOf(valor);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("VALIDATION_ERROR", "Clasificación inválida: " + valor);
+        }
+    }
+
+    private Tamano parseTamano(String valor) {
+        if (!StringUtils.hasText(valor)) return null;
+        try {
+            return Tamano.valueOf(valor);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("VALIDATION_ERROR", "Tamaño inválido: " + valor);
+        }
+    }
+
+    private com.arquitecsoft.gestion.domain.catalogo.entity.GcSector resolverSector(String codigo) {
+        if (!StringUtils.hasText(codigo)) return null;
+        return sectorRepository.findById(codigo)
+                .orElseThrow(() -> new BusinessException("VALIDATION_ERROR", "Sector no encontrado: " + codigo));
+    }
+
+    private com.arquitecsoft.gestion.domain.catalogo.entity.GcOrigen resolverOrigen(String codigo) {
+        if (!StringUtils.hasText(codigo)) return null;
+        return origenRepository.findById(codigo)
+                .orElseThrow(() -> new BusinessException("VALIDATION_ERROR", "Origen no encontrado: " + codigo));
     }
 }

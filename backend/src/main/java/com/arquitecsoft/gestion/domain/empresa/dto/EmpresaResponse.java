@@ -1,6 +1,7 @@
 package com.arquitecsoft.gestion.domain.empresa.dto;
 
 import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class EmpresaResponse {
@@ -19,6 +20,15 @@ public class EmpresaResponse {
     private String direccionFisica;
     private String sitioWeb;
     private String estado;
+    private String clasificacion;
+    private Long propietarioId;
+    private String sectorCodigo;
+    private String sectorNombre;
+    private String tamano;
+    private String origenCodigo;
+    private String origenNombre;
+    private BigDecimal ingresosAnuales;
+    private String descripcion;
     private LocalDateTime fechaCreacion;
 
     public EmpresaResponse() {}
@@ -36,6 +46,19 @@ public class EmpresaResponse {
         r.setDireccionFisica(empresa.getDireccionFisica());
         r.setSitioWeb(empresa.getSitioWeb());
         r.setEstado(empresa.getEstado().name());
+        r.setClasificacion(empresa.getClasificacion() != null ? empresa.getClasificacion().name() : null);
+        r.setPropietarioId(empresa.getPropietarioId());
+        if (empresa.getSector() != null) {
+            r.setSectorCodigo(empresa.getSector().getCodigo());
+            r.setSectorNombre(empresa.getSector().getNombre());
+        }
+        r.setTamano(empresa.getTamano() != null ? empresa.getTamano().name() : null);
+        if (empresa.getOrigen() != null) {
+            r.setOrigenCodigo(empresa.getOrigen().getCodigo());
+            r.setOrigenNombre(empresa.getOrigen().getNombre());
+        }
+        r.setIngresosAnuales(empresa.getIngresosAnuales());
+        r.setDescripcion(empresa.getDescripcion());
         r.setFechaCreacion(empresa.getFechaCreacion());
         return r;
     }
@@ -82,6 +105,33 @@ public class EmpresaResponse {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getClasificacion() { return clasificacion; }
+    public void setClasificacion(String clasificacion) { this.clasificacion = clasificacion; }
+
+    public Long getPropietarioId() { return propietarioId; }
+    public void setPropietarioId(Long propietarioId) { this.propietarioId = propietarioId; }
+
+    public String getSectorCodigo() { return sectorCodigo; }
+    public void setSectorCodigo(String sectorCodigo) { this.sectorCodigo = sectorCodigo; }
+
+    public String getSectorNombre() { return sectorNombre; }
+    public void setSectorNombre(String sectorNombre) { this.sectorNombre = sectorNombre; }
+
+    public String getTamano() { return tamano; }
+    public void setTamano(String tamano) { this.tamano = tamano; }
+
+    public String getOrigenCodigo() { return origenCodigo; }
+    public void setOrigenCodigo(String origenCodigo) { this.origenCodigo = origenCodigo; }
+
+    public String getOrigenNombre() { return origenNombre; }
+    public void setOrigenNombre(String origenNombre) { this.origenNombre = origenNombre; }
+
+    public BigDecimal getIngresosAnuales() { return ingresosAnuales; }
+    public void setIngresosAnuales(BigDecimal ingresosAnuales) { this.ingresosAnuales = ingresosAnuales; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }

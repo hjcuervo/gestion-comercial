@@ -1,6 +1,7 @@
 package com.arquitecsoft.gestion.domain.empresa.dto;
 
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
 public class EmpresaUpdateRequest {
 
@@ -36,6 +37,19 @@ public class EmpresaUpdateRequest {
 
     private String estado;
 
+    // --- Enriquecimiento CRM (F-RP4) ---
+    private String clasificacion;
+    private Long propietarioId;
+    @Size(max = 20)
+    private String sectorCodigo;
+    private String tamano;
+    @Size(max = 20)
+    private String origenCodigo;
+    @PositiveOrZero(message = "Los ingresos anuales no pueden ser negativos")
+    private BigDecimal ingresosAnuales;
+    @Size(max = 1000)
+    private String descripcion;
+
     public EmpresaUpdateRequest() {}
 
     // Getters and Setters
@@ -68,4 +82,25 @@ public class EmpresaUpdateRequest {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getClasificacion() { return clasificacion; }
+    public void setClasificacion(String clasificacion) { this.clasificacion = clasificacion; }
+
+    public Long getPropietarioId() { return propietarioId; }
+    public void setPropietarioId(Long propietarioId) { this.propietarioId = propietarioId; }
+
+    public String getSectorCodigo() { return sectorCodigo; }
+    public void setSectorCodigo(String sectorCodigo) { this.sectorCodigo = sectorCodigo; }
+
+    public String getTamano() { return tamano; }
+    public void setTamano(String tamano) { this.tamano = tamano; }
+
+    public String getOrigenCodigo() { return origenCodigo; }
+    public void setOrigenCodigo(String origenCodigo) { this.origenCodigo = origenCodigo; }
+
+    public BigDecimal getIngresosAnuales() { return ingresosAnuales; }
+    public void setIngresosAnuales(BigDecimal ingresosAnuales) { this.ingresosAnuales = ingresosAnuales; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 }

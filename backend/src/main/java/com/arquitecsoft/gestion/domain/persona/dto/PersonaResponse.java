@@ -12,8 +12,15 @@ public class PersonaResponse {
     private String nombres;
     private String apellidos;
     private String nombreCompleto;
-    private String email;
-    private String telefono;
+    private String tipoDocumento;
+    private String numeroDocumento;
+    private Long propietarioId;
+    private String origenCodigo;
+    private String origenNombre;
+    private Long reportaAId;
+    private String reportaANombre;
+    private String idioma;
+    private String notas;
     private Boolean activo;
     private List<PersonaEmpresaResponse> empresas;
 
@@ -26,8 +33,19 @@ public class PersonaResponse {
         response.setNombres(persona.getNombres());
         response.setApellidos(persona.getApellidos());
         response.setNombreCompleto(persona.getNombreCompleto());
-        response.setEmail(persona.getEmail());
-        response.setTelefono(persona.getTelefono());
+        response.setTipoDocumento(persona.getTipoDocumento());
+        response.setNumeroDocumento(persona.getNumeroDocumento());
+        response.setPropietarioId(persona.getPropietarioId());
+        if (persona.getOrigen() != null) {
+            response.setOrigenCodigo(persona.getOrigen().getCodigo());
+            response.setOrigenNombre(persona.getOrigen().getNombre());
+        }
+        if (persona.getReportaA() != null) {
+            response.setReportaAId(persona.getReportaA().getId());
+            response.setReportaANombre(persona.getReportaA().getNombreCompleto());
+        }
+        response.setIdioma(persona.getIdioma());
+        response.setNotas(persona.getNotas());
         response.setActivo(persona.isActivo());
         
         if (persona.getEmpresas() != null) {
@@ -45,8 +63,6 @@ public class PersonaResponse {
         response.setNombres(persona.getNombres());
         response.setApellidos(persona.getApellidos());
         response.setNombreCompleto(persona.getNombreCompleto());
-        response.setEmail(persona.getEmail());
-        response.setTelefono(persona.getTelefono());
         response.setActivo(persona.isActivo());
         return response;
     }
@@ -84,21 +100,32 @@ public class PersonaResponse {
         this.nombreCompleto = nombreCompleto;
     }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getNumeroDocumento() { return numeroDocumento; }
+    public void setNumeroDocumento(String numeroDocumento) { this.numeroDocumento = numeroDocumento; }
 
-    public String getTelefono() {
-        return telefono;
-    }
+    public Long getPropietarioId() { return propietarioId; }
+    public void setPropietarioId(Long propietarioId) { this.propietarioId = propietarioId; }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
+    public String getOrigenCodigo() { return origenCodigo; }
+    public void setOrigenCodigo(String origenCodigo) { this.origenCodigo = origenCodigo; }
+
+    public String getOrigenNombre() { return origenNombre; }
+    public void setOrigenNombre(String origenNombre) { this.origenNombre = origenNombre; }
+
+    public Long getReportaAId() { return reportaAId; }
+    public void setReportaAId(Long reportaAId) { this.reportaAId = reportaAId; }
+
+    public String getReportaANombre() { return reportaANombre; }
+    public void setReportaANombre(String reportaANombre) { this.reportaANombre = reportaANombre; }
+
+    public String getIdioma() { return idioma; }
+    public void setIdioma(String idioma) { this.idioma = idioma; }
+
+    public String getNotas() { return notas; }
+    public void setNotas(String notas) { this.notas = notas; }
 
     public Boolean getActivo() {
         return activo;

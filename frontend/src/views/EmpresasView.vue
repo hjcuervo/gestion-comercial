@@ -35,6 +35,16 @@
       <Teleport to="#gc-shell-aside">
         <div v-if="asideReady" class="emp-aside">
           <div class="emp-aside__sec">
+            <ContactosPanel
+              :contactos="medios"
+              :loading="loadingMedios"
+              @create="openContactoCreate"
+              @edit="openContactoEdit"
+              @principal="marcarPrincipal"
+              @eliminar="eliminarContacto"
+            />
+          </div>
+          <div class="emp-aside__sec">
             <h3 class="emp-aside__title">Contactos</h3>
             <GcEmpty v-if="!contactos.length" icon="user-off" message="Sin contactos" />
             <div v-else class="emp-aside__list">
@@ -65,6 +75,7 @@
         <div class="emp-heading">
           <h1 class="emp-title">{{ empresa.razonSocial }}</h1>
           <GcBadge :tone="empresa.estado === 'ACTIVA' ? 'success' : 'neutral'" :label="empresa.estado === 'ACTIVA' ? 'Activa' : 'Inactiva'" />
+          <GcBadge v-if="empresa.clasificacion" :tone="clasifTone(empresa.clasificacion)" soft :label="clasifLabel(empresa.clasificacion)" />
         </div>
         <GcButton variant="default" size="sm" icon="edit" @click="openEdit">Editar</GcButton>
       </header>
@@ -76,10 +87,28 @@
         <div class="emp-field"><span class="emp-label">Ciudad</span><span class="emp-value">{{ empresa.ciudadNombre || empresa.ciudad || '—' }}</span></div>
         <div class="emp-field"><span class="emp-label">Dirección</span><span class="emp-value">{{ empresa.direccionFisica || '—' }}</span></div>
         <div class="emp-field"><span class="emp-label">Sitio web</span><a v-if="empresa.sitioWeb" :href="empresa.sitioWeb" target="_blank" rel="noopener" class="emp-link">{{ empresa.sitioWeb }}</a><span v-else class="emp-value">—</span></div>
+        <div class="emp-field"><span class="emp-label">Sector</span><span class="emp-value">{{ empresa.sectorNombre || '—' }}</span></div>
+        <div class="emp-field"><span class="emp-label">Tamaño</span><span class="emp-value">{{ tamanoLabel(empresa.tamano) }}</span></div>
+        <div class="emp-field"><span class="emp-label">Origen</span><span class="emp-value">{{ empresa.origenNombre || '—' }}</span></div>
+        <div class="emp-field"><span class="emp-label">Propietario</span><span class="emp-value">{{ propietarioNombre(empresa.propietarioId) }}</span></div>
+        <div class="emp-field"><span class="emp-label">Ingresos anuales</span><span class="emp-value gc-mono">{{ empresa.ingresosAnuales != null ? fmtCurrency(empresa.ingresosAnuales, 'COP') : '—' }}</span></div>
+        <div class="emp-field emp-field--wide"><span class="emp-label">Descripción</span><span class="emp-value">{{ empresa.descripcion || '—' }}</span></div>
       </div>
     </template>
 
     <EmpresaModal :visible="showModal" :empresa="editing" :saving="saving" :error="modalError" @close="showModal = false" @submit="handleSubmit" />
+
+    <ContactoDrawer
+      :open="showContacto"
+      owner="empresa"
+      :owner-nombre="empresa?.razonSocial || ''"
+      :contacto="editingContacto"
+      :redes="redes"
+      :saving="savingContacto"
+      :server-error="contactoError"
+      @close="showContacto = false"
+      @submit="handleContactoSubmit"
+    />
   </div>
 </template>
 
@@ -90,8 +119,12 @@ import { useShell } from '@/composables/useShell';
 import { empresaService } from '@/services/empresa.service';
 import { personaService } from '@/services/persona.service';
 import { oportunidadService } from '@/services/oportunidad.service';
+import { contactoService } from '@/services/contacto.service';
+import { usuarioService } from '@/services/usuario.service';
 import { formatCurrency } from '@/utils/currency';
 import EmpresaModal from '@/components/empresa/EmpresaModal.vue';
+import ContactosPanel from '@/components/contacto/ContactosPanel.vue';
+import ContactoDrawer from '@/components/contacto/ContactoDrawer.vue';
 import GcInput from '@/components/ui/GcInput.vue';
 import GcButton from '@/components/ui/GcButton.vue';
 import GcBadge from '@/components/ui/GcBadge.vue';
@@ -120,11 +153,32 @@ const editing = ref(null);
 const saving = ref(false);
 const modalError = ref(null);
 
+// --- Contactos (medios) ---
+const medios = ref([]);
+const loadingMedios = ref(false);
+const redes = ref([]);
+const showContacto = ref(false);
+const editingContacto = ref(null);
+const savingContacto = ref(false);
+const contactoError = ref('');
+
 const selectedId = computed(() => route.params.id || null);
 
 function fmtCurrency(v, m) { return formatCurrency(v, m); }
 const OPP_TONE = { ABIERTA: 'info', SEGUIMIENTO: 'warning', GANADA: 'success', CONTRATADA: 'accent', PERDIDA: 'danger', NO_CONCRETADA: 'neutral' };
 function oppTone(e) { return OPP_TONE[e] || 'neutral'; }
+
+const usuarios = ref([]);
+const CLASIF = { PROSPECTO: { tone: 'info', label: 'Prospecto' }, CLIENTE: { tone: 'success', label: 'Cliente' }, ALIADO: { tone: 'accent', label: 'Aliado' } };
+function clasifTone(c) { return CLASIF[c]?.tone || 'neutral'; }
+function clasifLabel(c) { return CLASIF[c]?.label || c; }
+const TAMANO = { MICRO: 'Micro', PEQUENA: 'Pequeña', MEDIANA: 'Mediana', GRANDE: 'Grande' };
+function tamanoLabel(t) { return t ? (TAMANO[t] || t) : '—'; }
+function propietarioNombre(id) {
+  if (!id) return '—';
+  const u = usuarios.value.find((x) => String(x.id) === String(id));
+  return u ? (u.nombreCompleto || (u.nombres + ' ' + u.apellidos)) : `#${id}`;
+}
 
 async function reload() {
   loading.value = true;
@@ -151,8 +205,18 @@ async function cargarDetalle() {
     ]);
     contactos.value = pers.data || [];
     oportunidades.value = opps.data || [];
+    await cargarMedios();
   } catch (err) { console.error('Error cargando detalle empresa:', err); }
   finally { loadingDetalle.value = false; }
+}
+
+async function cargarMedios() {
+  if (!selectedId.value) { medios.value = []; return; }
+  loadingMedios.value = true;
+  try {
+    medios.value = await contactoService.listarPorEmpresa(selectedId.value);
+  } catch (err) { console.error('Error cargando contactos:', err); medios.value = []; }
+  finally { loadingMedios.value = false; }
 }
 
 function openCreate() { editing.value = null; modalError.value = null; showModal.value = true; }
@@ -169,9 +233,35 @@ async function handleSubmit(payload) {
   finally { saving.value = false; }
 }
 
+function openContactoCreate() { editingContacto.value = null; contactoError.value = ''; showContacto.value = true; }
+function openContactoEdit(c) { editingContacto.value = { ...c }; contactoError.value = ''; showContacto.value = true; }
+
+async function handleContactoSubmit({ id, payload }) {
+  savingContacto.value = true; contactoError.value = '';
+  try {
+    if (id) await contactoService.actualizar(id, payload);
+    else await contactoService.crearParaEmpresa(selectedId.value, payload);
+    showContacto.value = false;
+    await cargarMedios();
+  } catch (err) { contactoError.value = err.response?.data?.message || 'Error al guardar el contacto'; }
+  finally { savingContacto.value = false; }
+}
+
+async function marcarPrincipal(c) {
+  try { await contactoService.marcarPrincipal(c.id); await cargarMedios(); }
+  catch (err) { console.error('Error marcando principal:', err); }
+}
+
+async function eliminarContacto(c) {
+  try { await contactoService.eliminar(c.id); await cargarMedios(); }
+  catch (err) { console.error('Error eliminando contacto:', err); }
+}
+
 onMounted(async () => {
   await nextTick();
   asideReady.value = true;
+  contactoService.listarRedesSociales().then((r) => { redes.value = r || []; }).catch(() => { redes.value = []; });
+  usuarioService.listar().then((u) => { usuarios.value = u || []; }).catch(() => { usuarios.value = []; });
   await reload();
   if (selectedId.value) await cargarDetalle();
 });
@@ -193,6 +283,7 @@ watch(selectedId, () => cargarDetalle());
 .emp-title { font-size: var(--gc-fs-xl); }
 .emp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--gc-space-4); margin-top: var(--gc-space-5); }
 .emp-field { display: flex; flex-direction: column; gap: 2px; }
+.emp-field--wide { grid-column: 1 / -1; }
 .emp-label { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gc-text-3); }
 .emp-value { font-size: var(--gc-fs-md); color: var(--gc-text); }
 .emp-link { font-size: var(--gc-fs-md); color: var(--gc-info); }

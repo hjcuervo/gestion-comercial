@@ -1,5 +1,6 @@
 package com.arquitecsoft.gestion.domain.persona.entity;
 
+import com.arquitecsoft.gestion.domain.catalogo.entity.GcOrigen;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,11 +20,29 @@ public class GcPersona {
     @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
 
-    @Column(name = "email", length = 100)
-    private String email;
+    // --- Enriquecimiento CRM (F-RP5) ---
+    @Column(name = "tipo_documento", length = 20)
+    private String tipoDocumento;
 
-    @Column(name = "telefono", length = 30)
-    private String telefono;
+    @Column(name = "numero_documento", length = 50)
+    private String numeroDocumento;
+
+    @Column(name = "propietario_id")
+    private Long propietarioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origen_codigo")
+    private GcOrigen origen;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporta_a_id")
+    private GcPersona reportaA;
+
+    @Column(name = "idioma", length = 20)
+    private String idioma;
+
+    @Column(name = "notas", length = 1000)
+    private String notas;
 
     @Column(name = "activo", nullable = false)
     private Integer activo = 1;
@@ -97,20 +116,60 @@ public class GcPersona {
         this.apellidos = apellidos;
     }
 
-    public String getEmail() {
-        return email;
+    public String getTipoDocumento() {
+        return tipoDocumento;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
     }
 
-    public String getTelefono() {
-        return telefono;
+    public String getNumeroDocumento() {
+        return numeroDocumento;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
+    public void setNumeroDocumento(String numeroDocumento) {
+        this.numeroDocumento = numeroDocumento;
+    }
+
+    public Long getPropietarioId() {
+        return propietarioId;
+    }
+
+    public void setPropietarioId(Long propietarioId) {
+        this.propietarioId = propietarioId;
+    }
+
+    public GcOrigen getOrigen() {
+        return origen;
+    }
+
+    public void setOrigen(GcOrigen origen) {
+        this.origen = origen;
+    }
+
+    public GcPersona getReportaA() {
+        return reportaA;
+    }
+
+    public void setReportaA(GcPersona reportaA) {
+        this.reportaA = reportaA;
+    }
+
+    public String getIdioma() {
+        return idioma;
+    }
+
+    public void setIdioma(String idioma) {
+        this.idioma = idioma;
+    }
+
+    public String getNotas() {
+        return notas;
+    }
+
+    public void setNotas(String notas) {
+        this.notas = notas;
     }
 
     public Integer getActivo() {

@@ -46,6 +46,16 @@ export const empresaService = {
     const { data } = await api.get(`${CATALOGOS}/municipios`, { params });
     return data;
   },
+
+  async listarSectores() {
+    const { data } = await api.get(`${CATALOGOS}/sectores`);
+    return data;
+  },
+
+  async listarOrigenes() {
+    const { data } = await api.get(`${CATALOGOS}/origenes`);
+    return data;
+  },
 };
 
 export default empresaService;

@@ -13,6 +13,10 @@ public class PersonaEmpresaResponse {
     private String emailEmpresarial;
     private String telefonoEmpresarial;
     private Boolean esContactoPrincipal;
+    private Boolean activo;
+    private java.time.LocalDate fechaInicio;
+    private java.time.LocalDate fechaFin;
+    private Boolean esEmpresaPrincipal;
 
     public PersonaEmpresaResponse() {
     }
@@ -28,6 +32,10 @@ public class PersonaEmpresaResponse {
         response.setEmailEmpresarial(pe.getEmailEmpresarial());
         response.setTelefonoEmpresarial(pe.getTelefonoEmpresarial());
         response.setEsContactoPrincipal(pe.isContactoPrincipal());
+        response.setActivo(pe.isActivo());
+        response.setFechaInicio(pe.getFechaInicio());
+        response.setFechaFin(pe.getFechaFin());
+        response.setEsEmpresaPrincipal(pe.isEmpresaPrincipal());
         return response;
     }
 
@@ -103,4 +111,16 @@ public class PersonaEmpresaResponse {
     public void setEsContactoPrincipal(Boolean esContactoPrincipal) {
         this.esContactoPrincipal = esContactoPrincipal;
     }
+
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
+
+    public java.time.LocalDate getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(java.time.LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
+
+    public java.time.LocalDate getFechaFin() { return fechaFin; }
+    public void setFechaFin(java.time.LocalDate fechaFin) { this.fechaFin = fechaFin; }
+
+    public Boolean getEsEmpresaPrincipal() { return esEmpresaPrincipal; }
+    public void setEsEmpresaPrincipal(Boolean esEmpresaPrincipal) { this.esEmpresaPrincipal = esEmpresaPrincipal; }
 }

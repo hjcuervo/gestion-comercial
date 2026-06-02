@@ -19,7 +19,7 @@
         >
           <div class="per-master__row">
             <span class="per-master__name">{{ p.nombreCompleto || (p.nombres + ' ' + p.apellidos) }}</span>
-            <span class="per-master__meta">{{ p.email || '—' }}</span>
+            <span class="per-master__meta">{{ p.numeroDocumento || '—' }}</span>
           </div>
         </GcListRow>
       </div>
@@ -34,6 +34,16 @@
       <!-- Empresas asociadas en el aside -->
       <Teleport to="#gc-shell-aside">
         <div v-if="asideReady" class="per-aside">
+          <div class="per-aside__sec">
+            <ContactosPanel
+              :contactos="medios"
+              :loading="loadingMedios"
+              @create="openContactoCreate"
+              @edit="openContactoEdit"
+              @principal="marcarPrincipal"
+              @eliminar="eliminarContacto"
+            />
+          </div>
           <div class="per-aside__head">
             <h3 class="per-aside__title">Empresas asociadas</h3>
             <GcButton variant="default" size="sm" icon="plus" @click="showAsociar = true">Asociar</GcButton>
@@ -65,14 +75,30 @@
       </header>
 
       <div class="per-grid">
-        <div class="per-field"><span class="per-label">Email</span><span class="per-value">{{ persona.email || '—' }}</span></div>
-        <div class="per-field"><span class="per-label">Teléfono</span><span class="per-value gc-mono">{{ persona.telefono || '—' }}</span></div>
+        <div class="per-field"><span class="per-label">Documento</span><span class="per-value gc-mono">{{ persona.tipoDocumento ? persona.tipoDocumento + ' ' : '' }}{{ persona.numeroDocumento || '—' }}</span></div>
+        <div class="per-field"><span class="per-label">Origen</span><span class="per-value">{{ persona.origenNombre || '—' }}</span></div>
+        <div class="per-field"><span class="per-label">Propietario</span><span class="per-value">{{ propietarioNombre(persona.propietarioId) }}</span></div>
+        <div class="per-field"><span class="per-label">Reporta a</span><span class="per-value">{{ persona.reportaANombre || '—' }}</span></div>
+        <div class="per-field"><span class="per-label">Idioma</span><span class="per-value">{{ persona.idioma || '—' }}</span></div>
         <div class="per-field"><span class="per-label">Empresas</span><span class="per-value gc-mono">{{ persona.empresas?.length || 0 }}</span></div>
+        <div class="per-field per-field--wide"><span class="per-label">Notas</span><span class="per-value">{{ persona.notas || '—' }}</span></div>
       </div>
     </template>
 
     <PersonaModal :visible="showModal" :persona="editing" :saving="saving" :error="modalError" @close="showModal = false" @submit="handleSubmit" />
     <AsociarEmpresaModal :visible="showAsociar" :saving="savingAsoc" :error="asocError" @close="showAsociar = false" @submit="handleAsociar" />
+
+    <ContactoDrawer
+      :open="showContacto"
+      owner="persona"
+      :owner-nombre="persona ? (persona.nombreCompleto || (persona.nombres + ' ' + persona.apellidos)) : ''"
+      :contacto="editingContacto"
+      :redes="redes"
+      :saving="savingContacto"
+      :server-error="contactoError"
+      @close="showContacto = false"
+      @submit="handleContactoSubmit"
+    />
   </div>
 </template>
 
@@ -81,8 +107,12 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useShell } from '@/composables/useShell';
 import { personaService } from '@/services/persona.service';
+import { contactoService } from '@/services/contacto.service';
+import { usuarioService } from '@/services/usuario.service';
 import PersonaModal from '@/components/persona/PersonaModal.vue';
 import AsociarEmpresaModal from '@/components/persona/AsociarEmpresaModal.vue';
+import ContactosPanel from '@/components/contacto/ContactosPanel.vue';
+import ContactoDrawer from '@/components/contacto/ContactoDrawer.vue';
 import GcInput from '@/components/ui/GcInput.vue';
 import GcButton from '@/components/ui/GcButton.vue';
 import GcBadge from '@/components/ui/GcBadge.vue';
@@ -113,10 +143,26 @@ const showAsociar = ref(false);
 const savingAsoc = ref(false);
 const asocError = ref(null);
 
+// --- Contactos (medios) ---
+const medios = ref([]);
+const loadingMedios = ref(false);
+const redes = ref([]);
+const showContacto = ref(false);
+const editingContacto = ref(null);
+const savingContacto = ref(false);
+const contactoError = ref('');
+
 const selectedId = computed(() => route.params.id || null);
 
 const ROL = { DECISOR: 'Decisor', INFLUENCIADOR: 'Influenciador', TECNICO: 'Técnico', USUARIO: 'Usuario', ADMINISTRATIVO: 'Administrativo' };
 function rolLabel(r) { return ROL[r] || r; }
+
+const usuarios = ref([]);
+function propietarioNombre(id) {
+  if (!id) return '—';
+  const u = usuarios.value.find((x) => String(x.id) === String(id));
+  return u ? (u.nombreCompleto || (u.nombres + ' ' + u.apellidos)) : `#${id}`;
+}
 
 async function reload() {
   loading.value = true;
@@ -134,9 +180,17 @@ function select(id) { router.push(`/personas/${id}`); }
 async function cargarDetalle() {
   if (!selectedId.value) { persona.value = null; return; }
   loadingDetalle.value = true;
-  try { persona.value = await personaService.obtenerPorId(selectedId.value); }
+  try { persona.value = await personaService.obtenerPorId(selectedId.value); await cargarMedios(); }
   catch (err) { console.error('Error cargando persona:', err); }
   finally { loadingDetalle.value = false; }
+}
+
+async function cargarMedios() {
+  if (!selectedId.value) { medios.value = []; return; }
+  loadingMedios.value = true;
+  try { medios.value = await contactoService.listarPorPersona(selectedId.value); }
+  catch (err) { console.error('Error cargando contactos:', err); medios.value = []; }
+  finally { loadingMedios.value = false; }
 }
 
 function openCreate() { editing.value = null; modalError.value = null; showModal.value = true; }
@@ -165,9 +219,35 @@ async function desasociar(empresaId) {
   catch (err) { console.error('Error al desasociar:', err); }
 }
 
+function openContactoCreate() { editingContacto.value = null; contactoError.value = ''; showContacto.value = true; }
+function openContactoEdit(c) { editingContacto.value = { ...c }; contactoError.value = ''; showContacto.value = true; }
+
+async function handleContactoSubmit({ id, payload }) {
+  savingContacto.value = true; contactoError.value = '';
+  try {
+    if (id) await contactoService.actualizar(id, payload);
+    else await contactoService.crearParaPersona(selectedId.value, payload);
+    showContacto.value = false;
+    await cargarMedios();
+  } catch (err) { contactoError.value = err.response?.data?.message || 'Error al guardar el contacto'; }
+  finally { savingContacto.value = false; }
+}
+
+async function marcarPrincipal(c) {
+  try { await contactoService.marcarPrincipal(c.id); await cargarMedios(); }
+  catch (err) { console.error('Error marcando principal:', err); }
+}
+
+async function eliminarContacto(c) {
+  try { await contactoService.eliminar(c.id); await cargarMedios(); }
+  catch (err) { console.error('Error eliminando contacto:', err); }
+}
+
 onMounted(async () => {
   await nextTick();
   asideReady.value = true;
+  contactoService.listarRedesSociales().then((r) => { redes.value = r || []; }).catch(() => { redes.value = []; });
+  usuarioService.listar().then((u) => { usuarios.value = u || []; }).catch(() => { usuarios.value = []; });
   await reload();
   if (selectedId.value) await cargarDetalle();
 });
@@ -189,10 +269,12 @@ watch(selectedId, () => cargarDetalle());
 .per-title { font-size: var(--gc-fs-xl); }
 .per-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--gc-space-4); margin-top: var(--gc-space-5); }
 .per-field { display: flex; flex-direction: column; gap: 2px; }
+.per-field--wide { grid-column: 1 / -1; }
 .per-label { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gc-text-3); }
 .per-value { font-size: var(--gc-fs-md); color: var(--gc-text); }
 
-.per-aside { padding: var(--gc-space-5); display: flex; flex-direction: column; gap: var(--gc-space-3); }
+.per-aside { padding: var(--gc-space-5); display: flex; flex-direction: column; gap: var(--gc-space-5); }
+.per-aside__sec { display: flex; flex-direction: column; gap: var(--gc-space-2); }
 .per-aside__head { display: flex; align-items: center; justify-content: space-between; }
 .per-aside__title { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--gc-text-3); }
 .per-aside__list { border: 1px solid var(--gc-border); border-radius: var(--gc-radius-lg); overflow: hidden; }
