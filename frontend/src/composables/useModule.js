@@ -26,6 +26,7 @@ export const MODULES = [
     landing: '/',
     screens: [
       { path: '/', label: 'Dashboard', icon: 'dashboard', exact: true },
+      { path: '/bandeja', label: 'Bandeja', icon: 'checklist' },
       { path: '/actividades', label: 'Oportunidades', icon: 'target' },
       { path: '/pipeline', label: 'Pipeline', icon: 'layout-kanban' },
       { path: '/directorio', label: 'Directorio', icon: 'address-book' },

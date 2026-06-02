@@ -30,6 +30,15 @@ const routes = [
     meta: { requiresAuth: true, layout: 'app', module: 'venta' },
   },
 
+  // Bandeja de trabajo (Motor de Acción): cola operativa de la persona.
+  // Plantilla Operativo (lista maestra de acciones + ejecución en la superficie).
+  {
+    path: '/bandeja',
+    name: 'Bandeja',
+    component: () => import('@/views/BandejaView.vue'),
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
+  },
+
   // Consola Operativo: Oportunidades/Actividades. Lista maestra persistente;
   // el detalle (pestañas Resumen/Actividades/Proceso) se pinta en la superficie.
   {
