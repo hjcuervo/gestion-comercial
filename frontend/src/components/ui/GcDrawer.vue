@@ -4,7 +4,10 @@
       <div v-if="open" class="gc-drawer__overlay" @click.self="$emit('close')">
         <aside class="gc-drawer" role="dialog" aria-modal="true" :style="{ width }">
           <header class="gc-drawer__header">
-            <h2 class="gc-drawer__title">{{ title }}</h2>
+            <div class="gc-drawer__heading">
+              <h2 class="gc-drawer__title">{{ title }}</h2>
+              <p v-if="subtitle" class="gc-drawer__subtitle">{{ subtitle }}</p>
+            </div>
             <GcButton variant="ghost" size="sm" icon="x" @click="$emit('close')" />
           </header>
           <div class="gc-drawer__body">
@@ -25,6 +28,7 @@ import GcButton from './GcButton.vue';
 defineProps({
   open: { type: Boolean, default: false },
   title: { type: String, default: '' },
+  subtitle: { type: String, default: '' },
   width: { type: String, default: '420px' },
 });
 
@@ -57,7 +61,9 @@ defineEmits(['close']);
   padding: var(--gc-space-4) var(--gc-space-5);
   border-bottom: 1px solid var(--gc-border);
 }
+.gc-drawer__heading { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .gc-drawer__title { font-size: var(--gc-fs-lg); }
+.gc-drawer__subtitle { font-size: var(--gc-fs-sm); color: var(--gc-text-2); }
 .gc-drawer__body { flex: 1; padding: var(--gc-space-5); overflow-y: auto; }
 .gc-drawer__footer {
   display: flex;

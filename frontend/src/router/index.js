@@ -95,11 +95,12 @@ const routes = [
       },
     ],
   },
+  // --- RF7: Facturación (Mundo 3) plantilla Tablero ---
   {
     path: '/facturacion',
     name: 'Facturacion',
     component: () => import('@/views/FacturacionView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
+    meta: { requiresAuth: true, layout: 'app' },
   },
 
   {
