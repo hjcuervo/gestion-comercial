@@ -1,225 +1,120 @@
 <template>
-  <AppLayout>
-    <div class="facturacion">
-      <!-- Header con selector de mes -->
-      <section class="page-header animate-slideUp">
-        <div>
-          <h1 class="page-title gradient-text">Facturación</h1>
-          <p class="page-subtitle">{{ mesLabel }}</p>
-        </div>
-        <div class="period-controls">
-          <button class="btn btn--ghost btn--sm" @click="cambiarMes(-1)" title="Mes anterior">
-            <Icon name="chevron-left" :size="16" />
-          </button>
-          <input
-            type="month"
-            v-model="anioMes"
-            class="period-input"
-            @change="loadData"
-          />
-          <button class="btn btn--ghost btn--sm" @click="cambiarMes(1)" title="Mes siguiente">
-            <Icon name="chevron-right" :size="16" />
-          </button>
-          <button v-if="!esMesActual" class="btn btn--ghost btn--sm" @click="irAlMesActual">
-            <Icon name="calendar" :size="14" /> Hoy
-          </button>
-        </div>
-      </section>
-
-      <!-- Nota TRM (aproximaciones) -->
-      <div v-if="vista?.notaTrm" class="trm-note glass animate-slideUp">
-        <Icon name="info" :size="14" color="var(--warning)" />
-        <span>{{ vista.notaTrm }}</span>
+  <div class="fact">
+    <header class="fact__head">
+      <div>
+        <h1 class="fact__title">Facturación</h1>
+        <p class="fact__sub">{{ mesLabel }}</p>
       </div>
-
-      <!-- KPIs clickeables -->
-      <section class="kpi-row animate-slideUp delay-1">
-        <div
-          :class="['kpi glass', activeFilter === 'arrastreMesesAnteriores' && 'kpi--selected', conteosKpi.arrastreMesesAnteriores > 0 && 'kpi--alert']"
-          @click="toggleFilter('arrastreMesesAnteriores')"
-        >
-          <div class="kpi__icon kpi__icon--error"><Icon name="alert-circle" :size="20" /></div>
-          <div class="kpi__data">
-            <span class="kpi__value kpi__value--error">{{ conteosKpi.arrastreMesesAnteriores || 0 }}</span>
-            <span class="kpi__label">Arrastre</span>
-            <span class="kpi__sub">{{ fmtCop(montosKpi.arrastreMesesAnteriores) }}</span>
-          </div>
-        </div>
-
-        <div
-          :class="['kpi glass', activeFilter === 'mesActualVencidos' && 'kpi--selected', conteosKpi.mesActualVencidos > 0 && 'kpi--alert']"
-          @click="toggleFilter('mesActualVencidos')"
-        >
-          <div class="kpi__icon kpi__icon--warning"><Icon name="clock" :size="20" /></div>
-          <div class="kpi__data">
-            <span class="kpi__value kpi__value--warning">{{ conteosKpi.mesActualVencidos || 0 }}</span>
-            <span class="kpi__label">Vencidos del mes</span>
-            <span class="kpi__sub">{{ fmtCop(montosKpi.mesActualVencidos) }}</span>
-          </div>
-        </div>
-
-        <div
-          :class="['kpi glass', activeFilter === 'mesActualPorVencer' && 'kpi--selected']"
-          @click="toggleFilter('mesActualPorVencer')"
-        >
-          <div class="kpi__icon kpi__icon--primary"><Icon name="calendar" :size="20" /></div>
-          <div class="kpi__data">
-            <span class="kpi__value kpi__value--primary">{{ conteosKpi.mesActualPorVencer || 0 }}</span>
-            <span class="kpi__label">Por vencer</span>
-            <span class="kpi__sub">{{ fmtCop(montosKpi.mesActualPorVencer) }}</span>
-          </div>
-        </div>
-
-        <div class="kpi glass kpi--total">
-          <div class="kpi__icon kpi__icon--success"><Icon name="check-circle" :size="20" /></div>
-          <div class="kpi__data">
-            <span class="kpi__value kpi__value--success">{{ fmtPct(vista?.kpis?.porcentajeCumplimiento) }}</span>
-            <span class="kpi__label">Cumplimiento</span>
-            <span class="kpi__sub">{{ fmtCop(vista?.kpis?.totalFacturadoCOP) }} / {{ fmtCop(vista?.kpis?.totalPresupuestadoCOP) }}</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Distribución por estado (chip row) -->
-      <section v-if="distribucionEntries.length" class="distrib-row animate-slideUp delay-1">
-        <span class="distrib-label">Distribución por estado:</span>
-        <span
-          v-for="[estado, cantidad] in distribucionEntries"
-          :key="estado"
-          :class="['estado-pill', `estado-pill--${estado.toLowerCase()}`]"
-        >
-          {{ estadoLabel(estado) }} <strong>{{ cantidad }}</strong>
-        </span>
-      </section>
-
-      <!-- Loading -->
-      <div v-if="loading" class="loading-state">
-        <Icon name="loader" :size="24" class="animate-spin" /> Cargando...
+      <div class="fact__period">
+        <GcButton variant="ghost" size="sm" icon="chevron-left" @click="cambiarMes(-1)" />
+        <input type="month" v-model="anioMes" class="fact__month" @change="loadData" />
+        <GcButton variant="ghost" size="sm" icon="chevron-right" @click="cambiarMes(1)" />
+        <GcButton v-if="!esMesActual" variant="ghost" size="sm" icon="calendar" @click="irAlMesActual">Hoy</GcButton>
       </div>
+    </header>
 
-      <!-- Filtro activo: muestra solo una de las 3 listas -->
-      <section v-else-if="activeFilter" class="section animate-slideUp delay-2">
-        <div class="section-header">
-          <h2 :class="['section-title', filterTitleClass]">
-            <Icon :name="filterIcon" :size="18" :color="filterColor" />
-            {{ filterTitle }} <span class="section-count">{{ filteredList.length }}</span>
-          </h2>
-          <button class="btn btn--ghost btn--sm" @click="activeFilter = null">
-            <Icon name="x" :size="14" /> Ver todo
-          </button>
-        </div>
-
-        <div v-if="!filteredList.length" class="empty-state glass">
-          <Icon name="check-circle" :size="32" color="var(--text-muted)" />
-          <p>No hay elementos para este filtro</p>
-        </div>
-
-        <div v-else class="fp-list">
-          <FormaPagoCard
-            v-for="fp in filteredList"
-            :key="fp.id"
-            :item="fp"
-            @click="openGestion(fp)"
-          />
-        </div>
-      </section>
-
-      <!-- Vista por defecto: las 3 secciones del backend -->
-      <template v-else>
-        <!-- Arrastre (meses anteriores) -->
-        <section v-if="vista?.arrastreMesesAnteriores?.length" class="section animate-slideUp delay-2">
-          <div class="section-header">
-            <h2 class="section-title section-title--error">
-              <Icon name="alert-circle" :size="18" color="var(--error)" />
-              Arrastre de meses anteriores
-              <span class="section-count">{{ vista.arrastreMesesAnteriores.length }}</span>
-            </h2>
-          </div>
-          <div class="fp-list">
-            <FormaPagoCard
-              v-for="fp in vista.arrastreMesesAnteriores"
-              :key="fp.id"
-              :item="fp"
-              variant="arrastre"
-              @click="openGestion(fp)"
-            />
-          </div>
-        </section>
-
-        <!-- Vencidos del mes -->
-        <section v-if="vista?.mesActualVencidos?.length" class="section animate-slideUp delay-3">
-          <div class="section-header">
-            <h2 class="section-title section-title--warning">
-              <Icon name="clock" :size="18" color="var(--warning)" />
-              Vencidos en {{ mesLabel }}
-              <span class="section-count">{{ vista.mesActualVencidos.length }}</span>
-            </h2>
-          </div>
-          <div class="fp-list">
-            <FormaPagoCard
-              v-for="fp in vista.mesActualVencidos"
-              :key="fp.id"
-              :item="fp"
-              variant="vencido"
-              @click="openGestion(fp)"
-            />
-          </div>
-        </section>
-
-        <!-- Por vencer del mes -->
-        <section v-if="vista?.mesActualPorVencer?.length" class="section animate-slideUp delay-3">
-          <div class="section-header">
-            <h2 class="section-title">
-              <Icon name="calendar" :size="18" color="var(--primary)" />
-              Por vencer en {{ mesLabel }}
-              <span class="section-count">{{ vista.mesActualPorVencer.length }}</span>
-            </h2>
-          </div>
-          <div class="fp-list">
-            <FormaPagoCard
-              v-for="fp in vista.mesActualPorVencer"
-              :key="fp.id"
-              :item="fp"
-              @click="openGestion(fp)"
-            />
-          </div>
-        </section>
-
-        <!-- Sin nada -->
-        <div
-          v-if="!vista?.arrastreMesesAnteriores?.length && !vista?.mesActualVencidos?.length && !vista?.mesActualPorVencer?.length"
-          class="empty-state glass"
-        >
-          <Icon name="check-circle" :size="48" color="var(--success)" />
-          <p>No hay formas de pago activas para {{ mesLabel }}</p>
-        </div>
-      </template>
+    <div v-if="vista?.notaTrm" class="fact__trm">
+      <GcIcon name="info-circle" :size="14" /><span>{{ vista.notaTrm }}</span>
     </div>
 
-    <!-- Panel de Gestión lateral (se adapta en D2.0c) -->
-    <GestionPanel
-      v-if="selectedFp"
-      :forma-pago="selectedFp"
-      @close="selectedFp = null"
-      @updated="loadData"
-    />
-  </AppLayout>
+    <!-- KPIs clicables -->
+    <div class="fact__kpis">
+      <button :class="['fkpi', activeFilter === 'arrastreMesesAnteriores' && 'fkpi--on', conteosKpi.arrastreMesesAnteriores > 0 && 'fkpi--alert']" @click="toggleFilter('arrastreMesesAnteriores')">
+        <span class="fkpi__value gc-mono">{{ conteosKpi.arrastreMesesAnteriores || 0 }}</span>
+        <span class="fkpi__label">Arrastre</span>
+        <span class="fkpi__sub gc-mono">{{ fmtCop(montosKpi.arrastreMesesAnteriores) }}</span>
+      </button>
+      <button :class="['fkpi', activeFilter === 'mesActualVencidos' && 'fkpi--on', conteosKpi.mesActualVencidos > 0 && 'fkpi--warn']" @click="toggleFilter('mesActualVencidos')">
+        <span class="fkpi__value gc-mono">{{ conteosKpi.mesActualVencidos || 0 }}</span>
+        <span class="fkpi__label">Vencidos del mes</span>
+        <span class="fkpi__sub gc-mono">{{ fmtCop(montosKpi.mesActualVencidos) }}</span>
+      </button>
+      <button :class="['fkpi', activeFilter === 'mesActualPorVencer' && 'fkpi--on']" @click="toggleFilter('mesActualPorVencer')">
+        <span class="fkpi__value gc-mono">{{ conteosKpi.mesActualPorVencer || 0 }}</span>
+        <span class="fkpi__label">Por vencer</span>
+        <span class="fkpi__sub gc-mono">{{ fmtCop(montosKpi.mesActualPorVencer) }}</span>
+      </button>
+      <div class="fkpi fkpi--total">
+        <span class="fkpi__value fkpi__value--ok gc-mono">{{ fmtPct(vista?.kpis?.porcentajeCumplimiento) }}</span>
+        <span class="fkpi__label">Cumplimiento</span>
+        <span class="fkpi__sub gc-mono">{{ fmtCop(vista?.kpis?.totalFacturadoCOP) }} / {{ fmtCop(vista?.kpis?.totalPresupuestadoCOP) }}</span>
+      </div>
+    </div>
+
+    <!-- Distribución por estado -->
+    <div v-if="distribucionEntries.length" class="fact__distrib">
+      <span class="fact__distriblabel">Distribución:</span>
+      <GcBadge v-for="[estado, cantidad] in distribucionEntries" :key="estado" :tone="estadoTone(estado)" :label="`${estadoLabel(estado)} ${cantidad}`" />
+    </div>
+
+    <div v-if="loading" class="fact__state"><GcSpinner :size="24" /></div>
+
+    <!-- Filtro activo -->
+    <section v-else-if="activeFilter" class="fact__section">
+      <div class="fact__sechead">
+        <h2 class="fact__h2">{{ filterTitle }} <span class="gc-mono">{{ filteredList.length }}</span></h2>
+        <GcButton variant="ghost" size="sm" icon="x" @click="activeFilter = null">Ver todo</GcButton>
+      </div>
+      <GcEmpty v-if="!filteredList.length" icon="circle-check" message="No hay elementos para este filtro" />
+      <div v-else class="fact__list">
+        <FormaPagoCard v-for="fp in filteredList" :key="fp.id" :item="fp" @click="openGestion(fp)" />
+      </div>
+    </section>
+
+    <!-- Vista por defecto: 3 secciones -->
+    <template v-else-if="!loading">
+      <section v-if="vista?.arrastreMesesAnteriores?.length" class="fact__section">
+        <h2 class="fact__h2 fact__h2--danger">Arrastre de meses anteriores <span class="gc-mono">{{ vista.arrastreMesesAnteriores.length }}</span></h2>
+        <div class="fact__list">
+          <FormaPagoCard v-for="fp in vista.arrastreMesesAnteriores" :key="fp.id" :item="fp" variant="arrastre" @click="openGestion(fp)" />
+        </div>
+      </section>
+
+      <section v-if="vista?.mesActualVencidos?.length" class="fact__section">
+        <h2 class="fact__h2 fact__h2--warning">Vencidos en {{ mesLabel }} <span class="gc-mono">{{ vista.mesActualVencidos.length }}</span></h2>
+        <div class="fact__list">
+          <FormaPagoCard v-for="fp in vista.mesActualVencidos" :key="fp.id" :item="fp" variant="vencido" @click="openGestion(fp)" />
+        </div>
+      </section>
+
+      <section v-if="vista?.mesActualPorVencer?.length" class="fact__section">
+        <h2 class="fact__h2">Por vencer en {{ mesLabel }} <span class="gc-mono">{{ vista.mesActualPorVencer.length }}</span></h2>
+        <div class="fact__list">
+          <FormaPagoCard v-for="fp in vista.mesActualPorVencer" :key="fp.id" :item="fp" @click="openGestion(fp)" />
+        </div>
+      </section>
+
+      <GcEmpty
+        v-if="!vista?.arrastreMesesAnteriores?.length && !vista?.mesActualVencidos?.length && !vista?.mesActualPorVencer?.length"
+        icon="circle-check"
+        :message="`No hay formas de pago activas para ${mesLabel}`"
+      />
+    </template>
+
+    <GestionPanel v-if="selectedFp" :forma-pago="selectedFp" @close="selectedFp = null" @updated="loadData" />
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import AppLayout from '@/components/layout/AppLayout.vue';
-import Icon from '@/components/ui/Icon.vue';
+import { useShell } from '@/composables/useShell';
 import GestionPanel from '@/components/facturacion/GestionPanel.vue';
 import FormaPagoCard from '@/components/facturacion/FormaPagoCard.vue';
 import { facturacionService } from '@/services/facturacion.service';
+import GcButton from '@/components/ui/GcButton.vue';
+import GcBadge from '@/components/ui/GcBadge.vue';
+import GcIcon from '@/components/ui/GcIcon.vue';
+import GcEmpty from '@/components/ui/GcEmpty.vue';
+import GcSpinner from '@/components/ui/GcSpinner.vue';
+
+const { setRegions } = useShell();
+setRegions({ master: false, aside: false });
 
 const loading = ref(true);
-const vista = ref(null);                    // VistaPeriodoResponse del backend
+const vista = ref(null);
 const selectedFp = ref(null);
-const activeFilter = ref(null);             // 'arrastreMesesAnteriores' | 'mesActualVencidos' | 'mesActualPorVencer'
+const activeFilter = ref(null);
 
-// Mes activo (anio-mes formato YYYY-MM)
 const today = new Date();
 const anioMes = ref(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
 
@@ -231,22 +126,14 @@ const mesLabel = computed(() => {
 });
 const esMesActual = computed(() => vista.value?.esMesActual ?? false);
 
-// Conteos y montos de los KPIs (mapas del backend)
 const conteosKpi = computed(() => vista.value?.kpis?.conteosPorGrupo || {});
 const montosKpi = computed(() => vista.value?.kpis?.montosPorGrupoCOP || {});
+const distribucionEntries = computed(() => Object.entries(vista.value?.kpis?.distribucionEstado || {}));
 
-// Distribución por estado (orden alfabético — backend ya lo entrega ordenado)
-const distribucionEntries = computed(() => {
-  const dist = vista.value?.kpis?.distribucionEstado || {};
-  return Object.entries(dist);
-});
-
-// Lista filtrada cuando hay KPI seleccionado
 const filteredList = computed(() => {
   if (!activeFilter.value || !vista.value) return [];
   return vista.value[activeFilter.value] || [];
 });
-
 const filterTitle = computed(() => {
   switch (activeFilter.value) {
     case 'arrastreMesesAnteriores': return 'Arrastre de meses anteriores';
@@ -256,35 +143,7 @@ const filterTitle = computed(() => {
   }
 });
 
-const filterTitleClass = computed(() => {
-  switch (activeFilter.value) {
-    case 'arrastreMesesAnteriores': return 'section-title--error';
-    case 'mesActualVencidos': return 'section-title--warning';
-    default: return '';
-  }
-});
-
-const filterIcon = computed(() => {
-  switch (activeFilter.value) {
-    case 'arrastreMesesAnteriores': return 'alert-circle';
-    case 'mesActualVencidos': return 'clock';
-    case 'mesActualPorVencer': return 'calendar';
-    default: return 'calendar';
-  }
-});
-
-const filterColor = computed(() => {
-  switch (activeFilter.value) {
-    case 'arrastreMesesAnteriores': return 'var(--error)';
-    case 'mesActualVencidos': return 'var(--warning)';
-    case 'mesActualPorVencer': return 'var(--primary)';
-    default: return 'var(--primary)';
-  }
-});
-
-function toggleFilter(filter) {
-  activeFilter.value = activeFilter.value === filter ? null : filter;
-}
+function toggleFilter(filter) { activeFilter.value = activeFilter.value === filter ? null : filter; }
 
 function cambiarMes(delta) {
   const [a, m] = anioMes.value.split('-').map(Number);
@@ -292,7 +151,6 @@ function cambiarMes(delta) {
   anioMes.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   loadData();
 }
-
 function irAlMesActual() {
   const d = new Date();
   anioMes.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -313,304 +171,63 @@ async function loadData() {
   }
 }
 
-function openGestion(fp) {
-  selectedFp.value = fp;
-}
+function openGestion(fp) { selectedFp.value = fp; }
 
-// Helpers de formato
 function fmtCop(v) {
   if (v == null) return '$0';
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency', currency: 'COP', maximumFractionDigits: 0,
-  }).format(v);
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
 }
-
 function fmtPct(v) {
   if (v == null) return '0%';
-  // Backend devuelve fracción 0..1 (ej. 0.85 = 85%)
-  const pct = Number(v) * 100;
-  return `${pct.toFixed(0)}%`;
+  return `${(Number(v) * 100).toFixed(0)}%`;
 }
-
+const ESTADO_TONE = {
+  PENDIENTE_GESTION: 'neutral', EN_GESTION: 'info', COMPROMETIDO: 'info',
+  PARCIALMENTE_CUMPLIDO: 'warning', REPROGRAMADO: 'warning', CUMPLIDO: 'success', NO_LOGRADO: 'danger',
+};
+function estadoTone(e) { return ESTADO_TONE[e] || 'neutral'; }
 function estadoLabel(estado) {
   return {
-    PENDIENTE_GESTION: 'Pendiente',
-    EN_GESTION: 'En gestión',
-    COMPROMETIDO: 'Comprometido',
-    PARCIALMENTE_CUMPLIDO: 'Parcial',
-    REPROGRAMADO: 'Reprogramado',
-    CUMPLIDO: 'Cumplido',
-    NO_LOGRADO: 'No logrado',
+    PENDIENTE_GESTION: 'Pendiente', EN_GESTION: 'En gestión', COMPROMETIDO: 'Comprometido',
+    PARCIALMENTE_CUMPLIDO: 'Parcial', REPROGRAMADO: 'Reprogramado', CUMPLIDO: 'Cumplido', NO_LOGRADO: 'No logrado',
   }[estado] || estado;
 }
 </script>
 
 <style scoped>
-.facturacion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
+.fact { padding: var(--gc-space-6); display: flex; flex-direction: column; gap: var(--gc-space-5); }
+.fact__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--gc-space-4); }
+.fact__title { font-size: var(--gc-fs-2xl); }
+.fact__sub { margin-top: 2px; font-size: var(--gc-fs-md); color: var(--gc-text-2); }
+.fact__period { display: flex; align-items: center; gap: var(--gc-space-2); }
+.fact__month { height: 34px; padding: 0 var(--gc-space-3); background: var(--gc-surface); border: 1px solid var(--gc-border); border-radius: var(--gc-radius-md); color: var(--gc-text); font-size: var(--gc-fs-sm); }
+.fact__trm { display: flex; align-items: center; gap: var(--gc-space-2); padding: var(--gc-space-2) var(--gc-space-3); background: var(--gc-warning-soft); border: 1px solid var(--gc-warning); border-radius: var(--gc-radius-md); font-size: var(--gc-fs-sm); color: var(--gc-text-2); }
 
-/* Header */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: var(--space-4);
-}
-.page-title {
-  font-size: var(--text-3xl);
-  font-weight: var(--font-bold);
-  margin: 0;
-}
-.page-subtitle {
-  color: var(--text-secondary);
-  margin: var(--space-1) 0 0 0;
-  font-size: var(--text-sm);
-}
-.period-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.period-input {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color-scheme: dark;
-}
-.period-input:focus {
-  outline: none;
-  border-color: var(--primary);
-}
+.fact__kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gc-space-3); }
+.fkpi { display: flex; flex-direction: column; gap: 2px; padding: var(--gc-space-4); background: var(--gc-surface); border: 1px solid var(--gc-border); border-radius: var(--gc-radius-lg); text-align: left; cursor: pointer; transition: border-color var(--gc-t-fast); }
+.fkpi:hover { border-color: var(--gc-border-strong); }
+.fkpi--on { border-color: var(--gc-primary); box-shadow: inset 0 0 0 1px var(--gc-primary); }
+.fkpi--total { cursor: default; }
+.fkpi--alert { border-left: 2px solid var(--gc-danger); }
+.fkpi--warn { border-left: 2px solid var(--gc-warning); }
+.fkpi__value { font-size: var(--gc-fs-2xl); font-weight: var(--gc-fw-semibold); color: var(--gc-text); }
+.fkpi__value--ok { color: var(--gc-success); }
+.fkpi__label { font-size: var(--gc-fs-sm); color: var(--gc-text-2); }
+.fkpi__sub { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
 
-/* Nota TRM */
-.trm-note {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--warning);
-  border-left: 3px solid var(--warning);
-}
+.fact__distrib { display: flex; align-items: center; flex-wrap: wrap; gap: var(--gc-space-2); }
+.fact__distriblabel { font-size: var(--gc-fs-sm); color: var(--gc-text-3); }
+.fact__state { display: flex; justify-content: center; padding: var(--gc-space-12); color: var(--gc-text-3); }
 
-/* KPIs */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-4);
-}
-.kpi {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  transition: all 0.2s;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-.kpi:hover {
-  border-color: var(--glass-border);
-  background: rgba(255, 255, 255, 0.03);
-}
-.kpi--selected {
-  border-color: var(--primary) !important;
-  background: rgba(0, 212, 255, 0.05) !important;
-}
-.kpi--alert {
-  border-color: rgba(244, 63, 94, 0.3);
-}
-.kpi--total {
-  cursor: default;
-}
-.kpi--total:hover {
-  border-color: transparent;
-  background: var(--glass-bg);
-}
-.kpi__icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.kpi__icon--error    { background: var(--error-soft);    color: var(--error); }
-.kpi__icon--warning  { background: var(--warning-soft);  color: var(--warning); }
-.kpi__icon--success  { background: var(--success-soft);  color: var(--success); }
-.kpi__icon--primary  { background: var(--primary-soft);  color: var(--primary); }
-.kpi__data {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.kpi__value {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: var(--font-bold);
-}
-.kpi__value--error   { color: var(--error); }
-.kpi__value--warning { color: var(--warning); }
-.kpi__value--success { color: var(--success); }
-.kpi__value--primary { color: var(--primary); }
-.kpi__label {
-  font-size: 10px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: var(--font-semibold);
-}
-.kpi__sub {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  font-family: var(--font-mono, monospace);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.fact__section { display: flex; flex-direction: column; gap: var(--gc-space-3); }
+.fact__sechead { display: flex; align-items: center; justify-content: space-between; }
+.fact__h2 { font-size: var(--gc-fs-md); font-weight: var(--gc-fw-medium); color: var(--gc-text); }
+.fact__h2--danger { color: var(--gc-danger); }
+.fact__h2--warning { color: var(--gc-warning); }
+.fact__h2 span { color: var(--gc-text-3); font-weight: var(--gc-fw-regular); }
+.fact__list { display: flex; flex-direction: column; gap: var(--gc-space-2); }
 
-/* Distribución */
-.distrib-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-1);
-}
-.distrib-label {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  margin-right: var(--space-2);
-}
-
-/* Estado pills BEM */
-.estado-pill {
-  padding: 2px 10px;
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.estado-pill strong {
-  font-weight: var(--font-bold);
-  margin-left: 2px;
-}
-.estado-pill--pendiente_gestion    { background: var(--bg-surface);     color: var(--text-secondary); }
-.estado-pill--en_gestion           { background: var(--primary-soft);   color: var(--primary); }
-.estado-pill--comprometido         { background: var(--secondary-soft); color: var(--secondary); }
-.estado-pill--parcialmente_cumplido{ background: var(--warning-soft);   color: var(--warning); }
-.estado-pill--reprogramado         { background: var(--warning-soft);   color: var(--warning); opacity: 0.85; }
-.estado-pill--cumplido             { background: var(--success-soft);   color: var(--success); }
-.estado-pill--no_logrado           { background: var(--error-soft);     color: var(--error); }
-
-/* Loading / empty */
-.loading-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-8);
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-}
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-10);
-  border-radius: var(--radius-xl);
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-}
-
-/* Sección genérica */
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
-  margin: 0;
-}
-.section-title--error   { color: var(--error); }
-.section-title--warning { color: var(--warning); }
-.section-count {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  font-weight: var(--font-regular);
-  background: var(--bg-surface);
-  padding: 1px 8px;
-  border-radius: var(--radius-full);
-  margin-left: var(--space-1);
-}
-
-/* Lista */
-.fp-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Botones reutilizables */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  font-weight: var(--font-semibold);
-  cursor: pointer;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-secondary);
-}
-.btn--sm {
-  padding: var(--space-1) var(--space-3);
-  font-size: 11px;
-}
-.btn--ghost {
-  border-color: var(--glass-border);
-}
-.btn--ghost:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-/* Responsive */
-@media (max-width: 1100px) {
-  .kpi-row { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px) {
-  .kpi-row { grid-template-columns: 1fr; }
-  .page-header { flex-direction: column; align-items: flex-start; }
+@media (max-width: 980px) {
+  .fact__kpis { grid-template-columns: repeat(2, 1fr); }
 }
 </style>

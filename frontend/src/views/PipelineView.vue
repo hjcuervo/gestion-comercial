@@ -1,312 +1,261 @@
 <template>
-  <AppLayout>
-    <div class="pipeline-view">
-      <!-- Header -->
-      <section class="pipeline-view__header animate-slideUp">
-        <div class="header-left">
-          <h1 class="page-title gradient-text">Pipeline</h1>
-          <p class="page-subtitle">Gestiona tu proceso comercial y oportunidades</p>
-        </div>
-        <div class="header-actions">
-          <Button v-if="activeTab === 'kanban'" variant="primary" icon="plus" @click="openCreateOportunidad">Nueva Oportunidad</Button>
-          <Button v-if="activeTab === 'config'" variant="primary" icon="plus" @click="openCreatePipeline">Nuevo Pipeline</Button>
-        </div>
-      </section>
-
-      <!-- Tabs -->
-      <div class="tabs animate-slideUp delay-1">
-        <button class="tab" :class="{ 'tab--active': activeTab === 'kanban' }" @click="goToKanban">
-          <Icon name="pipeline" :size="16" /> Kanban
-        </button>
-        <button class="tab" :class="{ 'tab--active': activeTab === 'config' }" @click="activeTab = 'config'">
-          <Icon name="settings" :size="16" /> Configuración
-        </button>
+  <div class="pipeline">
+    <!-- Toolbar: selector de pipeline/ámbito + métricas + tabs Kanban/Config -->
+    <header class="pipeline__bar">
+      <div class="pipeline__tabs">
+        <button class="pipeline__tab" :class="{ 'pipeline__tab--active': tab === 'kanban' }" @click="goToKanban">Kanban</button>
+        <button class="pipeline__tab" :class="{ 'pipeline__tab--active': tab === 'config' }" @click="tab = 'config'">Configuración</button>
       </div>
 
-      <!-- ==================== TAB: KANBAN ==================== -->
-      <section v-if="activeTab === 'kanban'" class="kanban-section animate-slideUp delay-2">
-        <!-- Pipeline Selector -->
-        <div class="kanban-toolbar">
-          <div class="pipeline-selector">
-            <label class="selector-label">Ámbito:</label>
-            <select v-model="kanbanAmbito" class="pipeline-select pipeline-select--sm" @change="onAmbitoChange">
-              <option value="">Todos</option>
-              <option value="COMERCIAL">Comercial</option>
-              <option value="CONTRATACION">Contratación</option>
-            </select>
-            <label class="selector-label">Pipeline:</label>
-            <select v-model="selectedPipelineId" class="pipeline-select" @change="onPipelineChange">
-              <option v-for="p in kanbanPipelinesFiltrados" :key="p.id" :value="p.id">{{ p.nombre }}</option>
-            </select>
+      <div class="pipeline__spacer"></div>
+
+      <template v-if="tab === 'kanban'">
+        <div class="pipeline__selectors">
+          <select v-model="ambito" class="pipeline__select" @change="onAmbitoChange">
+            <option value="">Todos los ámbitos</option>
+            <option value="COMERCIAL">Comercial</option>
+            <option value="CONTRATACION">Contratación</option>
+          </select>
+          <select v-model="selectedPipelineId" class="pipeline__select" @change="onPipelineChange">
+            <option v-for="p in pipelinesFiltrados" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+        <GcButton variant="primary" icon="plus" @click="openCreateOportunidad">Nueva oportunidad</GcButton>
+      </template>
+      <template v-else>
+        <GcButton variant="primary" icon="plus" @click="openCreatePipeline">Nuevo pipeline</GcButton>
+      </template>
+    </header>
+
+    <!-- ===================== KANBAN (Tablero) ===================== -->
+    <section v-if="tab === 'kanban'" class="pipeline__kanban">
+      <div v-if="opStore.pipelineActivo" class="pipeline__stats">
+        <span class="pipeline__stat"><strong class="gc-mono">{{ opStore.countAbiertas }}</strong> oportunidades</span>
+        <span class="pipeline__statsep">·</span>
+        <span class="pipeline__stat"><strong class="gc-mono">{{ fmtCurrency(opStore.totalValorPipeline) }}</strong> en pipeline</span>
+      </div>
+
+      <div v-if="opStore.loading && !opStore.etapasDelPipeline.length" class="pipeline__state"><GcSpinner :size="24" /></div>
+
+      <GcEmpty v-else-if="!pipelinesFiltrados.length" icon="layout-kanban" message="No hay pipelines activos. Créalos en Configuración.">
+        <template #action><GcButton variant="default" @click="tab = 'config'">Ir a Configuración</GcButton></template>
+      </GcEmpty>
+
+      <GcEmpty v-else-if="!opStore.etapasDelPipeline.length" icon="columns" message="Este pipeline no tiene etapas activas.">
+        <template #action><GcButton variant="default" @click="tab = 'config'">Configurar etapas</GcButton></template>
+      </GcEmpty>
+
+      <div v-else class="board">
+        <div
+          v-for="etapa in opStore.etapasDelPipeline"
+          :key="etapa.id"
+          class="board__col"
+          :class="{ 'board__col--over': dragOverId === etapa.id }"
+          @dragover.prevent="onDragOver($event, etapa.id)"
+          @dragleave="onDragLeave"
+          @drop="onDrop($event, etapa.id)"
+        >
+          <div class="board__colhead">
+            <span class="board__dot" :style="{ background: etapa.color || 'var(--gc-info)' }"></span>
+            <span class="board__colname">{{ etapa.nombre }}</span>
+            <span class="board__count gc-mono">{{ cards(etapa.id).length }}</span>
+            <span v-if="etapa.probabilidadSugerida != null" class="board__prob gc-mono">{{ etapa.probabilidadSugerida }}%</span>
           </div>
-          <div class="kanban-stats" v-if="opStore.pipelineActivo">
-            <span class="stat-item"><strong>{{ opStore.countAbiertas }}</strong> oportunidad{{ opStore.countAbiertas !== 1 ? 'es' : '' }}</span>
-            <span class="stat-divider">·</span>
-            <span class="stat-item stat-item--valor"><strong>{{ formatCurrency(opStore.totalValorPipeline) }}</strong> en pipeline</span>
-          </div>
-        </div>
 
-        <!-- Loading -->
-        <div v-if="opStore.loading && !opStore.etapasDelPipeline.length" class="loading-state">
-          <Icon name="loader" :size="32" class="animate-spin" /><p>Cargando pipeline...</p>
-        </div>
-
-        <!-- Empty -->
-        <div v-else-if="!kanbanPipelinesFiltrados.length" class="empty-state glass">
-          <div class="empty-icon"><Icon name="pipeline" :size="48" color="var(--primary)" /></div>
-          <h3>No hay pipelines activos</h3>
-          <p>Ve a la pestaña Configuración para crear tu primer pipeline con sus etapas.</p>
-          <Button variant="secondary" @click="activeTab = 'config'">Ir a Configuración</Button>
-        </div>
-
-        <div v-else-if="!opStore.etapasDelPipeline.length" class="empty-state glass">
-          <div class="empty-icon"><Icon name="chart" :size="48" color="var(--secondary)" /></div>
-          <h3>Pipeline sin etapas</h3>
-          <p>Este pipeline no tiene etapas configuradas. Agrégalas en la pestaña Configuración.</p>
-          <Button variant="secondary" @click="activeTab = 'config'">Configurar Etapas</Button>
-        </div>
-
-        <!-- Kanban Board -->
-        <div v-else class="kanban-board">
-          <div class="kanban-scroll">
-            <div
-              v-for="etapa in opStore.etapasDelPipeline"
-              :key="etapa.id"
-              class="kanban-column"
-              :class="{ 'kanban-column--drag-over': dragOverEtapaId === etapa.id }"
-              @dragover.prevent="onDragOver($event, etapa.id)"
-              @dragleave="onDragLeave($event)"
-              @drop="onDrop($event, etapa.id)"
+          <div class="board__colbody">
+            <article
+              v-for="op in cards(etapa.id)"
+              :key="op.id"
+              class="card"
+              :class="`card--${(op.estadoMacro || '').toLowerCase()}`"
+              draggable="true"
+              @dragstart="onDragStart($event, op)"
+              @dragend="onDragEnd"
+              @click="goToDetalle(op.id)"
             >
-              <div class="column-header">
-                <div class="column-header__left">
-                  <div class="column-color" :style="{ background: etapa.color || 'var(--primary)' }"></div>
-                  <span class="column-name">{{ etapa.nombre }}</span>
-                  <span class="column-count">{{ getActiveOportunidades(etapa.id).length }}</span>
-                </div>
-                <span v-if="etapa.probabilidadSugerida != null" class="column-prob">{{ etapa.probabilidadSugerida }}%</span>
+              <div class="card__name">{{ op.nombre }}</div>
+              <div class="card__empresa">{{ op.empresaNombre }}</div>
+              <div class="card__foot">
+                <span v-if="op.valorEstimado" class="card__valor gc-mono">{{ fmtCurrency(op.valorEstimado, op.moneda) }}</span>
+                <span v-if="op.probabilidad != null" class="card__prob gc-mono">{{ op.probabilidad }}%</span>
               </div>
-
-              <div class="column-body">
-                <div
-                  v-for="op in getActiveOportunidades(etapa.id)"
-                  :key="op.id"
-                  class="kanban-card glass"
-                  draggable="true"
-                  @dragstart="onDragStart($event, op)"
-                  @dragend="onDragEnd"
-                  @click="openEditOportunidad(op)"
-                >
-                  <div class="card-header">
-                    <span class="card-name">{{ op.nombre }}</span>
-                  </div>
-                  <div class="card-empresa">{{ op.empresaNombre }}</div>
-                  <div class="card-footer">
-                    <span v-if="op.valorEstimado" class="card-valor">{{ formatCurrency(op.valorEstimado, op.moneda) }}</span>
-                    <span v-if="op.probabilidad != null" class="card-prob">{{ op.probabilidad }}%</span>
-                    <span v-if="op.fechaEstimadaCierre" class="card-fecha">
-                      <Icon name="clock" :size="10" /> {{ formatDate(op.fechaEstimadaCierre) }}
-                    </span>
-                  </div>
-                  <div class="card-actions">
-                    <button v-if="op.estadoMacro === 'GANADA'" class="card-btn card-btn--formalizar" @click.stop="openFormalizar(op)" title="Formalizar contrato">
-                      <Icon name="note-add" :size="14" /> Formalizar
-                    </button>
-                    <button v-else class="card-btn card-btn--cerrar" @click.stop="openCerrar(op)" title="Cerrar oportunidad">
-                      <Icon name="check-circle" :size="14" /> Cerrar
-                    </button>
-                  </div>
-                </div>
-
-                <div v-if="!getActiveOportunidades(etapa.id).length" class="column-empty">
-                  <span>Sin oportunidades</span>
-                </div>
+              <div class="card__actions">
+                <GcButton v-if="op.estadoMacro === 'GANADA'" variant="default" size="sm" icon="file-plus" @click.stop="openFormalizar(op)">Formalizar</GcButton>
+                <GcButton v-else variant="ghost" size="sm" icon="circle-check" @click.stop="openCerrar(op)">Cerrar</GcButton>
               </div>
+            </article>
+
+            <div v-if="!cards(etapa.id).length" class="board__empty">Sin oportunidades</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONFIGURACIÓN ===================== -->
+    <section v-else class="pipeline__config">
+      <div class="config">
+        <!-- Lista de pipelines -->
+        <aside class="config__list">
+          <div class="config__filters">
+            <GcInput v-model="configSearch" placeholder="Buscar pipelines…" icon="search" @update:modelValue="onConfigSearch" />
+            <div class="config__chips">
+              <button class="chip" :class="{ 'chip--on': configEstado === '' }" @click="setConfigEstado('')">Todos</button>
+              <button class="chip" :class="{ 'chip--on': configEstado === 'ACTIVO' }" @click="setConfigEstado('ACTIVO')">Activos</button>
+              <button class="chip" :class="{ 'chip--on': configEstado === 'INACTIVO' }" @click="setConfigEstado('INACTIVO')">Inactivos</button>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- ==================== TAB: CONFIGURACIÓN ==================== -->
-      <section v-if="activeTab === 'config'" class="config-section animate-slideUp delay-2">
-        <!-- Search & Filters -->
-        <div class="config-filters">
-          <div class="search-wrapper">
-            <Icon name="search" :size="18" color="var(--text-muted)" />
-            <input v-model="configSearch" type="text" class="search-input" placeholder="Buscar pipelines..." @input="onConfigSearch" />
-            <button v-if="configSearch" class="search-clear" @click="clearConfigSearch"><Icon name="x" :size="16" /></button>
-          </div>
-          <div class="filter-chips">
-            <button class="chip" :class="{ active: configEstado === '' }" @click="setConfigEstado('')">Todos</button>
-            <button class="chip" :class="{ active: configEstado === 'ACTIVO' }" @click="setConfigEstado('ACTIVO')">
-              <span class="chip-dot chip-dot--activo"></span> Activos
-            </button>
-            <button class="chip" :class="{ active: configEstado === 'INACTIVO' }" @click="setConfigEstado('INACTIVO')">
-              <span class="chip-dot chip-dot--inactivo"></span> Inactivos
-            </button>
-          </div>
-        </div>
-
-        <!-- Loading -->
-        <div v-if="pipStore.loading && !pipStore.pipelines.length" class="loading-state">
-          <Icon name="loader" :size="32" class="animate-spin" /><p>Cargando pipelines...</p>
-        </div>
-
-        <!-- Empty -->
-        <div v-else-if="!pipStore.pipelines.length" class="empty-state glass">
-          <div class="empty-icon"><Icon name="pipeline" :size="48" color="var(--primary)" /></div>
-          <h3>No hay pipelines</h3>
-          <p>Crea tu primer pipeline para comenzar a configurar tu proceso de ventas.</p>
-          <Button variant="primary" icon="plus" @click="openCreatePipeline">Crear Pipeline</Button>
-        </div>
-
-        <!-- Master-Detail -->
-        <div v-else class="master-detail">
-          <div class="master-panel glass">
-            <div class="master-panel__header">
-              <span class="master-panel__count">{{ pipStore.pipelines.length }} pipeline{{ pipStore.pipelines.length !== 1 ? 's' : '' }}</span>
-            </div>
-            <div class="pipeline-list">
-              <div v-for="pipeline in pipStore.pipelines" :key="pipeline.id" class="pipeline-card"
-                :class="{ 'pipeline-card--selected': configSelectedId === pipeline.id, 'pipeline-card--inactive': pipeline.estado === 'INACTIVO' }"
-                @click="selectConfigPipeline(pipeline.id)">
-                <div class="pipeline-card__indicator" :style="{ background: pipeline.estado === 'ACTIVO' ? 'var(--success)' : 'var(--text-muted)' }"></div>
-                <div class="pipeline-card__body">
-                  <div class="pipeline-card__name">{{ pipeline.nombre }}</div>
-                  <div class="pipeline-card__meta">
-                    <span class="badge" :class="pipeline.estado === 'ACTIVO' ? 'badge--success' : 'badge--muted'">{{ pipeline.estado }}</span>
-                    <span class="badge" :class="pipeline.ambito === 'CONTRATACION' ? 'badge--secondary' : 'badge--primary'">{{ pipeline.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial' }}</span>
-                    <span v-if="pipeline.esDefault" class="badge badge--primary">Default</span>
-                    <span class="pipeline-card__etapas">{{ pipeline.etapas?.length || 0 }} etapa{{ (pipeline.etapas?.length || 0) !== 1 ? 's' : '' }}</span>
-                  </div>
-                </div>
-                <Icon name="chevron-right" :size="16" color="var(--text-muted)" />
+          <div v-if="pipStore.loading && !pipStore.pipelines.length" class="pipeline__state"><GcSpinner :size="20" /></div>
+          <GcEmpty v-else-if="!pipStore.pipelines.length" icon="layout-kanban" message="No hay pipelines" />
+          <div v-else>
+            <GcListRow
+              v-for="p in pipStore.pipelines"
+              :key="p.id"
+              :tone="p.estado === 'ACTIVO' ? 'success' : 'neutral'"
+              clickable
+              :active="configSelectedId === p.id"
+              @click="selectConfigPipeline(p.id)"
+            >
+              <div class="config__row">
+                <span class="config__name">{{ p.nombre }}</span>
+                <span class="config__meta">
+                  <GcBadge :tone="p.ambito === 'CONTRATACION' ? 'accent' : 'info'" :label="p.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial'" />
+                  <span class="config__etapas gc-mono">{{ p.etapas?.length || 0 }} etapas</span>
+                </span>
               </div>
-            </div>
+            </GcListRow>
           </div>
+        </aside>
 
-          <div class="detail-panel">
-            <div v-if="!configSelectedId" class="detail-empty glass">
-              <Icon name="pipeline" :size="40" color="var(--text-muted)" />
-              <p>Selecciona un pipeline para ver sus etapas</p>
+        <!-- Detalle del pipeline: etapas -->
+        <div class="config__detail">
+          <GcEmpty v-if="!configSelectedId" icon="hand-click" message="Selecciona un pipeline para ver sus etapas" />
+          <template v-else-if="configSelectedPipeline">
+            <header class="config__dethead">
+              <div class="config__detheading">
+                <h2 class="config__dettitle">{{ configSelectedPipeline.nombre }}</h2>
+                <GcBadge :tone="configSelectedPipeline.estado === 'ACTIVO' ? 'success' : 'neutral'" :label="configSelectedPipeline.estado" />
+                <GcBadge :tone="configSelectedPipeline.ambito === 'CONTRATACION' ? 'accent' : 'info'" :label="configSelectedPipeline.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial'" />
+              </div>
+              <GcButton variant="default" size="sm" icon="settings" @click="openEditPipeline">Editar</GcButton>
+            </header>
+
+            <div class="config__etapashead">
+              <h3 class="config__etapastitle">Etapas</h3>
+              <GcButton variant="default" size="sm" icon="plus" @click="openCreateEtapa">Nueva etapa</GcButton>
             </div>
 
-            <div v-else-if="configSelectedPipeline" class="detail-content">
-              <Card>
-                <template #default>
-                  <div class="detail-header">
-                    <div class="detail-header__info">
-                      <h2 class="detail-header__name">{{ configSelectedPipeline.nombre }}</h2>
-                      <div class="detail-header__meta">
-                        <span class="badge" :class="configSelectedPipeline.estado === 'ACTIVO' ? 'badge--success' : 'badge--muted'">{{ configSelectedPipeline.estado }}</span>
-                        <span class="badge" :class="configSelectedPipeline.ambito === 'CONTRATACION' ? 'badge--secondary' : 'badge--primary'">{{ configSelectedPipeline.ambito === 'CONTRATACION' ? 'Contratación' : 'Comercial' }}</span>
-                        <span v-if="configSelectedPipeline.esDefault" class="badge badge--primary">Default</span>
-                        <span class="detail-header__version">v{{ configSelectedPipeline.version }}</span>
-                      </div>
-                    </div>
-                    <Button variant="ghost" icon="settings" size="sm" @click="openEditPipeline">Editar</Button>
-                  </div>
+            <div v-if="pipStore.loadingEtapas" class="pipeline__state"><GcSpinner :size="20" /></div>
+            <GcEmpty v-else-if="!configEtapas.length" icon="columns" message="Sin etapas configuradas" />
+            <div v-else class="config__etapas-list">
+              <GcListRow
+                v-for="e in configEtapas"
+                :key="e.id"
+                :tone="e.estado === 'ACTIVA' ? 'success' : 'neutral'"
+                clickable
+                @click="openEditEtapa(e)"
+              >
+                <template #lead><span class="config__etapaorden gc-mono">#{{ e.orden }}</span></template>
+                <div class="config__etaparow">
+                  <span class="config__etapaname">
+                    <span class="config__etapacolor" :style="{ background: e.color || 'var(--gc-info)' }"></span>
+                    {{ e.nombre }}
+                  </span>
+                  <span class="config__etapameta gc-mono">
+                    <template v-if="e.probabilidadSugerida != null">{{ e.probabilidadSugerida }}%</template>
+                  </span>
+                </div>
+                <template #actions>
+                  <GcBadge :tone="e.estado === 'ACTIVA' ? 'success' : 'neutral'" :label="e.estado" />
                 </template>
-              </Card>
-
-              <div class="etapas-section">
-                <div class="etapas-header">
-                  <h3 class="etapas-title"><Icon name="chart" :size="18" color="var(--secondary)" /> Etapas del Pipeline</h3>
-                  <Button variant="secondary" icon="plus" size="sm" @click="openCreateEtapa">Nueva Etapa</Button>
-                </div>
-
-                <div v-if="pipStore.loadingEtapas" class="loading-state loading-state--small">
-                  <Icon name="loader" :size="20" class="animate-spin" /><span>Cargando etapas...</span>
-                </div>
-
-                <div v-else-if="!configEtapas.length" class="etapas-empty glass">
-                  <p>Este pipeline aún no tiene etapas configuradas.</p>
-                  <Button variant="secondary" icon="plus" size="sm" @click="openCreateEtapa">Agregar primera etapa</Button>
-                </div>
-
-                <div v-else class="etapas-flow">
-                  <div v-for="(etapa, index) in configEtapas" :key="etapa.id" class="etapa-item" :class="{ 'etapa-item--inactive': etapa.estado === 'INACTIVA' }">
-                    <div v-if="index > 0" class="etapa-connector">
-                      <svg width="24" height="20" viewBox="0 0 24 20"><path d="M12 0 L12 20" stroke="var(--glass-border)" stroke-width="2" stroke-dasharray="4 3" /><path d="M6 14 L12 20 L18 14" stroke="var(--glass-border)" stroke-width="2" fill="none" /></svg>
-                    </div>
-                    <div class="etapa-card glass" @click="openEditEtapa(etapa)">
-                      <div class="etapa-card__color" :style="{ background: etapa.color || 'var(--primary)' }"></div>
-                      <div class="etapa-card__body">
-                        <div class="etapa-card__top">
-                          <span class="etapa-card__orden">#{{ etapa.orden }}</span>
-                          <span class="etapa-card__name">{{ etapa.nombre }}</span>
-                        </div>
-                        <div class="etapa-card__bottom">
-                          <span v-if="etapa.probabilidadSugerida != null" class="etapa-card__prob"><Icon name="trending-up" :size="12" /> {{ etapa.probabilidadSugerida }}%</span>
-                          <span v-if="etapa.modoBloqueo === 1" class="etapa-card__lock"><Icon name="lock" :size="12" /> Bloqueado</span>
-                          <span class="badge badge--sm" :class="etapa.estado === 'ACTIVA' ? 'badge--success' : 'badge--muted'">{{ etapa.estado }}</span>
-                        </div>
-                      </div>
-                      <Icon name="settings" :size="14" color="var(--text-muted)" class="etapa-card__edit" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              </GcListRow>
             </div>
-          </div>
+          </template>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Error Toasts -->
-      <Transition name="toast">
-        <div v-if="opStore.error || pipStore.error" class="error-toast" @click="opStore.limpiarError(); pipStore.limpiarError();">
-          <Icon name="alert-circle" :size="16" /> {{ opStore.error || pipStore.error }}
-          <Icon name="x" :size="14" />
-        </div>
-      </Transition>
+    <!-- Toast de error -->
+    <Transition name="gc-fade">
+      <div v-if="opStore.error || pipStore.error" class="pipeline__toast" @click="opStore.limpiarError(); pipStore.limpiarError();">
+        <GcIcon name="alert-circle" :size="16" /> {{ opStore.error || pipStore.error }}
+      </div>
+    </Transition>
 
-      <!-- Modals: Oportunidad -->
-      <OportunidadModal :visible="showOpModal" :oportunidad="editingOp" :empresas="opStore.empresasActivas" :pipelines="kanbanPipelinesFiltrados" :pipeline-preseleccionado="selectedPipelineId" :saving="opStore.saving" :error="modalError" @close="closeOpModal" @submit="handleOpSubmit" />
-      <CerrarOportunidadModal :visible="showCerrarModal" :oportunidad-nombre="cerrandoOp?.nombre || ''" :saving="opStore.saving" :error="modalError" @close="showCerrarModal = false" @submit="handleCerrarSubmit" />
-      <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="formalizandoOp?.id" :oportunidad-nombre="formalizandoOp?.nombre || ''" :moneda-default="formalizandoOp?.moneda || 'COP'" :valor-default="formalizandoOp?.valorEstimado" @close="showFormalizarModal = false" @created="onContratoFormalizado" />
-
-      <!-- Modals: Pipeline Config -->
-      <PipelineModal :visible="showPipModal" :pipeline="editingPip" :saving="pipStore.saving" :error="modalError" @close="closePipModal" @submit="handlePipSubmit" />
-      <EtapaModal :visible="showEtapaModal" :etapa="editingEtapa" :next-orden="nextEtapaOrden" :saving="pipStore.saving" :error="modalError" @close="closeEtapaModal" @submit="handleEtapaSubmit" />
-    </div>
-  </AppLayout>
+    <!-- Modales (legacy temporalmente; se reescriben en RF3-B) -->
+    <OportunidadModal :visible="showOpModal" :oportunidad="editingOp" :empresas="opStore.empresasActivas" :pipelines="pipelinesFiltrados" :pipeline-preseleccionado="selectedPipelineId" :saving="opStore.saving" :error="modalError" @close="closeOpModal" @submit="handleOpSubmit" />
+    <CerrarOportunidadModal :visible="showCerrarModal" :oportunidad-nombre="cerrandoOp?.nombre || ''" :saving="opStore.saving" :error="modalError" @close="showCerrarModal = false" @submit="handleCerrarSubmit" />
+    <FormalizarContratoModal v-if="showFormalizarModal" :oportunidad-id="formalizandoOp?.id" :oportunidad-nombre="formalizandoOp?.nombre || ''" :moneda-default="formalizandoOp?.moneda || 'COP'" :valor-default="formalizandoOp?.valorEstimado" @close="showFormalizarModal = false" @created="onContratoFormalizado" />
+    <PipelineModal :visible="showPipModal" :pipeline="editingPip" :saving="pipStore.saving" :error="modalError" @close="closePipModal" @submit="handlePipSubmit" />
+    <EtapaModal :visible="showEtapaModal" :etapa="editingEtapa" :next-orden="nextEtapaOrden" :saving="pipStore.saving" :error="modalError" @close="closeEtapaModal" @submit="handleEtapaSubmit" />
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { formatCurrency } from '@/utils/currency';
-import AppLayout from '@/components/layout/AppLayout.vue';
-import Card from '@/components/ui/Card.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import { useRouter } from 'vue-router';
+import { useShell } from '@/composables/useShell';
+import { formatCurrency as fmtCurrency } from '@/utils/currency';
+import { useOportunidadStore } from '@/stores/oportunidad.store';
+import { usePipelineStore } from '@/stores/pipeline.store';
+import GcButton from '@/components/ui/GcButton.vue';
+import GcInput from '@/components/ui/GcInput.vue';
+import GcBadge from '@/components/ui/GcBadge.vue';
+import GcListRow from '@/components/ui/GcListRow.vue';
+import GcEmpty from '@/components/ui/GcEmpty.vue';
+import GcSpinner from '@/components/ui/GcSpinner.vue';
+import GcIcon from '@/components/ui/GcIcon.vue';
 import OportunidadModal from '@/components/oportunidad/OportunidadModal.vue';
 import CerrarOportunidadModal from '@/components/oportunidad/CerrarOportunidadModal.vue';
 import FormalizarContratoModal from '@/components/contrato/FormalizarContratoModal.vue';
 import PipelineModal from '@/components/pipeline/PipelineModal.vue';
 import EtapaModal from '@/components/pipeline/EtapaModal.vue';
-import { useOportunidadStore } from '@/stores/oportunidad.store';
-import { usePipelineStore } from '@/stores/pipeline.store';
 
+const router = useRouter();
+const { setRegions } = useShell();
 const opStore = useOportunidadStore();
 const pipStore = usePipelineStore();
 
-const activeTab = ref('kanban');
+const tab = ref('kanban');
 
-/**
- * Cambia al tab Kanban y recarga el pipeline activo desde el backend.
- * Esto garantiza que cambios hechos en Configuración (etapas activadas/desactivadas,
- * renombradas, recoloreadas, etc.) se reflejen al instante en el Kanban,
- * sin necesidad de refresh manual.
- */
-async function goToKanban() {
-  activeTab.value = 'kanban';
-  if (opStore.pipelineActivo?.id) {
-    await opStore.seleccionarPipeline(opStore.pipelineActivo.id);
+// ---- Kanban ----
+const ambito = ref('');
+const selectedPipelineId = ref(null);
+const dragOverId = ref(null);
+const draggingOp = ref(null);
+
+const pipelinesFiltrados = computed(() => {
+  const all = opStore.pipelinesActivos || [];
+  return ambito.value ? all.filter((p) => p.ambito === ambito.value) : all;
+});
+
+function cards(etapaId) {
+  const all = opStore.oportunidadesPorEtapa[etapaId] || [];
+  return all.filter((o) => ['ABIERTA', 'SEGUIMIENTO', 'GANADA'].includes(o.estadoMacro));
+}
+
+function onPipelineChange() { opStore.seleccionarPipeline(selectedPipelineId.value); }
+function onAmbitoChange() {
+  if (pipelinesFiltrados.value.length) {
+    selectedPipelineId.value = pipelinesFiltrados.value[0].id;
+    onPipelineChange();
   }
 }
 
-// ==================== KANBAN STATE ====================
-const selectedPipelineId = ref(null);
+function onDragStart(e, op) { draggingOp.value = op; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(op.id)); e.target.classList.add('card--dragging'); }
+function onDragEnd(e) { e.target.classList.remove('card--dragging'); draggingOp.value = null; dragOverId.value = null; }
+function onDragOver(e, etapaId) { if (draggingOp.value) { e.dataTransfer.dropEffect = 'move'; dragOverId.value = etapaId; } }
+function onDragLeave(e) { if (!e.currentTarget.contains(e.relatedTarget)) dragOverId.value = null; }
+async function onDrop(e, etapaId) {
+  dragOverId.value = null;
+  const op = draggingOp.value;
+  if (!op || op.etapaId === etapaId) return;
+  try { await opStore.moverEtapa(op.id, etapaId); } catch { /* error mostrado por el store */ }
+}
+
+function goToDetalle(id) { router.push(`/oportunidades/${id}`); }
+
+// Modales oportunidad
 const showOpModal = ref(false);
 const editingOp = ref(null);
 const showCerrarModal = ref(false);
@@ -314,88 +263,18 @@ const cerrandoOp = ref(null);
 const showFormalizarModal = ref(false);
 const formalizandoOp = ref(null);
 const modalError = ref(null);
-const dragOverEtapaId = ref(null);
-const draggingOp = ref(null);
 
-// ==================== CONFIG STATE ====================
-const configSearch = ref('');
-const configEstado = ref('');
-const configSelectedId = ref(null);
-const showPipModal = ref(false);
-const editingPip = ref(null);
-const showEtapaModal = ref(false);
-const editingEtapa = ref(null);
-let searchTimeout = null;
-
-const configSelectedPipeline = computed(() => pipStore.pipelineSeleccionado);
-const configEtapas = computed(() => [...(pipStore.etapas || [])].sort((a, b) => a.orden - b.orden));
-const nextEtapaOrden = computed(() => {
-  if (!pipStore.etapas.length) return 1;
-  return Math.max(...pipStore.etapas.map(e => e.orden)) + 1;
-});
-
-// Filtro de ámbito para Kanban y Configuración
-const kanbanAmbito = ref('');
-const kanbanPipelinesFiltrados = computed(() => {
-  const todos = opStore.pipelinesActivos || [];
-  if (!kanbanAmbito.value) return todos;
-  return todos.filter(p => p.ambito === kanbanAmbito.value);
-});
-
-// ==================== LIFECYCLE ====================
-onMounted(async () => {
-  await opStore.cargarPipelinesActivos();
-  if (opStore.pipelineActivo) selectedPipelineId.value = opStore.pipelineActivo.id;
-  pipStore.cargarPipelines();
-});
-
-// ==================== KANBAN: Only active opportunities ====================
-function getActiveOportunidades(etapaId) {
-  const all = opStore.oportunidadesPorEtapa[etapaId] || [];
-  return all.filter(o => o.estadoMacro === 'ABIERTA' || o.estadoMacro === 'SEGUIMIENTO' || o.estadoMacro === 'GANADA');
-}
-
-function onPipelineChange() { opStore.seleccionarPipeline(selectedPipelineId.value); }
-
-function onAmbitoChange() {
-  // Select first pipeline of the filtered list
-  if (kanbanPipelinesFiltrados.value.length) {
-    selectedPipelineId.value = kanbanPipelinesFiltrados.value[0].id;
-    onPipelineChange();
-  }
-}
-
-// Drag & Drop
-function onDragStart(event, op) {
-  draggingOp.value = op;
-  event.dataTransfer.effectAllowed = 'move';
-  event.dataTransfer.setData('text/plain', op.id);
-  event.target.classList.add('dragging');
-}
-function onDragEnd(event) { event.target.classList.remove('dragging'); draggingOp.value = null; dragOverEtapaId.value = null; }
-function onDragOver(event, etapaId) { if (draggingOp.value) { event.dataTransfer.dropEffect = 'move'; dragOverEtapaId.value = etapaId; } }
-function onDragLeave(event) { if (!event.currentTarget.contains(event.relatedTarget)) dragOverEtapaId.value = null; }
-async function onDrop(event, etapaId) {
-  dragOverEtapaId.value = null;
-  const op = draggingOp.value;
-  if (!op || op.etapaId === etapaId) return;
-  try { await opStore.moverEtapa(op.id, etapaId); } catch {}
-}
-
-// Oportunidad CRUD
 async function openCreateOportunidad() { editingOp.value = null; modalError.value = null; await opStore.cargarEmpresasActivas(); showOpModal.value = true; }
-async function openEditOportunidad(op) { editingOp.value = { ...op }; modalError.value = null; await opStore.cargarEmpresasActivas(); showOpModal.value = true; }
 function closeOpModal() { showOpModal.value = false; editingOp.value = null; modalError.value = null; }
 async function handleOpSubmit(payload) {
   modalError.value = null;
   try {
-    if (editingOp.value) { await opStore.actualizarOportunidad(editingOp.value.id, payload); }
-    else { await opStore.crearOportunidad(payload); }
+    if (editingOp.value) await opStore.actualizarOportunidad(editingOp.value.id, payload);
+    else await opStore.crearOportunidad(payload);
     closeOpModal();
   } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar oportunidad'; }
 }
 
-// Cerrar
 function openCerrar(op) { cerrandoOp.value = op; modalError.value = null; showCerrarModal.value = true; }
 async function handleCerrarSubmit(payload) {
   modalError.value = null;
@@ -403,18 +282,24 @@ async function handleCerrarSubmit(payload) {
   catch (err) { modalError.value = err.response?.data?.message || 'Error al cerrar oportunidad'; }
 }
 
-// Formalizar contrato
 function openFormalizar(op) { formalizandoOp.value = op; modalError.value = null; showFormalizarModal.value = true; }
-async function onContratoFormalizado() {
-  showFormalizarModal.value = false;
-  formalizandoOp.value = null;
-  // Recargar oportunidades — la oportunidad CONTRATADA desaparece del Kanban
-  await opStore.cargarOportunidades();
-}
+async function onContratoFormalizado() { showFormalizarModal.value = false; formalizandoOp.value = null; await opStore.cargarOportunidades(); }
 
-// ==================== CONFIG: Pipeline CRUD ====================
-function onConfigSearch() { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => pipStore.setFiltros({ q: configSearch.value }), 400); }
-function clearConfigSearch() { configSearch.value = ''; pipStore.setFiltros({ q: '' }); }
+// ---- Configuración ----
+const configSearch = ref('');
+const configEstado = ref('');
+const configSelectedId = ref(null);
+const showPipModal = ref(false);
+const editingPip = ref(null);
+const showEtapaModal = ref(false);
+const editingEtapa = ref(null);
+let searchTimer = null;
+
+const configSelectedPipeline = computed(() => pipStore.pipelineSeleccionado);
+const configEtapas = computed(() => [...(pipStore.etapas || [])].sort((a, b) => a.orden - b.orden));
+const nextEtapaOrden = computed(() => (pipStore.etapas.length ? Math.max(...pipStore.etapas.map((e) => e.orden)) + 1 : 1));
+
+function onConfigSearch() { clearTimeout(searchTimer); searchTimer = setTimeout(() => pipStore.setFiltros({ q: configSearch.value }), 400); }
 function setConfigEstado(estado) { configEstado.value = estado; pipStore.setFiltros({ estado }); }
 function selectConfigPipeline(id) { configSelectedId.value = id; pipStore.seleccionarPipeline(id); }
 
@@ -435,188 +320,158 @@ async function handlePipSubmit(payload) {
   } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar pipeline'; }
 }
 
-// Etapa CRUD
 function openCreateEtapa() { editingEtapa.value = null; modalError.value = null; showEtapaModal.value = true; }
 function openEditEtapa(etapa) { editingEtapa.value = { ...etapa }; modalError.value = null; showEtapaModal.value = true; }
 function closeEtapaModal() { showEtapaModal.value = false; editingEtapa.value = null; modalError.value = null; }
 async function handleEtapaSubmit(payload) {
   modalError.value = null;
   try {
-    if (editingEtapa.value) { await pipStore.actualizarEtapa(configSelectedId.value, editingEtapa.value.id, payload); }
-    else { await pipStore.crearEtapa(configSelectedId.value, payload); }
+    if (editingEtapa.value) await pipStore.actualizarEtapa(configSelectedId.value, editingEtapa.value.id, payload);
+    else await pipStore.crearEtapa(configSelectedId.value, payload);
     closeEtapaModal();
   } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar etapa'; }
 }
 
-// Formatters
-function formatDate(date) {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+// Política 1: recargar al cambiar a Kanban (los tabs no remontan la vista)
+async function goToKanban() {
+  tab.value = 'kanban';
+  if (opStore.pipelineActivo?.id) await opStore.seleccionarPipeline(opStore.pipelineActivo.id);
 }
+
+onMounted(async () => {
+  setRegions({ master: false, aside: false }); // Tablero: superficie a todo el ancho
+  await opStore.cargarPipelinesActivos();
+  if (opStore.pipelineActivo) selectedPipelineId.value = opStore.pipelineActivo.id;
+  pipStore.cargarPipelines();
+});
 </script>
 
 <style scoped>
-.pipeline-view { display: flex; flex-direction: column; gap: var(--space-5); height: calc(100vh - var(--header-height) - var(--space-6) * 2); overflow: hidden; }
+.pipeline { display: flex; flex-direction: column; height: 100%; }
 
-/* Header */
-.pipeline-view__header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-shrink: 0; flex-wrap: wrap; }
-.page-title { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; margin: 0; line-height: 1.2; }
-.page-subtitle { color: var(--text-tertiary); font-size: var(--text-sm); margin: var(--space-1) 0 0; }
-.header-actions { flex-shrink: 0; }
-
-/* Tabs */
-.tabs { display: flex; gap: var(--space-1); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 3px; flex-shrink: 0; width: fit-content; }
-.tab { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-5); border-radius: var(--radius-md); border: none; background: transparent; color: var(--text-muted); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; }
-.tab:hover { color: var(--text-secondary); }
-.tab--active { background: var(--primary-soft); color: var(--primary); }
-
-/* ==================== KANBAN ==================== */
-.kanban-section { display: flex; flex-direction: column; gap: var(--space-4); flex: 1; min-height: 0; overflow: hidden; }
-
-.kanban-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-shrink: 0; flex-wrap: wrap; }
-.pipeline-selector { display: flex; align-items: center; gap: var(--space-3); }
-.selector-label { font-size: var(--text-sm); color: var(--text-secondary); font-weight: 500; }
-.pipeline-select { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; padding: var(--space-2) var(--space-8) var(--space-2) var(--space-4); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
-.pipeline-select:focus { outline: none; border-color: var(--primary); }
-.pipeline-select option { background: var(--bg-elevated); }
-.pipeline-select--sm { font-size: var(--text-xs); padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3); }
-.kanban-stats { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-muted); }
-.stat-divider { color: var(--glass-border); }
-.stat-item strong { color: var(--text-secondary); }
-.stat-item--valor strong { color: var(--primary); }
-
-/* Board with scroll */
-.kanban-board { flex: 1; min-height: 0; overflow: hidden; }
-.kanban-scroll { display: flex; gap: var(--space-4); overflow-x: auto; overflow-y: hidden; height: 100%; padding-bottom: var(--space-3); -webkit-overflow-scrolling: touch; }
-.kanban-scroll::-webkit-scrollbar { height: 8px; }
-.kanban-scroll::-webkit-scrollbar-track { background: var(--bg-surface); border-radius: 4px; }
-.kanban-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-.kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
-
-.kanban-column { flex: 0 0 280px; display: flex; flex-direction: column; background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); overflow: hidden; transition: border-color 0.2s, background 0.2s; height: 100%; min-height: 300px; }
-.kanban-column--drag-over { border-color: var(--primary); background: var(--primary-soft); }
-
-.column-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--glass-border); flex-shrink: 0; }
-.column-header__left { display: flex; align-items: center; gap: var(--space-2); }
-.column-color { width: 4px; height: 18px; border-radius: 2px; }
-.column-name { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); }
-.column-count { font-size: 10px; color: var(--text-muted); background: var(--bg-surface); padding: 0 5px; border-radius: var(--radius-full); font-weight: 600; }
-.column-prob { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
-
-.column-body { flex: 1; overflow-y: auto; padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); min-height: 80px; }
-.column-body::-webkit-scrollbar { width: 4px; }
-.column-body::-webkit-scrollbar-track { background: transparent; }
-.column-body::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
-
-.column-empty { display: flex; align-items: center; justify-content: center; height: 60px; color: var(--text-muted); font-size: var(--text-xs); border: 1px dashed var(--glass-border); border-radius: var(--radius-md); }
-
-/* Card */
-.kanban-card { padding: var(--space-3); border-radius: var(--radius-md); cursor: grab; transition: all 0.15s; }
-.kanban-card:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
-.kanban-card:active { cursor: grabbing; }
-.kanban-card.dragging { opacity: 0.4; }
-
-.card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); }
-.card-name { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); line-height: 1.3; }
-.card-empresa { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
-.card-footer { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
-.card-valor { font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--primary); }
-.card-prob { font-size: 9px; color: var(--text-muted); background: var(--bg-surface); padding: 0 4px; border-radius: var(--radius-full); }
-.card-fecha { display: flex; align-items: center; gap: 2px; font-size: 9px; color: var(--text-muted); }
-
-.card-actions { display: flex; justify-content: flex-end; margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--glass-border); }
-.card-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-full); border: 1px solid transparent; font-family: var(--font-body); font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.card-btn--cerrar { background: rgba(16,185,129,0.08); color: var(--success); border-color: rgba(16,185,129,0.2); }
-.card-btn--cerrar:hover { background: rgba(16,185,129,0.2); border-color: var(--success); }
-.card-btn--formalizar { background: rgba(168,85,247,0.08); color: var(--secondary); border-color: rgba(168,85,247,0.2); }
-.card-btn--formalizar:hover { background: rgba(168,85,247,0.2); border-color: var(--secondary); }
-.card-btn--formalizar { background: rgba(168,85,247,0.08); color: var(--secondary); border-color: rgba(168,85,247,0.2); }
-.card-btn--formalizar:hover { background: rgba(168,85,247,0.2); border-color: var(--secondary); }
-
-/* ==================== CONFIG ==================== */
-.config-section { display: flex; flex-direction: column; gap: var(--space-5); flex: 1; min-height: 0; overflow-y: auto; }
-
-.config-filters { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; flex-shrink: 0; }
-.search-wrapper { position: relative; display: flex; align-items: center; flex: 1; min-width: 240px; max-width: 400px; }
-.search-wrapper > :first-child { position: absolute; left: var(--space-4); pointer-events: none; }
-.search-input { width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 24px); box-sizing: border-box; }
-.search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
-.search-input::placeholder { color: var(--text-muted); }
-.search-clear { position: absolute; right: var(--space-3); background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; padding: var(--space-1); }
-.filter-chips { display: flex; gap: var(--space-2); }
-.chip { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-full); color: var(--text-secondary); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500; cursor: pointer; transition: all 0.2s; }
-.chip:hover { background: rgba(255,255,255,0.06); }
-.chip.active { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
-.chip-dot { width: 6px; height: 6px; border-radius: 50%; }
-.chip-dot--activo { background: var(--success); }
-.chip-dot--inactivo { background: var(--text-muted); }
-
-/* Master-Detail (config) */
-.master-detail { display: grid; grid-template-columns: 340px 1fr; gap: var(--space-6); flex: 1; }
-.master-panel { border-radius: var(--radius-xl); overflow: hidden; display: flex; flex-direction: column; height: fit-content; max-height: 500px; }
-.master-panel__header { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--glass-border); }
-.master-panel__count { font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-.pipeline-list { overflow-y: auto; flex: 1; }
-.pipeline-card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); cursor: pointer; transition: all 0.15s; border-bottom: 1px solid rgba(255,255,255,0.03); }
-.pipeline-card:hover { background: rgba(255,255,255,0.03); }
-.pipeline-card--selected { background: var(--primary-soft); border-left: 3px solid var(--primary); }
-.pipeline-card--inactive { opacity: 0.6; }
-.pipeline-card__indicator { width: 8px; height: 8px; min-width: 8px; border-radius: 50%; }
-.pipeline-card__body { flex: 1; min-width: 0; }
-.pipeline-card__name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pipeline-card__meta { display: flex; align-items: center; gap: var(--space-2); margin-top: 2px; }
-.pipeline-card__etapas { font-size: var(--text-xs); color: var(--text-muted); }
-
-.detail-panel { display: flex; flex-direction: column; gap: var(--space-5); }
-.detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-8); border-radius: var(--radius-xl); text-align: center; color: var(--text-muted); font-size: var(--text-sm); }
-.detail-content { display: flex; flex-direction: column; gap: var(--space-5); }
-.detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
-.detail-header__name { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0; }
-.detail-header__meta { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
-.detail-header__version { font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
-
-.etapas-section { display: flex; flex-direction: column; gap: var(--space-4); }
-.etapas-header { display: flex; justify-content: space-between; align-items: center; }
-.etapas-title { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-size: var(--text-lg); font-weight: 600; color: var(--text-primary); margin: 0; }
-.etapas-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-6); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); font-size: var(--text-sm); }
-.etapas-empty p { margin: 0; }
-.etapas-flow { display: flex; flex-direction: column; align-items: stretch; }
-.etapa-item { display: flex; flex-direction: column; align-items: center; }
-.etapa-connector { display: flex; justify-content: center; padding: var(--space-1) 0; }
-.etapa-card { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; width: 100%; box-sizing: border-box; }
-.etapa-card:hover { background: rgba(255,255,255,0.04); }
-.etapa-card:hover .etapa-card__edit { opacity: 1; }
-.etapa-item--inactive .etapa-card { opacity: 0.5; }
-.etapa-card__color { width: 4px; height: 36px; min-width: 4px; border-radius: 2px; }
-.etapa-card__body { flex: 1; min-width: 0; }
-.etapa-card__top { display: flex; align-items: center; gap: var(--space-2); }
-.etapa-card__orden { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); min-width: 20px; }
-.etapa-card__name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
-.etapa-card__bottom { display: flex; align-items: center; gap: var(--space-3); margin-top: 2px; padding-left: calc(20px + var(--space-2)); }
-.etapa-card__prob, .etapa-card__lock { display: flex; align-items: center; gap: 3px; font-size: var(--text-xs); color: var(--text-muted); }
-.etapa-card__edit { opacity: 0; transition: opacity 0.2s; }
-
-/* Shared */
-.badge { display: inline-flex; align-items: center; padding: 1px var(--space-2); border-radius: var(--radius-full); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-.badge--sm { font-size: 9px; }
-.badge--success { background: rgba(16,185,129,0.15); color: var(--success); }
-.badge--muted { background: rgba(255,255,255,0.06); color: var(--text-muted); }
-.badge--primary { background: var(--primary-soft); color: var(--primary); }
-.badge--secondary { background: var(--secondary-soft); color: var(--secondary); }
-
-.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-8); color: var(--text-tertiary); font-size: var(--text-sm); }
-.loading-state--small { flex-direction: row; padding: var(--space-6); }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); padding: calc(var(--space-8) * 2); border-radius: var(--radius-xl); text-align: center; }
-.empty-icon { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); border-radius: var(--radius-xl); }
-.empty-state h3 { color: var(--text-primary); font-family: var(--font-display); margin: 0; }
-.empty-state p { color: var(--text-tertiary); font-size: var(--text-sm); max-width: 320px; margin: 0; }
-
-.error-toast { position: fixed; bottom: var(--space-6); right: var(--space-6); display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); background: rgba(244,63,94,0.15); border: 1px solid rgba(244,63,94,0.3); border-radius: var(--radius-lg); color: var(--error); font-size: var(--text-sm); cursor: pointer; z-index: 900; backdrop-filter: blur(12px); }
-.toast-enter-active { transition: all 0.3s ease; } .toast-leave-active { transition: all 0.2s ease; }
-.toast-enter-from { transform: translateY(20px); opacity: 0; } .toast-leave-to { transform: translateY(10px); opacity: 0; }
-
-@media (max-width: 900px) {
-  .master-detail { grid-template-columns: 1fr; }
-  .kanban-column { flex: 0 0 260px; }
+/* Barra superior de la vista */
+.pipeline__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--gc-space-3);
+  padding: var(--gc-space-3) var(--gc-space-5);
+  border-bottom: 1px solid var(--gc-border);
 }
+.pipeline__tabs { display: flex; gap: var(--gc-space-1); }
+.pipeline__tab {
+  padding: var(--gc-space-2) var(--gc-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--gc-radius-sm);
+  font-size: var(--gc-fs-md);
+  color: var(--gc-text-2);
+}
+.pipeline__tab:hover { background: var(--gc-surface-2); color: var(--gc-text); }
+.pipeline__tab--active { color: var(--gc-text); font-weight: var(--gc-fw-medium); box-shadow: inset 0 -2px 0 var(--gc-primary); }
+.pipeline__spacer { flex: 1; }
+.pipeline__selectors { display: flex; gap: var(--gc-space-2); }
+.pipeline__select {
+  height: 32px;
+  padding: 0 var(--gc-space-3);
+  background: var(--gc-surface-2);
+  border: 1px solid var(--gc-border);
+  border-radius: var(--gc-radius-md);
+  color: var(--gc-text);
+  font-size: var(--gc-fs-sm);
+}
+
+/* Kanban */
+.pipeline__kanban { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.pipeline__stats { display: flex; align-items: center; gap: var(--gc-space-2); padding: var(--gc-space-3) var(--gc-space-5); font-size: var(--gc-fs-sm); color: var(--gc-text-2); }
+.pipeline__statsep { color: var(--gc-text-3); }
+.pipeline__state { display: flex; justify-content: center; padding: var(--gc-space-12); color: var(--gc-text-3); }
+
+.board { flex: 1; display: flex; gap: var(--gc-space-3); padding: 0 var(--gc-space-5) var(--gc-space-5); overflow-x: auto; min-height: 0; }
+.board__col {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--gc-surface-2);
+  border: 1px solid var(--gc-border);
+  border-radius: var(--gc-radius-lg);
+  transition: border-color var(--gc-t-fast), background var(--gc-t-fast);
+}
+.board__col--over { border-color: var(--gc-primary); background: var(--gc-surface); }
+.board__colhead { display: flex; align-items: center; gap: var(--gc-space-2); padding: var(--gc-space-3); border-bottom: 1px solid var(--gc-border); }
+.board__dot { width: 8px; height: 8px; border-radius: var(--gc-radius-full); flex-shrink: 0; }
+.board__colname { font-size: var(--gc-fs-md); font-weight: var(--gc-fw-medium); flex: 1; }
+.board__count { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+.board__prob { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+.board__colbody { flex: 1; display: flex; flex-direction: column; gap: var(--gc-space-2); padding: var(--gc-space-2); overflow-y: auto; }
+.board__empty { padding: var(--gc-space-6) var(--gc-space-2); text-align: center; font-size: var(--gc-fs-sm); color: var(--gc-text-3); }
+
+.card {
+  position: relative;
+  background: var(--gc-surface);
+  border: 1px solid var(--gc-border);
+  border-left: 2px solid var(--gc-border-strong);
+  border-radius: var(--gc-radius-md);
+  padding: var(--gc-space-3);
+  cursor: pointer;
+  transition: border-color var(--gc-t-fast);
+}
+.card:hover { border-color: var(--gc-border-strong); }
+.card--dragging { opacity: 0.5; }
+.card--ganada { border-left-color: var(--gc-success); }
+.card--seguimiento { border-left-color: var(--gc-warning); }
+.card--abierta { border-left-color: var(--gc-info); }
+.card__name { font-size: var(--gc-fs-md); color: var(--gc-text); }
+.card__empresa { margin-top: 2px; font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+.card__foot { display: flex; align-items: center; gap: var(--gc-space-2); margin-top: var(--gc-space-2); }
+.card__valor { font-size: var(--gc-fs-sm); color: var(--gc-text-2); }
+.card__prob { font-size: var(--gc-fs-xs); color: var(--gc-text-3); margin-left: auto; }
+.card__actions { margin-top: var(--gc-space-2); display: flex; }
+
+/* Configuración */
+.config { display: flex; gap: var(--gc-space-5); padding: var(--gc-space-5); height: 100%; }
+.config__list { width: 360px; flex-shrink: 0; border: 1px solid var(--gc-border); border-radius: var(--gc-radius-lg); overflow: hidden; align-self: flex-start; }
+.config__filters { display: flex; flex-direction: column; gap: var(--gc-space-2); padding: var(--gc-space-3); border-bottom: 1px solid var(--gc-border); }
+.config__chips { display: flex; gap: var(--gc-space-1); }
+.chip { padding: 4px 10px; background: var(--gc-surface-2); border: 1px solid var(--gc-border); border-radius: var(--gc-radius-full); font-size: var(--gc-fs-xs); color: var(--gc-text-2); }
+.chip--on { background: var(--gc-primary); color: var(--gc-primary-text); border-color: var(--gc-primary); }
+.config__row { display: flex; flex-direction: column; gap: 4px; }
+.config__name { font-size: var(--gc-fs-md); }
+.config__meta { display: flex; align-items: center; gap: var(--gc-space-2); }
+.config__etapas { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+
+.config__detail { flex: 1; min-width: 0; }
+.config__dethead { display: flex; align-items: center; gap: var(--gc-space-3); padding-bottom: var(--gc-space-4); border-bottom: 1px solid var(--gc-border); }
+.config__detheading { display: flex; align-items: center; gap: var(--gc-space-2); flex: 1; }
+.config__dettitle { font-size: var(--gc-fs-lg); }
+.config__etapashead { display: flex; align-items: center; justify-content: space-between; margin: var(--gc-space-4) 0 var(--gc-space-2); }
+.config__etapastitle { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--gc-text-3); }
+.config__etapas-list { border: 1px solid var(--gc-border); border-radius: var(--gc-radius-lg); overflow: hidden; }
+.config__etapas-list > :deep(.gc-row:last-child) { border-bottom: none; }
+.config__etapaorden { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+.config__etaparow { display: flex; align-items: center; justify-content: space-between; gap: var(--gc-space-2); }
+.config__etapaname { display: flex; align-items: center; gap: var(--gc-space-2); font-size: var(--gc-fs-md); }
+.config__etapacolor { width: 8px; height: 8px; border-radius: var(--gc-radius-full); }
+.config__etapameta { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
+
+/* Toast */
+.pipeline__toast {
+  position: fixed;
+  bottom: var(--gc-space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--gc-space-2);
+  padding: var(--gc-space-3) var(--gc-space-4);
+  background: var(--gc-danger);
+  color: #fff;
+  border-radius: var(--gc-radius-md);
+  font-size: var(--gc-fs-sm);
+  box-shadow: var(--gc-shadow-pop);
+  z-index: var(--gc-z-toast);
+  cursor: pointer;
+}
+.gc-fade-enter-active, .gc-fade-leave-active { transition: opacity var(--gc-t-normal); }
+.gc-fade-enter-from, .gc-fade-leave-to { opacity: 0; }
 </style>

@@ -1,7 +1,6 @@
 package com.arquitecsoft.gestion.domain.facturacion.entity;
 
 import com.arquitecsoft.gestion.domain.contrato.entity.GcContrato;
-import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -113,10 +112,6 @@ public class GcCompromisoIngreso {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reemplaza_a_id")
     private GcCompromisoIngreso reemplazaA;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "empresa_facturacion_id")
-    private GcEmpresa empresaFacturacion;
 
     @Column(name = "moneda", nullable = false, length = 3)
     private String moneda = "COP";
@@ -260,9 +255,6 @@ public class GcCompromisoIngreso {
 
     public GcCompromisoIngreso getReemplazaA() { return reemplazaA; }
     public void setReemplazaA(GcCompromisoIngreso reemplazaA) { this.reemplazaA = reemplazaA; }
-
-    public GcEmpresa getEmpresaFacturacion() { return empresaFacturacion; }
-    public void setEmpresaFacturacion(GcEmpresa empresaFacturacion) { this.empresaFacturacion = empresaFacturacion; }
 
     public String getMoneda() { return moneda; }
     public void setMoneda(String moneda) { this.moneda = moneda; }

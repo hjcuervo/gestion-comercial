@@ -33,8 +33,6 @@ public class CompromisoIngresoResponse {
     private String motivoPerdida;
     private Long reemplazaAId;
 
-    private Long empresaFacturacionId;
-    private String empresaFacturacionNombre;
 
     private String moneda;
 
@@ -77,10 +75,6 @@ public class CompromisoIngresoResponse {
             r.setReemplazaAId(c.getReemplazaA().getId());
         }
 
-        if (c.getEmpresaFacturacion() != null) {
-            r.setEmpresaFacturacionId(c.getEmpresaFacturacion().getId());
-            r.setEmpresaFacturacionNombre(c.getEmpresaFacturacion().getRazonSocial());
-        }
 
         r.setMoneda(c.getMoneda());
         r.setEstadoFinal(c.isEstadoFinal());
@@ -128,10 +122,6 @@ public class CompromisoIngresoResponse {
     public void setMotivoPerdida(String motivoPerdida) { this.motivoPerdida = motivoPerdida; }
     public Long getReemplazaAId() { return reemplazaAId; }
     public void setReemplazaAId(Long reemplazaAId) { this.reemplazaAId = reemplazaAId; }
-    public Long getEmpresaFacturacionId() { return empresaFacturacionId; }
-    public void setEmpresaFacturacionId(Long empresaFacturacionId) { this.empresaFacturacionId = empresaFacturacionId; }
-    public String getEmpresaFacturacionNombre() { return empresaFacturacionNombre; }
-    public void setEmpresaFacturacionNombre(String empresaFacturacionNombre) { this.empresaFacturacionNombre = empresaFacturacionNombre; }
     public String getMoneda() { return moneda; }
     public void setMoneda(String moneda) { this.moneda = moneda; }
     public boolean isEstadoFinal() { return estadoFinal; }

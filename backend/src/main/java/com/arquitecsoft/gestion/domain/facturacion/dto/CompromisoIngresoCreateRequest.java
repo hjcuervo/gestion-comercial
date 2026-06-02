@@ -32,7 +32,6 @@ public class CompromisoIngresoCreateRequest {
     private LocalDate fechaEsperada;
 
     private String tipo;                    // NUEVO, RECURRENTE, RENOVACION, REEMPLAZO
-    private Long empresaFacturacionId;
     private String moneda;
     private Long reemplazaAId;
 
@@ -46,8 +45,6 @@ public class CompromisoIngresoCreateRequest {
     public void setFechaEsperada(LocalDate fechaEsperada) { this.fechaEsperada = fechaEsperada; }
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
-    public Long getEmpresaFacturacionId() { return empresaFacturacionId; }
-    public void setEmpresaFacturacionId(Long empresaFacturacionId) { this.empresaFacturacionId = empresaFacturacionId; }
     public String getMoneda() { return moneda; }
     public void setMoneda(String moneda) { this.moneda = moneda; }
     public Long getReemplazaAId() { return reemplazaAId; }

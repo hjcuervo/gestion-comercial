@@ -1,240 +1,209 @@
 <template>
-  <AppLayout>
-    <div class="empresas-view">
-      <!-- Header -->
-      <section class="empresas-view__header animate-slideUp">
-        <div class="header-left">
-          <h1 class="page-title gradient-text">Empresas</h1>
-          <p class="page-subtitle">Gestiona tu cartera de empresas y clientes</p>
-        </div>
-        <Button variant="primary" icon="plus" @click="openCreate">Nueva Empresa</Button>
-      </section>
+  <!-- Lista maestra -->
+  <Teleport to="#gc-shell-master">
+    <div class="emp-master">
+      <div class="emp-master__filters">
+        <GcInput v-model="search" placeholder="Buscar empresa…" icon="search" @update:modelValue="debouncedReload" />
+        <GcButton variant="primary" size="sm" icon="plus" full-width @click="openCreate">Nueva empresa</GcButton>
+      </div>
+      <div v-if="loading" class="emp-master__state"><GcSpinner :size="20" /></div>
+      <GcEmpty v-else-if="!empresas.length" icon="building-off" message="Sin empresas" />
+      <div v-else>
+        <GcListRow
+          v-for="e in empresas"
+          :key="e.id"
+          :tone="e.estado === 'ACTIVA' ? 'success' : 'neutral'"
+          clickable
+          :active="String(e.id) === String(selectedId)"
+          @click="select(e.id)"
+        >
+          <div class="emp-master__row">
+            <span class="emp-master__name">{{ e.razonSocial }}</span>
+            <span class="emp-master__meta gc-mono">{{ e.identificacionTributaria || '—' }}</span>
+          </div>
+        </GcListRow>
+      </div>
+    </div>
+  </Teleport>
 
-      <!-- Filters -->
-      <section class="empresas-view__filters animate-slideUp delay-1">
-        <div class="search-wrapper">
-          <Icon name="search" :size="18" color="var(--text-muted)" />
-          <input v-model="searchQuery" type="text" class="search-input" placeholder="Buscar por razón social..." @input="onSearch" />
-          <button v-if="searchQuery" class="search-clear" @click="clearSearch"><Icon name="x" :size="16" /></button>
-        </div>
-        <div class="filter-chips">
-          <button class="chip" :class="{ active: filtroEstado === '' }" @click="setEstadoFilter('')">Todos</button>
-          <button class="chip" :class="{ active: filtroEstado === 'ACTIVA' }" @click="setEstadoFilter('ACTIVA')">
-            <span class="chip-dot chip-dot--activo"></span> Activas
-          </button>
-          <button class="chip" :class="{ active: filtroEstado === 'INACTIVA' }" @click="setEstadoFilter('INACTIVA')">
-            <span class="chip-dot chip-dot--inactivo"></span> Inactivas
-          </button>
-        </div>
-      </section>
-
-      <!-- Content -->
-      <section class="empresas-view__content animate-slideUp delay-2">
-        <div v-if="store.loading && !store.empresas.length" class="loading-state">
-          <Icon name="loader" :size="32" class="animate-spin" /><p>Cargando empresas...</p>
-        </div>
-
-        <div v-else-if="!store.empresas.length" class="empty-state glass">
-          <div class="empty-icon"><Icon name="business" :size="48" color="var(--primary)" /></div>
-          <h3>No hay empresas</h3>
-          <p>Registra tu primera empresa para comenzar a gestionar clientes.</p>
-          <Button variant="primary" icon="plus" @click="openCreate">Crear Empresa</Button>
-        </div>
-
-        <div v-else class="table-wrapper glass">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Razón Social</th>
-                <th>Identificación</th>
-                <th>Ubicación</th>
-                <th>Sitio Web</th>
-                <th>Estado</th>
-                <th class="th-actions">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="empresa in store.empresas" :key="empresa.id" class="data-row" :class="{ 'data-row--inactive': empresa.estado === 'INACTIVA' }">
-                <td>
-                  <div class="cell-empresa">
-                    <div class="empresa-avatar">{{ getInitials(empresa.razonSocial) }}</div>
-                    <div class="cell-empresa__info">
-                      <span class="cell-empresa__name">{{ empresa.razonSocial }}</span>
-                      <span v-if="empresa.direccionFisica" class="cell-empresa__sub">{{ empresa.direccionFisica }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div v-if="empresa.identificacionTributaria" class="cell-id">
-                    <span v-if="empresa.tipoDoc" class="cell-id__tipo">{{ empresa.tipoDoc }}</span>
-                    <span class="cell-id__num">{{ empresa.identificacionTributaria }}</span>
-                    <span v-if="empresa.dv != null" class="cell-id__dv">-{{ empresa.dv }}</span>
-                  </div>
-                  <span v-else class="cell-empty">—</span>
-                </td>
-                <td>
-                  <div class="cell-location" v-if="empresa.paisNombre || empresa.departamentoNombre || empresa.ciudadNombre">
-                    <span v-if="empresa.paisNombre" class="cell-location__pais">{{ empresa.paisNombre }}</span>
-                    <span v-if="empresa.departamentoNombre" class="cell-location__dept">{{ empresa.departamentoNombre }}</span>
-                    <span v-if="empresa.ciudadNombre" class="cell-location__city">{{ empresa.ciudadNombre }}</span>
-                  </div>
-                  <span v-else class="cell-empty">—</span>
-                </td>
-                <td>
-                  <a v-if="empresa.sitioWeb" :href="empresa.sitioWeb" target="_blank" rel="noopener" class="cell-link">
-                    {{ formatUrl(empresa.sitioWeb) }}
-                    <Icon name="external-link" :size="12" />
-                  </a>
-                  <span v-else class="cell-empty">—</span>
-                </td>
-                <td>
-                  <span class="badge" :class="empresa.estado === 'ACTIVA' ? 'badge--success' : 'badge--muted'">{{ empresa.estado }}</span>
-                </td>
-                <td class="td-actions">
-                  <Button variant="ghost" icon="settings" icon-only size="sm" @click="openEdit(empresa)" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div v-if="store.pagination.totalPages > 1" class="pagination">
-            <span class="pagination-total">{{ store.pagination.totalItems }} empresa{{ store.pagination.totalItems !== 1 ? 's' : '' }}</span>
-            <div class="pagination-controls">
-              <button class="pagination-btn" :disabled="store.pagination.page <= 1" @click="store.setPagina(store.pagination.page - 1)"><Icon name="chevron-left" :size="16" /></button>
-              <span class="pagination-info">{{ store.pagination.page }} / {{ store.pagination.totalPages }}</span>
-              <button class="pagination-btn" :disabled="store.pagination.page >= store.pagination.totalPages" @click="store.setPagina(store.pagination.page + 1)"><Icon name="chevron-right" :size="16" /></button>
+  <!-- Detalle -->
+  <div class="emp-surface">
+    <div v-if="!selectedId" class="emp-empty"><GcEmpty icon="hand-click" message="Selecciona una empresa de la izquierda" /></div>
+    <div v-else-if="loadingDetalle" class="emp-empty"><GcSpinner :size="24" /></div>
+    <template v-else-if="empresa">
+      <!-- Contactos / oportunidades en el aside -->
+      <Teleport to="#gc-shell-aside">
+        <div v-if="asideReady" class="emp-aside">
+          <div class="emp-aside__sec">
+            <h3 class="emp-aside__title">Contactos</h3>
+            <GcEmpty v-if="!contactos.length" icon="user-off" message="Sin contactos" />
+            <div v-else class="emp-aside__list">
+              <GcListRow v-for="p in contactos" :key="p.id" tone="info" clickable @click="$router.push(`/personas/${p.id}`)">
+                <div class="emp-aside__row">
+                  <span class="emp-aside__rowname">{{ p.nombreCompleto }}</span>
+                  <span class="emp-aside__rowmeta">{{ p.email || '—' }}</span>
+                </div>
+              </GcListRow>
+            </div>
+          </div>
+          <div class="emp-aside__sec">
+            <h3 class="emp-aside__title">Oportunidades</h3>
+            <GcEmpty v-if="!oportunidades.length" icon="briefcase-off" message="Sin oportunidades" />
+            <div v-else class="emp-aside__list">
+              <GcListRow v-for="o in oportunidades" :key="o.id" :tone="oppTone(o.estadoMacro)" clickable @click="$router.push(`/oportunidades/${o.id}`)">
+                <div class="emp-aside__row">
+                  <span class="emp-aside__rowname">{{ o.nombre }}</span>
+                  <span class="emp-aside__rowmeta gc-mono">{{ fmtCurrency(o.valorEstimado, o.moneda) }}</span>
+                </div>
+              </GcListRow>
             </div>
           </div>
         </div>
-      </section>
+      </Teleport>
 
-      <Transition name="toast">
-        <div v-if="store.error" class="error-toast" @click="store.limpiarError()">
-          <Icon name="alert-circle" :size="16" /> {{ store.error }}
-          <Icon name="x" :size="14" class="error-toast__close" />
+      <header class="emp-head">
+        <div class="emp-heading">
+          <h1 class="emp-title">{{ empresa.razonSocial }}</h1>
+          <GcBadge :tone="empresa.estado === 'ACTIVA' ? 'success' : 'neutral'" :label="empresa.estado === 'ACTIVA' ? 'Activa' : 'Inactiva'" />
         </div>
-      </Transition>
+        <GcButton variant="default" size="sm" icon="edit" @click="openEdit">Editar</GcButton>
+      </header>
 
-      <EmpresaModal :visible="showModal" :empresa="editingEmpresa" :saving="store.saving" :error="modalError" @close="closeModal" @submit="handleSubmit" />
-    </div>
-  </AppLayout>
+      <div class="emp-grid">
+        <div class="emp-field"><span class="emp-label">Identificación</span><span class="emp-value gc-mono">{{ empresa.tipoDoc || '' }} {{ empresa.identificacionTributaria || '—' }}<template v-if="empresa.dv">-{{ empresa.dv }}</template></span></div>
+        <div class="emp-field"><span class="emp-label">País</span><span class="emp-value">{{ empresa.paisNombre || empresa.pais || '—' }}</span></div>
+        <div class="emp-field"><span class="emp-label">Departamento</span><span class="emp-value">{{ empresa.departamentoNombre || empresa.departamento || '—' }}</span></div>
+        <div class="emp-field"><span class="emp-label">Ciudad</span><span class="emp-value">{{ empresa.ciudadNombre || empresa.ciudad || '—' }}</span></div>
+        <div class="emp-field"><span class="emp-label">Dirección</span><span class="emp-value">{{ empresa.direccionFisica || '—' }}</span></div>
+        <div class="emp-field"><span class="emp-label">Sitio web</span><a v-if="empresa.sitioWeb" :href="empresa.sitioWeb" target="_blank" rel="noopener" class="emp-link">{{ empresa.sitioWeb }}</a><span v-else class="emp-value">—</span></div>
+      </div>
+    </template>
+
+    <EmpresaModal :visible="showModal" :empresa="editing" :saving="saving" :error="modalError" @close="showModal = false" @submit="handleSubmit" />
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import AppLayout from '@/components/layout/AppLayout.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useShell } from '@/composables/useShell';
+import { empresaService } from '@/services/empresa.service';
+import { personaService } from '@/services/persona.service';
+import { oportunidadService } from '@/services/oportunidad.service';
+import { formatCurrency } from '@/utils/currency';
 import EmpresaModal from '@/components/empresa/EmpresaModal.vue';
-import { useEmpresaStore } from '@/stores/empresa.store';
+import GcInput from '@/components/ui/GcInput.vue';
+import GcButton from '@/components/ui/GcButton.vue';
+import GcBadge from '@/components/ui/GcBadge.vue';
+import GcListRow from '@/components/ui/GcListRow.vue';
+import GcEmpty from '@/components/ui/GcEmpty.vue';
+import GcSpinner from '@/components/ui/GcSpinner.vue';
 
-const store = useEmpresaStore();
-const searchQuery = ref('');
-const filtroEstado = ref('');
+const route = useRoute();
+const router = useRouter();
+const { setRegions } = useShell();
+setRegions({ master: true, aside: true });
+
+const empresas = ref([]);
+const loading = ref(true);
+const search = ref('');
+let timer = null;
+
+const empresa = ref(null);
+const contactos = ref([]);
+const oportunidades = ref([]);
+const loadingDetalle = ref(false);
+const asideReady = ref(false);
+
 const showModal = ref(false);
-const editingEmpresa = ref(null);
+const editing = ref(null);
+const saving = ref(false);
 const modalError = ref(null);
-let searchTimeout = null;
 
-onMounted(() => { store.cargarEmpresas(); });
+const selectedId = computed(() => route.params.id || null);
 
-function onSearch() { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { store.setFiltros({ q: searchQuery.value }); }, 400); }
-function clearSearch() { searchQuery.value = ''; store.setFiltros({ q: '' }); }
-function setEstadoFilter(estado) { filtroEstado.value = estado; store.setFiltros({ estado }); }
+function fmtCurrency(v, m) { return formatCurrency(v, m); }
+const OPP_TONE = { ABIERTA: 'info', SEGUIMIENTO: 'warning', GANADA: 'success', CONTRATADA: 'accent', PERDIDA: 'danger', NO_CONCRETADA: 'neutral' };
+function oppTone(e) { return OPP_TONE[e] || 'neutral'; }
 
-function openCreate() { editingEmpresa.value = null; modalError.value = null; showModal.value = true; }
-function openEdit(empresa) { editingEmpresa.value = { ...empresa }; modalError.value = null; showModal.value = true; }
-function closeModal() { showModal.value = false; editingEmpresa.value = null; modalError.value = null; }
-
-async function handleSubmit(payload) {
-  modalError.value = null;
+async function reload() {
+  loading.value = true;
   try {
-    if (editingEmpresa.value) { await store.actualizarEmpresa(editingEmpresa.value.id, payload); }
-    else { await store.crearEmpresa(payload); }
-    closeModal();
-  } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar empresa'; }
+    const params = { page: 1, page_size: 50 };
+    if (search.value) params.q = search.value;
+    const res = await empresaService.listar(params);
+    empresas.value = res.data || [];
+  } catch (err) { console.error('Error cargando empresas:', err); empresas.value = []; }
+  finally { loading.value = false; }
+}
+function debouncedReload() { clearTimeout(timer); timer = setTimeout(reload, 400); }
+
+function select(id) { router.push(`/empresas/${id}`); }
+
+async function cargarDetalle() {
+  if (!selectedId.value) { empresa.value = null; return; }
+  loadingDetalle.value = true;
+  try {
+    empresa.value = await empresaService.obtenerPorId(selectedId.value);
+    const [pers, opps] = await Promise.all([
+      personaService.listar({ empresa_id: selectedId.value, page_size: 100 }).catch(() => ({ data: [] })),
+      oportunidadService.listar({ empresa_id: selectedId.value, page_size: 100 }).catch(() => ({ data: [] })),
+    ]);
+    contactos.value = pers.data || [];
+    oportunidades.value = opps.data || [];
+  } catch (err) { console.error('Error cargando detalle empresa:', err); }
+  finally { loadingDetalle.value = false; }
 }
 
-function getInitials(name) { return name ? name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : '?'; }
-function formatUrl(url) { return url ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : ''; }
+function openCreate() { editing.value = null; modalError.value = null; showModal.value = true; }
+function openEdit() { editing.value = { ...empresa.value }; modalError.value = null; showModal.value = true; }
+async function handleSubmit(payload) {
+  saving.value = true; modalError.value = null;
+  try {
+    if (editing.value) await empresaService.actualizar(editing.value.id, payload);
+    else await empresaService.crear(payload);
+    showModal.value = false;
+    await reload();
+    if (editing.value) await cargarDetalle();
+  } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar empresa'; }
+  finally { saving.value = false; }
+}
+
+onMounted(async () => {
+  await nextTick();
+  asideReady.value = true;
+  await reload();
+  if (selectedId.value) await cargarDetalle();
+});
+watch(selectedId, () => cargarDetalle());
 </script>
 
 <style scoped>
-.empresas-view { display: flex; flex-direction: column; gap: var(--space-6); }
-.empresas-view__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
-.page-title { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; margin: 0; line-height: 1.2; }
-.page-subtitle { color: var(--text-tertiary); font-size: var(--text-sm); margin: var(--space-1) 0 0; }
+.emp-master { display: flex; flex-direction: column; }
+.emp-master__filters { display: flex; flex-direction: column; gap: var(--gc-space-2); padding: var(--gc-space-3); border-bottom: 1px solid var(--gc-border); }
+.emp-master__state { display: flex; justify-content: center; padding: var(--gc-space-8); color: var(--gc-text-3); }
+.emp-master__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.emp-master__name { font-size: var(--gc-fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.emp-master__meta { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
 
-.empresas-view__filters { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
-.search-wrapper { position: relative; display: flex; align-items: center; flex: 1; min-width: 240px; max-width: 400px; }
-.search-wrapper > :first-child { position: absolute; left: var(--space-4); pointer-events: none; }
-.search-input { width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 24px); transition: all 0.2s; box-sizing: border-box; }
-.search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
-.search-input::placeholder { color: var(--text-muted); }
-.search-clear { position: absolute; right: var(--space-3); background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; padding: var(--space-1); }
-.filter-chips { display: flex; gap: var(--space-2); }
-.chip { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-full); color: var(--text-secondary); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-.chip:hover { background: rgba(255, 255, 255, 0.06); }
-.chip.active { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
-.chip-dot { width: 6px; height: 6px; border-radius: 50%; }
-.chip-dot--activo { background: var(--success); }
-.chip-dot--inactivo { background: var(--text-muted); }
+.emp-surface { padding: var(--gc-space-6); }
+.emp-empty { display: flex; justify-content: center; padding: var(--gc-space-12); }
+.emp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--gc-space-2); }
+.emp-heading { display: flex; align-items: center; gap: var(--gc-space-3); }
+.emp-title { font-size: var(--gc-fs-xl); }
+.emp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--gc-space-4); margin-top: var(--gc-space-5); }
+.emp-field { display: flex; flex-direction: column; gap: 2px; }
+.emp-label { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gc-text-3); }
+.emp-value { font-size: var(--gc-fs-md); color: var(--gc-text); }
+.emp-link { font-size: var(--gc-fs-md); color: var(--gc-info); }
+.emp-link:hover { text-decoration: underline; }
 
-.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-8); color: var(--text-tertiary); font-size: var(--text-sm); }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); padding: calc(var(--space-8) * 2); border-radius: var(--radius-xl); text-align: center; }
-.empty-icon { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); border-radius: var(--radius-xl); }
-.empty-state h3 { color: var(--text-primary); font-family: var(--font-display); margin: 0; }
-.empty-state p { color: var(--text-tertiary); font-size: var(--text-sm); max-width: 320px; margin: 0; }
-
-.table-wrapper { border-radius: var(--radius-xl); overflow: hidden; }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table thead th { text-align: left; padding: var(--space-4) var(--space-5); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border); white-space: nowrap; }
-.data-table tbody td { padding: var(--space-4) var(--space-5); font-size: var(--text-sm); color: var(--text-primary); border-bottom: 1px solid rgba(255, 255, 255, 0.03); vertical-align: middle; }
-.data-row { transition: background 0.15s; }
-.data-row:hover { background: rgba(255, 255, 255, 0.02); }
-.data-row--inactive { opacity: 0.5; }
-.th-actions, .td-actions { text-align: right; width: 60px; }
-
-.cell-empresa { display: flex; align-items: center; gap: var(--space-3); }
-.empresa-avatar { width: 36px; height: 36px; min-width: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 12px; font-weight: 700; background: var(--primary-soft); color: var(--primary); }
-.cell-empresa__info { display: flex; flex-direction: column; min-width: 0; }
-.cell-empresa__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cell-empresa__sub { font-size: var(--text-xs); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.cell-id { display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: var(--text-xs); }
-.cell-id__tipo { color: var(--secondary); font-weight: 600; }
-.cell-id__num { color: var(--text-secondary); }
-.cell-id__dv { color: var(--text-muted); }
-
-.cell-location { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-secondary); flex-wrap: wrap; }
-.cell-location__pais { font-weight: 600; }
-.cell-location__dept::before, .cell-location__city::before { content: '·'; margin-right: 4px; color: var(--text-muted); }
-
-.cell-link { display: flex; align-items: center; gap: 4px; color: var(--primary); font-size: var(--text-xs); text-decoration: none; transition: opacity 0.15s; }
-.cell-link:hover { opacity: 0.8; }
-.cell-empty { color: var(--text-muted); font-size: var(--text-xs); }
-
-.badge { display: inline-flex; align-items: center; padding: 1px var(--space-2); border-radius: var(--radius-full); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-.badge--success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-.badge--muted { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
-
-.pagination { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-5); border-top: 1px solid var(--glass-border); }
-.pagination-total { font-size: var(--text-xs); color: var(--text-muted); }
-.pagination-controls { display: flex; align-items: center; gap: var(--space-3); }
-.pagination-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-secondary); padding: var(--space-2); cursor: pointer; display: flex; transition: all 0.15s; }
-.pagination-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); color: var(--text-primary); }
-.pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.pagination-info { font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
-
-.error-toast { position: fixed; bottom: var(--space-6); right: var(--space-6); display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: var(--radius-lg); color: var(--error); font-size: var(--text-sm); cursor: pointer; z-index: 900; backdrop-filter: blur(12px); }
-.error-toast__close { opacity: 0.5; }
-.toast-enter-active { transition: all 0.3s ease; }
-.toast-leave-active { transition: all 0.2s ease; }
-.toast-enter-from { transform: translateY(20px); opacity: 0; }
-.toast-leave-to { transform: translateY(10px); opacity: 0; }
-
-@media (max-width: 1100px) {
-  .data-table { font-size: var(--text-xs); }
-  .data-table thead th, .data-table tbody td { padding: var(--space-3); }
-}
+.emp-aside { padding: var(--gc-space-5); display: flex; flex-direction: column; gap: var(--gc-space-5); }
+.emp-aside__sec { display: flex; flex-direction: column; gap: var(--gc-space-2); }
+.emp-aside__title { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--gc-text-3); }
+.emp-aside__list { border: 1px solid var(--gc-border); border-radius: var(--gc-radius-lg); overflow: hidden; }
+.emp-aside__list > :deep(.gc-row:last-child) { border-bottom: none; }
+.emp-aside__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.emp-aside__rowname { font-size: var(--gc-fs-md); }
+.emp-aside__rowmeta { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
 </style>

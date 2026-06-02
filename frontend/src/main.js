@@ -3,9 +3,12 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 
-// Styles
-import './assets/styles/tokens.css';
-import './assets/styles/global.css';
+// Iconos (un solo set: Tabler outline, webfont)
+import '@tabler/icons-webfont/dist/tabler-icons.min.css';
+
+// Estilos: identidad "Instrumento" (tokens --gc-* + reset global + base).
+// El sistema legacy "Luxury Tech" (tokens.css + global.css) fue eliminado en RF8.
+import './assets/styles/instrument.css';
 
 const app = createApp(App);
 

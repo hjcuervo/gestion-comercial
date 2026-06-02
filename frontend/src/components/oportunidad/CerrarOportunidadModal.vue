@@ -1,75 +1,53 @@
 <template>
-  <Teleport to="body">
-    <Transition name="modal">
-      <div v-if="visible" class="modal-overlay" @click.self="$emit('close')">
-        <div class="modal-container animate-scaleIn">
-          <div class="modal-header">
-            <h3 class="modal-title gradient-text">Cerrar Oportunidad</h3>
-            <button class="modal-close" @click="$emit('close')"><Icon name="x" :size="20" /></button>
-          </div>
+  <GcModal :open="visible" title="Cerrar oportunidad" width="520px" @close="$emit('close')">
+    <div class="cerrar">
+      <p class="cerrar__nombre">{{ oportunidadNombre }}</p>
 
-          <div class="modal-body">
-            <p class="modal-subtitle">¿Cómo se resolvió <strong>{{ oportunidadNombre }}</strong>?</p>
-
-            <div class="form-group">
-              <div class="estado-options">
-                <button class="estado-btn estado-btn--ganada" :class="{ active: form.estadoMacro === 'GANADA' }" @click="form.estadoMacro = 'GANADA'">
-                  <Icon name="trophy" :size="20" /> Ganada
-                </button>
-                <button class="estado-btn estado-btn--perdida" :class="{ active: form.estadoMacro === 'PERDIDA' }" @click="form.estadoMacro = 'PERDIDA'">
-                  <Icon name="trending-down" :size="20" /> Perdida
-                </button>
-                <button class="estado-btn estado-btn--no-concretada" :class="{ active: form.estadoMacro === 'NO_CONCRETADA' }" @click="form.estadoMacro = 'NO_CONCRETADA'">
-                  <Icon name="x" :size="20" /> No Concretada
-                </button>
-              </div>
-              <span v-if="errors.estadoMacro" class="form-error">{{ errors.estadoMacro }}</span>
-            </div>
-
-            <!-- Pipeline de contratación (solo si GANADA) -->
-            <div v-if="form.estadoMacro === 'GANADA'" class="form-group ganada-section">
-              <div class="ganada-info">
-                <Icon name="note-add" :size="16" color="var(--secondary)" />
-                <span>La oportunidad se moverá al pipeline de contratación para gestionar el proceso de formalización.</span>
-              </div>
-              <label class="form-label">Pipeline de Contratación <span class="req">*</span></label>
-              <div v-if="loadingPipelines" class="loading-inline"><Icon name="loader" :size="14" class="animate-spin" /> Cargando pipelines...</div>
-              <select v-else v-model="form.pipelineContratacionId" class="form-select">
-                <option :value="null" disabled>Seleccione un pipeline de contratación</option>
-                <option v-for="p in pipelinesContratacion" :key="p.id" :value="p.id">{{ p.nombre }}</option>
-              </select>
-              <span v-if="!pipelinesContratacion.length && !loadingPipelines" class="form-hint form-hint--warn">
-                No hay pipelines de contratación. Créelos en Pipeline → Configuración con ámbito "Contratación".
-              </span>
-              <span v-if="errors.pipeline" class="form-error">{{ errors.pipeline }}</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Comentario de Cierre</label>
-              <textarea v-model="form.comentario" class="form-textarea" placeholder="Describe el resultado..." rows="3" maxlength="500"></textarea>
-              <span class="form-hint">{{ (form.comentario || '').length }}/500</span>
-            </div>
-
-            <div v-if="error" class="form-error-banner"><Icon name="alert-circle" :size="16" /> {{ error }}</div>
-          </div>
-
-          <div class="modal-footer">
-            <Button variant="ghost" @click="$emit('close')">Cancelar</Button>
-            <Button :variant="form.estadoMacro === 'GANADA' ? 'success' : 'danger'" icon="check" :loading="saving" @click="handleSubmit">
-              Confirmar Cierre
-            </Button>
-          </div>
+      <div class="cerrar__field">
+        <span class="cerrar__label">Resultado</span>
+        <div class="cerrar__opts">
+          <button class="cerrar__opt" :class="{ 'cerrar__opt--on cerrar__opt--ganada': form.estadoMacro === 'GANADA' }" @click="form.estadoMacro = 'GANADA'">
+            <GcIcon name="trophy" :size="16" /> Ganada
+          </button>
+          <button class="cerrar__opt" :class="{ 'cerrar__opt--on cerrar__opt--perdida': form.estadoMacro === 'PERDIDA' }" @click="form.estadoMacro = 'PERDIDA'">
+            <GcIcon name="circle-x" :size="16" /> Perdida
+          </button>
+          <button class="cerrar__opt" :class="{ 'cerrar__opt--on cerrar__opt--noconc': form.estadoMacro === 'NO_CONCRETADA' }" @click="form.estadoMacro = 'NO_CONCRETADA'">
+            <GcIcon name="ban" :size="16" /> No concretada
+          </button>
         </div>
+        <span v-if="errors.estadoMacro" class="cerrar__err">{{ errors.estadoMacro }}</span>
       </div>
-    </Transition>
-  </Teleport>
+
+      <GcSelect
+        v-if="form.estadoMacro === 'GANADA' && pipelinesContratacion.length"
+        v-model="form.pipelineContratacionId"
+        label="Pipeline de contratación"
+        :options="pipelineOptions"
+        placeholder="Selecciona…"
+        :error="errors.pipeline"
+      />
+
+      <GcTextarea v-model="form.comentario" label="Comentario" placeholder="Describe el resultado…" :rows="3" />
+
+      <div v-if="error" class="cerrar__error"><GcIcon name="alert-circle" :size="16" /><span>{{ error }}</span></div>
+    </div>
+
+    <template #footer>
+      <GcButton variant="ghost" @click="$emit('close')">Cancelar</GcButton>
+      <GcButton :variant="form.estadoMacro === 'GANADA' ? 'primary' : 'danger'" :loading="saving" @click="handleSubmit">Cerrar oportunidad</GcButton>
+    </template>
+  </GcModal>
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
-import Icon from '@/components/ui/Icon.vue';
-import Button from '@/components/ui/Button.vue';
+import { reactive, ref, computed, watch } from 'vue';
 import { pipelineService } from '@/services/pipeline.service';
+import GcModal from '@/components/ui/GcModal.vue';
+import GcSelect from '@/components/ui/GcSelect.vue';
+import GcTextarea from '@/components/ui/GcTextarea.vue';
+import GcButton from '@/components/ui/GcButton.vue';
+import GcIcon from '@/components/ui/GcIcon.vue';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -77,90 +55,62 @@ const props = defineProps({
   saving: { type: Boolean, default: false },
   error: { type: String, default: null },
 });
-
 const emit = defineEmits(['close', 'submit']);
+
 const form = reactive({ estadoMacro: '', comentario: '', pipelineContratacionId: null });
 const errors = reactive({ estadoMacro: '', pipeline: '' });
 const pipelinesContratacion = ref([]);
-const loadingPipelines = ref(false);
+
+const pipelineOptions = computed(() => pipelinesContratacion.value.map((p) => ({ value: p.id, label: p.nombre })));
 
 watch(() => props.visible, async (val) => {
-  if (val) {
-    form.estadoMacro = '';
-    form.comentario = '';
-    form.pipelineContratacionId = null;
-    errors.estadoMacro = '';
-    errors.pipeline = '';
-
-    loadingPipelines.value = true;
-    try {
-      pipelinesContratacion.value = await pipelineService.listarActivos('CONTRATACION');
-      if (pipelinesContratacion.value.length === 1) {
-        form.pipelineContratacionId = pipelinesContratacion.value[0].id;
-      }
-    } catch {}
-    finally { loadingPipelines.value = false; }
-  }
+  if (!val) return;
+  form.estadoMacro = '';
+  form.comentario = '';
+  form.pipelineContratacionId = null;
+  errors.estadoMacro = '';
+  errors.pipeline = '';
+  try {
+    pipelinesContratacion.value = await pipelineService.listarActivos('CONTRATACION');
+    if (pipelinesContratacion.value.length === 1) form.pipelineContratacionId = pipelinesContratacion.value[0].id;
+  } catch { pipelinesContratacion.value = []; }
 });
 
 function handleSubmit() {
   errors.estadoMacro = '';
   errors.pipeline = '';
-
   if (!form.estadoMacro) { errors.estadoMacro = 'Selecciona un resultado'; return; }
-
   if (form.estadoMacro === 'GANADA' && !form.pipelineContratacionId && pipelinesContratacion.value.length > 0) {
     errors.pipeline = 'Seleccione el pipeline de contratación';
     return;
   }
-
-  const payload = {
-    estadoMacro: form.estadoMacro,
-    comentario: form.comentario?.trim() || undefined,
-  };
-
-  if (form.estadoMacro === 'GANADA' && form.pipelineContratacionId) {
-    payload.pipelineContratacionId = form.pipelineContratacionId;
-  }
-
+  const payload = { estadoMacro: form.estadoMacro, comentario: form.comentario?.trim() || undefined };
+  if (form.estadoMacro === 'GANADA' && form.pipelineContratacionId) payload.pipelineContratacionId = form.pipelineContratacionId;
   emit('submit', payload);
 }
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4); }
-.modal-container { background: var(--bg-elevated); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-6) var(--space-6) 0; }
-.modal-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; margin: 0; }
-.modal-close { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-secondary); padding: var(--space-2); cursor: pointer; transition: all 0.2s; display: flex; }
-.modal-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
-.modal-body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
-.modal-subtitle { font-size: var(--text-sm); color: var(--text-secondary); margin: 0; }
-.modal-subtitle strong { color: var(--text-primary); }
-.modal-footer { display: flex; justify-content: flex-end; gap: var(--space-3); padding: 0 var(--space-6) var(--space-6); }
-
-.estado-options { display: flex; gap: var(--space-3); }
-.estado-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-surface); border: 2px solid var(--glass-border); border-radius: var(--radius-lg); color: var(--text-secondary); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.estado-btn:hover { background: rgba(255,255,255,0.04); }
-.estado-btn--ganada.active { border-color: var(--success); color: var(--success); background: var(--success-soft); }
-.estado-btn--perdida.active { border-color: var(--error); color: var(--error); background: var(--error-soft); }
-.estado-btn--no-concretada.active { border-color: var(--warning); color: var(--warning); background: var(--warning-soft); }
-
-.ganada-section { display: flex; flex-direction: column; gap: var(--space-3); }
-.ganada-info { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-3); background: var(--secondary-soft); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--secondary); line-height: 1.5; }
-.req { color: var(--error); }
-
-.form-label { display: block; font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2); }
-.form-select { width: 100%; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-3) var(--space-4); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; box-sizing: border-box; }
-.form-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
-.form-select option { background: var(--bg-elevated); }
-.form-textarea { width: 100%; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-3) var(--space-4); resize: vertical; box-sizing: border-box; }
-.form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
-.form-textarea::placeholder { color: var(--text-muted); }
-.form-hint { font-size: var(--text-xs); color: var(--text-muted); text-align: right; display: block; margin-top: 2px; }
-.form-hint--warn { color: var(--warning); text-align: left; }
-.form-error { font-size: var(--text-xs); color: var(--error); margin-top: 2px; display: block; text-align: center; }
-.form-error-banner { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.2); border-radius: var(--radius-md); color: var(--error); font-size: var(--text-sm); }
-.loading-inline { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); font-size: var(--text-xs); padding: var(--space-2); }
-.modal-enter-active { transition: opacity 0.25s ease; } .modal-leave-active { transition: opacity 0.2s ease; } .modal-enter-from, .modal-leave-to { opacity: 0; }
+.cerrar { display: flex; flex-direction: column; gap: var(--gc-space-4); }
+.cerrar__nombre { font-size: var(--gc-fs-md); color: var(--gc-text-2); }
+.cerrar__field { display: flex; flex-direction: column; gap: var(--gc-space-2); }
+.cerrar__label { font-size: var(--gc-fs-sm); font-weight: var(--gc-fw-medium); color: var(--gc-text-2); }
+.cerrar__opts { display: flex; flex-direction: column; gap: var(--gc-space-2); }
+.cerrar__opt {
+  display: flex; align-items: center; gap: var(--gc-space-2);
+  padding: var(--gc-space-3);
+  background: var(--gc-surface-2);
+  border: 1px solid var(--gc-border);
+  border-radius: var(--gc-radius-md);
+  color: var(--gc-text-2);
+  font-size: var(--gc-fs-md);
+  text-align: left;
+}
+.cerrar__opt:hover { border-color: var(--gc-border-strong); color: var(--gc-text); }
+.cerrar__opt--on { color: var(--gc-text); font-weight: var(--gc-fw-medium); }
+.cerrar__opt--ganada.cerrar__opt--on { border-color: var(--gc-success); background: var(--gc-success-soft); }
+.cerrar__opt--perdida.cerrar__opt--on { border-color: var(--gc-danger); background: var(--gc-danger-soft); }
+.cerrar__opt--noconc.cerrar__opt--on { border-color: var(--gc-text-3); background: var(--gc-neutral-soft); }
+.cerrar__err { font-size: var(--gc-fs-sm); color: var(--gc-danger); }
+.cerrar__error { display: flex; align-items: center; gap: var(--gc-space-2); padding: var(--gc-space-3); background: var(--gc-danger-soft); border: 1px solid var(--gc-danger); border-radius: var(--gc-radius-md); font-size: var(--gc-fs-sm); color: var(--gc-danger); }
 </style>
