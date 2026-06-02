@@ -20,9 +20,25 @@
         <GcInput v-model="form.telefonoEmpresarial" label="Teléfono empresarial" placeholder="+57 2 555 1234" />
       </div>
 
+      <div class="asoc__row">
+        <GcInput v-model="form.fechaInicio" label="Fecha inicio" type="date" />
+        <GcInput v-model="form.fechaFin" label="Fecha fin" type="date" />
+      </div>
+
       <label class="asoc__toggle">
         <input type="checkbox" v-model="form.esContactoPrincipal" />
-        <span>Es contacto principal</span>
+        <span class="asoc__check">
+          <span class="asoc__checktitle">Contacto principal de la empresa</span>
+          <span class="asoc__checkhint">Esta persona es el contacto de referencia de la empresa.</span>
+        </span>
+      </label>
+
+      <label class="asoc__toggle">
+        <input type="checkbox" v-model="form.esEmpresaPrincipal" />
+        <span class="asoc__check">
+          <span class="asoc__checktitle">Empresa principal de la persona</span>
+          <span class="asoc__checkhint">Es la empresa principal asociada a esta persona.</span>
+        </span>
       </label>
 
       <div v-if="error" class="asoc__error"><GcIcon name="alert-circle" :size="16" /><span>{{ error }}</span></div>
@@ -58,7 +74,7 @@ const roles = [
   { value: 'ADMINISTRATIVO', label: 'Administrativo' },
 ];
 
-const form = reactive({ empresaId: '', cargo: '', puesto: '', rolContacto: '', emailEmpresarial: '', telefonoEmpresarial: '', esContactoPrincipal: false });
+const form = reactive({ empresaId: '', cargo: '', puesto: '', rolContacto: '', emailEmpresarial: '', telefonoEmpresarial: '', esContactoPrincipal: false, esEmpresaPrincipal: false, fechaInicio: '', fechaFin: '' });
 const errors = reactive({ empresaId: '' });
 const empresas = ref([]);
 const loadingEmpresas = ref(false);
@@ -67,7 +83,7 @@ const empresaOptions = computed(() => empresas.value.map((e) => ({ value: e.id, 
 
 watch(() => props.visible, async (val) => {
   if (!val) return;
-  Object.assign(form, { empresaId: '', cargo: '', puesto: '', rolContacto: '', emailEmpresarial: '', telefonoEmpresarial: '', esContactoPrincipal: false });
+  Object.assign(form, { empresaId: '', cargo: '', puesto: '', rolContacto: '', emailEmpresarial: '', telefonoEmpresarial: '', esContactoPrincipal: false, esEmpresaPrincipal: false, fechaInicio: '', fechaFin: '' });
   errors.empresaId = '';
   loadingEmpresas.value = true;
   try { const res = await empresaService.listar({ page_size: 200, estado: 'ACTIVA' }); empresas.value = res.data || []; }
@@ -86,6 +102,9 @@ function handleSubmit() {
     emailEmpresarial: form.emailEmpresarial?.trim() || undefined,
     telefonoEmpresarial: form.telefonoEmpresarial?.trim() || undefined,
     esContactoPrincipal: form.esContactoPrincipal,
+    esEmpresaPrincipal: form.esEmpresaPrincipal,
+    fechaInicio: form.fechaInicio || undefined,
+    fechaFin: form.fechaFin || undefined,
   });
 }
 </script>
@@ -98,6 +117,10 @@ function handleSubmit() {
 .asoc__roles { display: flex; flex-wrap: wrap; gap: var(--gc-space-2); }
 .asoc__role { padding: 4px 10px; background: var(--gc-surface-2); border: 1px solid var(--gc-border); border-radius: var(--gc-radius-full); font-size: var(--gc-fs-sm); color: var(--gc-text-2); }
 .asoc__role--on { border-color: var(--gc-primary); background: var(--gc-primary); color: var(--gc-primary-text); }
-.asoc__toggle { display: flex; align-items: center; gap: var(--gc-space-2); font-size: var(--gc-fs-md); color: var(--gc-text-2); cursor: pointer; }
+.asoc__toggle { display: flex; align-items: flex-start; gap: var(--gc-space-2); font-size: var(--gc-fs-md); color: var(--gc-text-2); cursor: pointer; }
+.asoc__toggle input { margin-top: 3px; }
+.asoc__check { display: flex; flex-direction: column; gap: 1px; }
+.asoc__checktitle { font-size: var(--gc-fs-md); color: var(--gc-text); }
+.asoc__checkhint { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
 .asoc__error { display: flex; align-items: center; gap: var(--gc-space-2); padding: var(--gc-space-3); background: var(--gc-danger-soft); border: 1px solid var(--gc-danger); border-radius: var(--gc-radius-md); font-size: var(--gc-fs-sm); color: var(--gc-danger); }
 </style>

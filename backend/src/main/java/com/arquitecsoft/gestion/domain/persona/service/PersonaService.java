@@ -138,8 +138,23 @@ public class PersonaService {
         if (reportaAId.equals(personaActualId)) {
             throw new BusinessException("VALIDATION_ERROR", "Una persona no puede reportarse a sí misma");
         }
-        return personaRepository.findById(reportaAId)
+        GcPersona jefe = personaRepository.findById(reportaAId)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Persona (reporta a) no encontrada: " + reportaAId));
+
+        // Detección de ciclos: subir por la cadena de jefes; si reaparece la persona actual, hay ciclo.
+        if (personaActualId != null) {
+            java.util.Set<Long> visitados = new java.util.HashSet<>();
+            GcPersona cursor = jefe;
+            while (cursor != null && cursor.getReportaA() != null) {
+                Long jefeId = cursor.getReportaA().getId();
+                if (personaActualId.equals(jefeId)) {
+                    throw new BusinessException("VALIDATION_ERROR", "La relación de reporte crearía un ciclo");
+                }
+                if (!visitados.add(jefeId)) break; // corta ante un ciclo preexistente
+                cursor = personaRepository.findById(jefeId).orElse(null);
+            }
+        }
+        return jefe;
     }
 
     private String trimToNull(String s) {
@@ -156,12 +171,18 @@ public class PersonaService {
         GcEmpresa empresa = empresaRepository.findById(request.getEmpresaId())
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Empresa no encontrada con ID: " + request.getEmpresaId()));
 
-        if (personaEmpresaRepository.existsByPersonaIdAndEmpresaId(personaId, request.getEmpresaId())) {
+        // Si ya existe un vínculo ACTIVO, es duplicado. Si existe pero cerrado (activo=0),
+        // se reactiva en vez de crear uno nuevo (coherente con el soft-close de desasociar).
+        GcPersonaEmpresa personaEmpresa = personaEmpresaRepository
+                .findByPersonaIdAndEmpresaId(personaId, request.getEmpresaId())
+                .orElse(null);
+        if (personaEmpresa != null && personaEmpresa.isActivo()) {
             throw new BusinessException("DUPLICATE_ERROR",
                 "La persona ya está asociada a esta empresa");
         }
-
-        GcPersonaEmpresa personaEmpresa = new GcPersonaEmpresa(persona, empresa);
+        if (personaEmpresa == null) {
+            personaEmpresa = new GcPersonaEmpresa(persona, empresa);
+        }
         personaEmpresa.setCargo(request.getCargo());
         personaEmpresa.setPuesto(request.getPuesto());
         personaEmpresa.setEmailEmpresarial(request.getEmailEmpresarial());
@@ -216,6 +237,9 @@ public class PersonaService {
                 .orElseThrow(() -> new BusinessException("NOT_FOUND",
                     "No existe asociación entre la persona " + personaId + " y la empresa " + empresaId));
 
-        personaEmpresaRepository.delete(personaEmpresa);
+        // Soft-close: se preserva el histórico del vínculo (F-RP6).
+        personaEmpresa.setActivo(0);
+        personaEmpresa.setFechaFin(java.time.LocalDate.now());
+        personaEmpresaRepository.save(personaEmpresa);
     }
 }

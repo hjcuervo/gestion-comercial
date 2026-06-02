@@ -27,8 +27,10 @@
                 <span class="per-aside__rowname">{{ pe.empresaRazonSocial }}</span>
                 <span class="per-aside__rowmeta">
                   {{ pe.cargo || '—' }}<template v-if="pe.rolContacto"> · {{ rolLabel(pe.rolContacto) }}</template>
-                  <template v-if="pe.esContactoPrincipal"> · principal</template>
+                  <template v-if="pe.esContactoPrincipal"> · contacto principal</template>
+                  <template v-if="pe.esEmpresaPrincipal"> · empresa principal</template>
                 </span>
+                <span v-if="pe.fechaInicio || pe.fechaFin" class="per-aside__rowmeta gc-mono">{{ vigencia(pe) }}</span>
               </div>
               <template #actions>
                 <GcButton variant="ghost" size="sm" icon="unlink" @click.stop="desasociar(pe.empresaId)" />
@@ -79,6 +81,7 @@ import { ref, onMounted, watch, nextTick } from 'vue';
 import { personaService } from '@/services/persona.service';
 import { contactoService } from '@/services/contacto.service';
 import { usuarioService } from '@/services/usuario.service';
+import { formatDate } from '@/utils/datetime';
 import PersonaModal from '@/components/persona/PersonaModal.vue';
 import AsociarEmpresaModal from '@/components/persona/AsociarEmpresaModal.vue';
 import ContactosPanel from '@/components/contacto/ContactosPanel.vue';
@@ -118,6 +121,11 @@ const contactoError = ref('');
 
 const ROL = { DECISOR: 'Decisor', INFLUENCIADOR: 'Influenciador', TECNICO: 'Técnico', USUARIO: 'Usuario', ADMINISTRATIVO: 'Administrativo' };
 function rolLabel(r) { return ROL[r] || r; }
+function vigencia(pe) {
+  const ini = pe.fechaInicio ? formatDate(pe.fechaInicio) : '—';
+  const fin = pe.fechaFin ? formatDate(pe.fechaFin) : 'actual';
+  return `${ini} → ${fin}`;
+}
 
 const usuarios = ref([]);
 function propietarioNombre(id) {

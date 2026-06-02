@@ -28,6 +28,9 @@
                   <span class="emp-aside__rowname">{{ p.nombreCompleto }}</span>
                   <span class="emp-aside__rowmeta">{{ p.numeroDocumento || '—' }}</span>
                 </div>
+                <template #actions>
+                  <GcButton variant="ghost" size="sm" icon="unlink" @click.stop="desasociarPersona(p.id)" />
+                </template>
               </GcListRow>
             </div>
           </div>
@@ -144,6 +147,14 @@ async function handleAsociarPersona(data) {
   } finally {
     savingAsocP.value = false;
   }
+}
+
+async function desasociarPersona(personaId) {
+  if (!confirm('¿Desasociar esta persona de la empresa?')) return;
+  try {
+    await personaService.desasociarEmpresa(personaId, props.id);
+    await cargarDetalle();
+  } catch (err) { console.error('Error al desasociar persona:', err); }
 }
 
 // --- Contactos (medios) ---

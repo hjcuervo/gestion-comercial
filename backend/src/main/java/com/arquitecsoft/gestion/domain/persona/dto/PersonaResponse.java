@@ -50,6 +50,7 @@ public class PersonaResponse {
         
         if (persona.getEmpresas() != null) {
             response.setEmpresas(persona.getEmpresas().stream()
+                    .filter((pe) -> pe.isActivo())
                     .map(PersonaEmpresaResponse::fromEntity)
                     .collect(Collectors.toList()));
         }

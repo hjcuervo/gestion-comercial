@@ -31,6 +31,6 @@ public interface GcPersonaRepository extends JpaRepository<GcPersona, Long> {
            "p.activo = 1")
     Page<GcPersona> findWithFilters(@Param("nombre") String nombre, Pageable pageable);
 
-    @Query("SELECT DISTINCT p FROM GcPersona p JOIN p.empresas pe WHERE pe.empresa.id = :empresaId AND p.activo = 1")
+    @Query("SELECT DISTINCT p FROM GcPersona p JOIN p.empresas pe WHERE pe.empresa.id = :empresaId AND pe.activo = 1 AND p.activo = 1")
     Page<GcPersona> findByEmpresaId(@Param("empresaId") Long empresaId, Pageable pageable);
 }
