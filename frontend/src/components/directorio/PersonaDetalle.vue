@@ -1,34 +1,6 @@
 <template>
-  <!-- Lista maestra -->
-  <Teleport to="#gc-shell-master">
-    <div class="per-master">
-      <div class="per-master__filters">
-        <GcInput v-model="search" placeholder="Buscar persona…" icon="search" @update:modelValue="debouncedReload" />
-        <GcButton variant="primary" size="sm" icon="plus" full-width @click="openCreate">Nueva persona</GcButton>
-      </div>
-      <div v-if="loading" class="per-master__state"><GcSpinner :size="20" /></div>
-      <GcEmpty v-else-if="!personas.length" icon="user-off" message="Sin personas" />
-      <div v-else>
-        <GcListRow
-          v-for="p in personas"
-          :key="p.id"
-          :tone="p.activo !== false ? 'success' : 'neutral'"
-          clickable
-          :active="String(p.id) === String(selectedId)"
-          @click="select(p.id)"
-        >
-          <div class="per-master__row">
-            <span class="per-master__name">{{ p.nombreCompleto || (p.nombres + ' ' + p.apellidos) }}</span>
-            <span class="per-master__meta">{{ p.numeroDocumento || '—' }}</span>
-          </div>
-        </GcListRow>
-      </div>
-    </div>
-  </Teleport>
-
-  <!-- Detalle -->
   <div class="per-surface">
-    <div v-if="!selectedId" class="per-empty"><GcEmpty icon="hand-click" message="Selecciona una persona de la izquierda" /></div>
+    <div v-if="!id" class="per-empty"><GcEmpty icon="hand-click" message="Selecciona una persona de la izquierda" /></div>
     <div v-else-if="loadingDetalle" class="per-empty"><GcSpinner :size="24" /></div>
     <template v-else-if="persona">
       <!-- Empresas asociadas en el aside -->
@@ -50,7 +22,7 @@
           </div>
           <GcEmpty v-if="!persona.empresas?.length" icon="building-off" message="Sin empresas asociadas" />
           <div v-else class="per-aside__list">
-            <GcListRow v-for="pe in persona.empresas" :key="pe.id" :tone="pe.esContactoPrincipal ? 'accent' : 'neutral'">
+            <GcListRow v-for="pe in persona.empresas" :key="pe.id" :tone="pe.esContactoPrincipal ? 'accent' : 'neutral'" clickable @click="$emit('open-empresa', pe.empresaId)">
               <div class="per-aside__row">
                 <span class="per-aside__rowname">{{ pe.empresaRazonSocial }}</span>
                 <span class="per-aside__rowmeta">
@@ -59,7 +31,7 @@
                 </span>
               </div>
               <template #actions>
-                <GcButton variant="ghost" size="sm" icon="unlink" @click="desasociar(pe.empresaId)" />
+                <GcButton variant="ghost" size="sm" icon="unlink" @click.stop="desasociar(pe.empresaId)" />
               </template>
             </GcListRow>
           </div>
@@ -103,9 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useShell } from '@/composables/useShell';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { personaService } from '@/services/persona.service';
 import { contactoService } from '@/services/contacto.service';
 import { usuarioService } from '@/services/usuario.service';
@@ -113,22 +83,16 @@ import PersonaModal from '@/components/persona/PersonaModal.vue';
 import AsociarEmpresaModal from '@/components/persona/AsociarEmpresaModal.vue';
 import ContactosPanel from '@/components/contacto/ContactosPanel.vue';
 import ContactoDrawer from '@/components/contacto/ContactoDrawer.vue';
-import GcInput from '@/components/ui/GcInput.vue';
 import GcButton from '@/components/ui/GcButton.vue';
 import GcBadge from '@/components/ui/GcBadge.vue';
 import GcListRow from '@/components/ui/GcListRow.vue';
 import GcEmpty from '@/components/ui/GcEmpty.vue';
 import GcSpinner from '@/components/ui/GcSpinner.vue';
 
-const route = useRoute();
-const router = useRouter();
-const { setRegions } = useShell();
-setRegions({ master: true, aside: true });
-
-const personas = ref([]);
-const loading = ref(true);
-const search = ref('');
-let timer = null;
+const props = defineProps({
+  id: { type: [String, Number], default: null },
+});
+const emit = defineEmits(['updated', 'open-empresa']);
 
 const persona = ref(null);
 const loadingDetalle = ref(false);
@@ -152,8 +116,6 @@ const editingContacto = ref(null);
 const savingContacto = ref(false);
 const contactoError = ref('');
 
-const selectedId = computed(() => route.params.id || null);
-
 const ROL = { DECISOR: 'Decisor', INFLUENCIADOR: 'Influenciador', TECNICO: 'Técnico', USUARIO: 'Usuario', ADMINISTRATIVO: 'Administrativo' };
 function rolLabel(r) { return ROL[r] || r; }
 
@@ -164,31 +126,18 @@ function propietarioNombre(id) {
   return u ? (u.nombreCompleto || (u.nombres + ' ' + u.apellidos)) : `#${id}`;
 }
 
-async function reload() {
-  loading.value = true;
-  try {
-    const params = { page: 1, page_size: 50 };
-    if (search.value) params.q = search.value;
-    const res = await personaService.listar(params);
-    personas.value = res.data || [];
-  } catch (err) { console.error('Error cargando personas:', err); personas.value = []; }
-  finally { loading.value = false; }
-}
-function debouncedReload() { clearTimeout(timer); timer = setTimeout(reload, 400); }
-function select(id) { router.push(`/personas/${id}`); }
-
 async function cargarDetalle() {
-  if (!selectedId.value) { persona.value = null; return; }
+  if (!props.id) { persona.value = null; return; }
   loadingDetalle.value = true;
-  try { persona.value = await personaService.obtenerPorId(selectedId.value); await cargarMedios(); }
+  try { persona.value = await personaService.obtenerPorId(props.id); await cargarMedios(); }
   catch (err) { console.error('Error cargando persona:', err); }
   finally { loadingDetalle.value = false; }
 }
 
 async function cargarMedios() {
-  if (!selectedId.value) { medios.value = []; return; }
+  if (!props.id) { medios.value = []; return; }
   loadingMedios.value = true;
-  try { medios.value = await contactoService.listarPorPersona(selectedId.value); }
+  try { medios.value = await contactoService.listarPorPersona(props.id); }
   catch (err) { console.error('Error cargando contactos:', err); medios.value = []; }
   finally { loadingMedios.value = false; }
 }
@@ -201,7 +150,7 @@ async function handleSubmit(payload) {
     if (editing.value) await personaService.actualizar(editing.value.id, payload);
     else await personaService.crear(payload);
     showModal.value = false;
-    await reload();
+    emit('updated');
     if (editing.value) await cargarDetalle();
   } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar persona'; }
   finally { saving.value = false; }
@@ -226,7 +175,7 @@ async function handleContactoSubmit({ id, payload }) {
   savingContacto.value = true; contactoError.value = '';
   try {
     if (id) await contactoService.actualizar(id, payload);
-    else await contactoService.crearParaPersona(selectedId.value, payload);
+    else await contactoService.crearParaPersona(props.id, payload);
     showContacto.value = false;
     await cargarMedios();
   } catch (err) { contactoError.value = err.response?.data?.message || 'Error al guardar el contacto'; }
@@ -248,20 +197,14 @@ onMounted(async () => {
   asideReady.value = true;
   contactoService.listarRedesSociales().then((r) => { redes.value = r || []; }).catch(() => { redes.value = []; });
   usuarioService.listar().then((u) => { usuarios.value = u || []; }).catch(() => { usuarios.value = []; });
-  await reload();
-  if (selectedId.value) await cargarDetalle();
+  if (props.id) await cargarDetalle();
 });
-watch(selectedId, () => cargarDetalle());
+watch(() => props.id, () => cargarDetalle());
+
+defineExpose({ openCreate });
 </script>
 
 <style scoped>
-.per-master { display: flex; flex-direction: column; }
-.per-master__filters { display: flex; flex-direction: column; gap: var(--gc-space-2); padding: var(--gc-space-3); border-bottom: 1px solid var(--gc-border); }
-.per-master__state { display: flex; justify-content: center; padding: var(--gc-space-8); color: var(--gc-text-3); }
-.per-master__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.per-master__name { font-size: var(--gc-fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.per-master__meta { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
-
 .per-surface { padding: var(--gc-space-6); }
 .per-empty { display: flex; justify-content: center; padding: var(--gc-space-12); }
 .per-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--gc-space-2); }

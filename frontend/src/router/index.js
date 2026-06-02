@@ -63,18 +63,24 @@ const routes = [
     meta: { requiresAuth: true, layout: 'app', module: 'venta' },
   },
 
-  // Empresas + Personas (plantilla Operativo; :id opcional, sin router-view interno).
+  // Directorio unificado: Empresas + Personas en un solo módulo (enfoque A).
+  // :modo = empresa | persona ; :id opcional (lista sin selección si falta).
+  {
+    path: '/directorio/:modo(empresa|persona)/:id?',
+    name: 'Directorio',
+    component: () => import('@/views/DirectorioView.vue'),
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
+  },
+  { path: '/directorio', redirect: { name: 'Directorio', params: { modo: 'empresa' } } },
+
+  // Compatibilidad: las rutas viejas redirigen al Directorio (no rompe deep-links).
   {
     path: '/empresas/:id?',
-    name: 'Empresas',
-    component: () => import('@/views/EmpresasView.vue'),
-    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
+    redirect: (to) => ({ name: 'Directorio', params: { modo: 'empresa', id: to.params.id } }),
   },
   {
     path: '/personas/:id?',
-    name: 'Personas',
-    component: () => import('@/views/PersonasView.vue'),
-    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
+    redirect: (to) => ({ name: 'Directorio', params: { modo: 'persona', id: to.params.id } }),
   },
 
   // ====================================================================

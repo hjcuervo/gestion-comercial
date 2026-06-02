@@ -28,8 +28,7 @@ export const MODULES = [
       { path: '/', label: 'Dashboard', icon: 'dashboard', exact: true },
       { path: '/actividades', label: 'Oportunidades', icon: 'target' },
       { path: '/pipeline', label: 'Pipeline', icon: 'layout-kanban' },
-      { path: '/empresas', label: 'Empresas', icon: 'building' },
-      { path: '/personas', label: 'Personas', icon: 'users' },
+      { path: '/directorio', label: 'Directorio', icon: 'address-book' },
     ],
   },
   {

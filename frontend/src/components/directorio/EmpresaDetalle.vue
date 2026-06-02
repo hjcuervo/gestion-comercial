@@ -1,34 +1,6 @@
 <template>
-  <!-- Lista maestra -->
-  <Teleport to="#gc-shell-master">
-    <div class="emp-master">
-      <div class="emp-master__filters">
-        <GcInput v-model="search" placeholder="Buscar empresa…" icon="search" @update:modelValue="debouncedReload" />
-        <GcButton variant="primary" size="sm" icon="plus" full-width @click="openCreate">Nueva empresa</GcButton>
-      </div>
-      <div v-if="loading" class="emp-master__state"><GcSpinner :size="20" /></div>
-      <GcEmpty v-else-if="!empresas.length" icon="building-off" message="Sin empresas" />
-      <div v-else>
-        <GcListRow
-          v-for="e in empresas"
-          :key="e.id"
-          :tone="e.estado === 'ACTIVA' ? 'success' : 'neutral'"
-          clickable
-          :active="String(e.id) === String(selectedId)"
-          @click="select(e.id)"
-        >
-          <div class="emp-master__row">
-            <span class="emp-master__name">{{ e.razonSocial }}</span>
-            <span class="emp-master__meta gc-mono">{{ e.identificacionTributaria || '—' }}</span>
-          </div>
-        </GcListRow>
-      </div>
-    </div>
-  </Teleport>
-
-  <!-- Detalle -->
   <div class="emp-surface">
-    <div v-if="!selectedId" class="emp-empty"><GcEmpty icon="hand-click" message="Selecciona una empresa de la izquierda" /></div>
+    <div v-if="!id" class="emp-empty"><GcEmpty icon="hand-click" message="Selecciona una empresa de la izquierda" /></div>
     <div v-else-if="loadingDetalle" class="emp-empty"><GcSpinner :size="24" /></div>
     <template v-else-if="empresa">
       <!-- Contactos / oportunidades en el aside -->
@@ -45,13 +17,16 @@
             />
           </div>
           <div class="emp-aside__sec">
-            <h3 class="emp-aside__title">Contactos</h3>
+            <div class="emp-aside__head">
+              <h3 class="emp-aside__title">Contactos</h3>
+              <GcButton variant="default" size="sm" icon="plus" @click="showAsociarPersona = true">Asociar</GcButton>
+            </div>
             <GcEmpty v-if="!contactos.length" icon="user-off" message="Sin contactos" />
             <div v-else class="emp-aside__list">
-              <GcListRow v-for="p in contactos" :key="p.id" tone="info" clickable @click="$router.push(`/personas/${p.id}`)">
+              <GcListRow v-for="p in contactos" :key="p.id" tone="info" clickable @click="$emit('open-persona', p.id)">
                 <div class="emp-aside__row">
                   <span class="emp-aside__rowname">{{ p.nombreCompleto }}</span>
-                  <span class="emp-aside__rowmeta">{{ p.email || '—' }}</span>
+                  <span class="emp-aside__rowmeta">{{ p.numeroDocumento || '—' }}</span>
                 </div>
               </GcListRow>
             </div>
@@ -98,6 +73,8 @@
 
     <EmpresaModal :visible="showModal" :empresa="editing" :saving="saving" :error="modalError" @close="showModal = false" @submit="handleSubmit" />
 
+    <AsociarPersonaModal :visible="showAsociarPersona" :saving="savingAsocP" :error="asocPError" @close="showAsociarPersona = false" @submit="handleAsociarPersona" />
+
     <ContactoDrawer
       :open="showContacto"
       owner="empresa"
@@ -113,9 +90,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useShell } from '@/composables/useShell';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { empresaService } from '@/services/empresa.service';
 import { personaService } from '@/services/persona.service';
 import { oportunidadService } from '@/services/oportunidad.service';
@@ -123,24 +98,19 @@ import { contactoService } from '@/services/contacto.service';
 import { usuarioService } from '@/services/usuario.service';
 import { formatCurrency } from '@/utils/currency';
 import EmpresaModal from '@/components/empresa/EmpresaModal.vue';
+import AsociarPersonaModal from '@/components/persona/AsociarPersonaModal.vue';
 import ContactosPanel from '@/components/contacto/ContactosPanel.vue';
 import ContactoDrawer from '@/components/contacto/ContactoDrawer.vue';
-import GcInput from '@/components/ui/GcInput.vue';
 import GcButton from '@/components/ui/GcButton.vue';
 import GcBadge from '@/components/ui/GcBadge.vue';
 import GcListRow from '@/components/ui/GcListRow.vue';
 import GcEmpty from '@/components/ui/GcEmpty.vue';
 import GcSpinner from '@/components/ui/GcSpinner.vue';
 
-const route = useRoute();
-const router = useRouter();
-const { setRegions } = useShell();
-setRegions({ master: true, aside: true });
-
-const empresas = ref([]);
-const loading = ref(true);
-const search = ref('');
-let timer = null;
+const props = defineProps({
+  id: { type: [String, Number], default: null },
+});
+const emit = defineEmits(['updated', 'open-persona']);
 
 const empresa = ref(null);
 const contactos = ref([]);
@@ -153,6 +123,29 @@ const editing = ref(null);
 const saving = ref(false);
 const modalError = ref(null);
 
+// --- Asociar persona (existente o nueva) ---
+const showAsociarPersona = ref(false);
+const savingAsocP = ref(false);
+const asocPError = ref(null);
+
+async function handleAsociarPersona(data) {
+  savingAsocP.value = true; asocPError.value = null;
+  try {
+    let personaId = data.personaId;
+    if (data.modo === 'nueva') {
+      const creada = await personaService.crear(data.nuevaPersona);
+      personaId = creada.id;
+    }
+    await personaService.asociarEmpresa(personaId, { empresaId: props.id, ...data.rel });
+    showAsociarPersona.value = false;
+    await cargarDetalle();
+  } catch (err) {
+    asocPError.value = err.response?.data?.message || 'Error al asociar la persona';
+  } finally {
+    savingAsocP.value = false;
+  }
+}
+
 // --- Contactos (medios) ---
 const medios = ref([]);
 const loadingMedios = ref(false);
@@ -161,8 +154,6 @@ const showContacto = ref(false);
 const editingContacto = ref(null);
 const savingContacto = ref(false);
 const contactoError = ref('');
-
-const selectedId = computed(() => route.params.id || null);
 
 function fmtCurrency(v, m) { return formatCurrency(v, m); }
 const OPP_TONE = { ABIERTA: 'info', SEGUIMIENTO: 'warning', GANADA: 'success', CONTRATADA: 'accent', PERDIDA: 'danger', NO_CONCRETADA: 'neutral' };
@@ -180,28 +171,14 @@ function propietarioNombre(id) {
   return u ? (u.nombreCompleto || (u.nombres + ' ' + u.apellidos)) : `#${id}`;
 }
 
-async function reload() {
-  loading.value = true;
-  try {
-    const params = { page: 1, page_size: 50 };
-    if (search.value) params.q = search.value;
-    const res = await empresaService.listar(params);
-    empresas.value = res.data || [];
-  } catch (err) { console.error('Error cargando empresas:', err); empresas.value = []; }
-  finally { loading.value = false; }
-}
-function debouncedReload() { clearTimeout(timer); timer = setTimeout(reload, 400); }
-
-function select(id) { router.push(`/empresas/${id}`); }
-
 async function cargarDetalle() {
-  if (!selectedId.value) { empresa.value = null; return; }
+  if (!props.id) { empresa.value = null; return; }
   loadingDetalle.value = true;
   try {
-    empresa.value = await empresaService.obtenerPorId(selectedId.value);
+    empresa.value = await empresaService.obtenerPorId(props.id);
     const [pers, opps] = await Promise.all([
-      personaService.listar({ empresa_id: selectedId.value, page_size: 100 }).catch(() => ({ data: [] })),
-      oportunidadService.listar({ empresa_id: selectedId.value, page_size: 100 }).catch(() => ({ data: [] })),
+      personaService.listar({ empresa_id: props.id, page_size: 100 }).catch(() => ({ data: [] })),
+      oportunidadService.listar({ empresa_id: props.id, page_size: 100 }).catch(() => ({ data: [] })),
     ]);
     contactos.value = pers.data || [];
     oportunidades.value = opps.data || [];
@@ -211,10 +188,10 @@ async function cargarDetalle() {
 }
 
 async function cargarMedios() {
-  if (!selectedId.value) { medios.value = []; return; }
+  if (!props.id) { medios.value = []; return; }
   loadingMedios.value = true;
   try {
-    medios.value = await contactoService.listarPorEmpresa(selectedId.value);
+    medios.value = await contactoService.listarPorEmpresa(props.id);
   } catch (err) { console.error('Error cargando contactos:', err); medios.value = []; }
   finally { loadingMedios.value = false; }
 }
@@ -227,7 +204,7 @@ async function handleSubmit(payload) {
     if (editing.value) await empresaService.actualizar(editing.value.id, payload);
     else await empresaService.crear(payload);
     showModal.value = false;
-    await reload();
+    emit('updated');
     if (editing.value) await cargarDetalle();
   } catch (err) { modalError.value = err.response?.data?.message || 'Error al guardar empresa'; }
   finally { saving.value = false; }
@@ -240,7 +217,7 @@ async function handleContactoSubmit({ id, payload }) {
   savingContacto.value = true; contactoError.value = '';
   try {
     if (id) await contactoService.actualizar(id, payload);
-    else await contactoService.crearParaEmpresa(selectedId.value, payload);
+    else await contactoService.crearParaEmpresa(props.id, payload);
     showContacto.value = false;
     await cargarMedios();
   } catch (err) { contactoError.value = err.response?.data?.message || 'Error al guardar el contacto'; }
@@ -262,20 +239,14 @@ onMounted(async () => {
   asideReady.value = true;
   contactoService.listarRedesSociales().then((r) => { redes.value = r || []; }).catch(() => { redes.value = []; });
   usuarioService.listar().then((u) => { usuarios.value = u || []; }).catch(() => { usuarios.value = []; });
-  await reload();
-  if (selectedId.value) await cargarDetalle();
+  if (props.id) await cargarDetalle();
 });
-watch(selectedId, () => cargarDetalle());
+watch(() => props.id, () => cargarDetalle());
+
+defineExpose({ openCreate });
 </script>
 
 <style scoped>
-.emp-master { display: flex; flex-direction: column; }
-.emp-master__filters { display: flex; flex-direction: column; gap: var(--gc-space-2); padding: var(--gc-space-3); border-bottom: 1px solid var(--gc-border); }
-.emp-master__state { display: flex; justify-content: center; padding: var(--gc-space-8); color: var(--gc-text-3); }
-.emp-master__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.emp-master__name { font-size: var(--gc-fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.emp-master__meta { font-size: var(--gc-fs-xs); color: var(--gc-text-3); }
-
 .emp-surface { padding: var(--gc-space-6); }
 .emp-empty { display: flex; justify-content: center; padding: var(--gc-space-12); }
 .emp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--gc-space-2); }
@@ -291,6 +262,7 @@ watch(selectedId, () => cargarDetalle());
 
 .emp-aside { padding: var(--gc-space-5); display: flex; flex-direction: column; gap: var(--gc-space-5); }
 .emp-aside__sec { display: flex; flex-direction: column; gap: var(--gc-space-2); }
+.emp-aside__head { display: flex; align-items: center; justify-content: space-between; }
 .emp-aside__title { font-size: var(--gc-fs-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--gc-text-3); }
 .emp-aside__list { border: 1px solid var(--gc-border); border-radius: var(--gc-radius-lg); overflow: hidden; }
 .emp-aside__list > :deep(.gc-row:last-child) { border-bottom: none; }
