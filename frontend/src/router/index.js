@@ -78,17 +78,20 @@ const routes = [
     component: () => import('@/views/PersonasView.vue'),
     meta: { requiresAuth: true, layout: 'legacy' },
   },
+  // --- RF5: Contratos (Mundo 2) plantilla Operativo ---
   {
     path: '/contratos',
     name: 'Contratos',
     component: () => import('@/views/ContratosListView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
-  },
-  {
-    path: '/contratos/:id',
-    name: 'ContratoDetalle',
-    component: () => import('@/views/ContratoDetalleView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
+    meta: { requiresAuth: true, layout: 'app' },
+    children: [
+      {
+        path: ':id',
+        name: 'ContratoDetalle',
+        component: () => import('@/views/ContratoDetalleView.vue'),
+        meta: { requiresAuth: true, layout: 'app' },
+      },
+    ],
   },
   {
     path: '/facturacion',

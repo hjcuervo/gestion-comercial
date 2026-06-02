@@ -145,14 +145,6 @@ public class CompromisoIngresoService {
             c.setTipo(TipoCompromiso.NUEVO);
         }
 
-        // Empresa de facturación
-        if (request.getEmpresaFacturacionId() != null) {
-            GcEmpresa empresa = empresaRepository.findById(request.getEmpresaFacturacionId())
-                    .orElseThrow(() -> new BusinessException("NOT_FOUND",
-                        "Empresa de facturación no encontrada con ID: " + request.getEmpresaFacturacionId()));
-            c.setEmpresaFacturacion(empresa);
-        }
-
         // Moneda — si no viene, hereda del contrato
         c.setMoneda(StringUtils.hasText(request.getMoneda())
                 ? request.getMoneda()

@@ -10,6 +10,7 @@ import com.arquitecsoft.gestion.domain.empresa.entity.GcEmpresa;
 import com.arquitecsoft.gestion.domain.empresa.repository.GcEmpresaRepository;
 import com.arquitecsoft.gestion.domain.oportunidad.entity.GcOportunidad;
 import com.arquitecsoft.gestion.domain.oportunidad.repository.GcOportunidadRepository;
+import com.arquitecsoft.gestion.domain.facturacion.repository.GcCompromisoIngresoRepository;
 import com.arquitecsoft.gestion.infrastructure.dto.PageResponse;
 import com.arquitecsoft.gestion.infrastructure.exception.BusinessException;
 import com.arquitecsoft.gestion.infrastructure.security.SecurityUtils;
@@ -37,6 +38,7 @@ public class ContratoService {
 
     private final GcContratoRepository contratoRepository;
     private final GcContratoModificacionRepository modificacionRepository;
+    private final GcCompromisoIngresoRepository compromisoIngresoRepository;
     private final GcProcesoContratacionRepository procesoRepository;
     private final GcTipoContratoRepository tipoContratoRepository;
     private final GcEmpresaRepository empresaRepository;
@@ -46,6 +48,7 @@ public class ContratoService {
     public ContratoService(
             GcContratoRepository contratoRepository,
             GcContratoModificacionRepository modificacionRepository,
+            GcCompromisoIngresoRepository compromisoIngresoRepository,
             GcProcesoContratacionRepository procesoRepository,
             GcTipoContratoRepository tipoContratoRepository,
             GcEmpresaRepository empresaRepository,
@@ -53,6 +56,7 @@ public class ContratoService {
             SecurityUtils securityUtils) {
         this.contratoRepository = contratoRepository;
         this.modificacionRepository = modificacionRepository;
+        this.compromisoIngresoRepository = compromisoIngresoRepository;
         this.procesoRepository = procesoRepository;
         this.tipoContratoRepository = tipoContratoRepository;
         this.empresaRepository = empresaRepository;
@@ -66,6 +70,11 @@ public class ContratoService {
     public ContratoResponse obtenerPorId(Long id) {
         GcContrato contrato = contratoRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new BusinessException("NOT_FOUND", "Contrato no encontrado con ID: " + id));
+        // DT-03: findByIdWithRelations NO fetcha la colección 'compromisos' (evita MultipleBagFetchException
+        // al haber dos List). La cargamos explícitamente dentro de la transacción y la seteamos para que
+        // ContratoResponse.fromEntity no dispare un lazy-load sobre una colección no inicializada.
+        contrato.setCompromisos(
+                compromisoIngresoRepository.findByContratoIdOrderByFechaEsperadaActualAsc(contrato.getId()));
         return ContratoResponse.fromEntity(contrato);
     }
 
