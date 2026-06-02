@@ -3,9 +3,12 @@ import { useAuthStore } from '@/stores/auth.store';
 
 /**
  * meta.layout:
- *  - 'blank'  → sin chasis (Login).
- *  - 'app'    → shell nuevo (AppShell). Pantallas ya migradas al rediseño.
- *  - 'legacy' → pantalla aún no migrada; conserva su propio <AppLayout> (transitorio).
+ *  - 'blank' → sin chasis (Login).
+ *  - 'app'   → shell (AppShell). Todas las pantallas migradas al rediseño.
+ *
+ * meta.module:  módulo de dominio al que pertenece la ruta. Controla el
+ *   resaltado del Nivel 1 (barra superior) y la barra secundaria (Nivel 2).
+ *   Valores: 'venta' | 'contratacion' | 'facturacion'. Ver composables/useModule.js.
  */
 const routes = [
   {
@@ -15,85 +18,98 @@ const routes = [
     meta: { requiresAuth: false, layout: 'blank' },
   },
 
-  // --- Consola Operativo: Oportunidades/Actividades (RF2 + RF3) ---
-  // Lista maestra persistente; el detalle (con pestañas Resumen/Actividades/Proceso)
-  // se pinta en la superficie. Absorbe la antigua lista huérfana (RF3.4).
+  // ====================================================================
+  // MÓDULO: Proceso de Venta (Mundo 1 — Comercial)
+  // ====================================================================
+
+  // Dashboard comercial (plantilla Panel). Aterrizaje del módulo Venta.
+  {
+    path: '/',
+    name: 'Dashboard',
+    component: () => import('@/views/DashboardView.vue'),
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
+  },
+
+  // Consola Operativo: Oportunidades/Actividades. Lista maestra persistente;
+  // el detalle (pestañas Resumen/Actividades/Proceso) se pinta en la superficie.
   {
     path: '/actividades',
     name: 'Actividades',
     component: () => import('@/views/ActividadesView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
     children: [
       {
         path: ':oportunidadId',
         name: 'ActividadOportunidad',
         component: () => import('@/views/OportunidadDetalleView.vue'),
-        meta: { requiresAuth: true, layout: 'app' },
+        meta: { requiresAuth: true, layout: 'app', module: 'venta' },
       },
     ],
   },
 
-  // --- RF3: Pipeline (Tablero) ---
+  // Pipeline (plantilla Tablero).
   {
     path: '/pipeline',
     name: 'Pipeline',
     component: () => import('@/views/PipelineView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
   },
 
-  // --- RF3: Detalle de oportunidad directo (sin lista maestra) ---
-  // El Kanban enlaza aquí. Reutiliza la misma vista de detalle.
+  // Detalle de oportunidad directo (enlace desde el Kanban). Reutiliza la vista de detalle.
   {
     path: '/oportunidades/:id',
     name: 'OportunidadDetalle',
     component: () => import('@/views/OportunidadDetalleView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
   },
 
-  // --- RF4: Dashboard (Panel) ---
-  {
-    path: '/',
-    name: 'Dashboard',
-    component: () => import('@/views/DashboardView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
-  },
-  // --- Pantallas aún no migradas (layout legacy) ---
-  // --- RF6: Empresas + Personas (Mundo 1) plantilla Operativo ---
-  // La vista pinta lista (master) + detalle (surface) según :id opcional; no usa router-view interno.
+  // Empresas + Personas (plantilla Operativo; :id opcional, sin router-view interno).
   {
     path: '/empresas/:id?',
     name: 'Empresas',
     component: () => import('@/views/EmpresasView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
   },
   {
     path: '/personas/:id?',
     name: 'Personas',
     component: () => import('@/views/PersonasView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'venta' },
   },
-  // --- RF5: Contratos (Mundo 2) plantilla Operativo ---
+
+  // ====================================================================
+  // MÓDULO: Contratación (Mundo 2 — Contractual)
+  // ====================================================================
+
+  // Contratos (plantilla Operativo). Lista maestra + detalle.
   {
     path: '/contratos',
     name: 'Contratos',
     component: () => import('@/views/ContratosListView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'contratacion' },
     children: [
       {
         path: ':id',
         name: 'ContratoDetalle',
         component: () => import('@/views/ContratoDetalleView.vue'),
-        meta: { requiresAuth: true, layout: 'app' },
+        meta: { requiresAuth: true, layout: 'app', module: 'contratacion' },
       },
     ],
   },
-  // --- RF7: Facturación (Mundo 3) plantilla Tablero ---
+  // Pendiente F3: Dashboard de Contratación (requiere endpoint backend de stats).
+
+  // ====================================================================
+  // MÓDULO: Facturación (Mundo 3 — Flujo de Facturación)
+  // ====================================================================
+
+  // Facturación (plantilla Tablero). Tablero de compromisos del periodo.
   {
     path: '/facturacion',
     name: 'Facturacion',
     component: () => import('@/views/FacturacionView.vue'),
-    meta: { requiresAuth: true, layout: 'app' },
+    meta: { requiresAuth: true, layout: 'app', module: 'facturacion' },
   },
+  // Pendiente F4: Dashboard de Facturación (Panel sobre /compromisos/vista-periodo).
 
   {
     path: '/:pathMatch(.*)*',
