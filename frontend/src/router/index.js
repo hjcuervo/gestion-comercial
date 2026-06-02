@@ -66,17 +66,19 @@ const routes = [
     meta: { requiresAuth: true, layout: 'app' },
   },
   // --- Pantallas aún no migradas (layout legacy) ---
+  // --- RF6: Empresas + Personas (Mundo 1) plantilla Operativo ---
+  // La vista pinta lista (master) + detalle (surface) según :id opcional; no usa router-view interno.
   {
-    path: '/empresas',
+    path: '/empresas/:id?',
     name: 'Empresas',
     component: () => import('@/views/EmpresasView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
+    meta: { requiresAuth: true, layout: 'app' },
   },
   {
-    path: '/personas',
+    path: '/personas/:id?',
     name: 'Personas',
     component: () => import('@/views/PersonasView.vue'),
-    meta: { requiresAuth: true, layout: 'legacy' },
+    meta: { requiresAuth: true, layout: 'app' },
   },
   // --- RF5: Contratos (Mundo 2) plantilla Operativo ---
   {
