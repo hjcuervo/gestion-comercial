@@ -20,6 +20,9 @@
       </nav>
 
       <div class="gc-shell__tools">
+        <button class="gc-shell__icon-btn" type="button" @click="toggleDensity" :title="density === 'compact' ? 'Densidad cómoda' : 'Densidad compacta'" :aria-label="density === 'compact' ? 'Densidad cómoda' : 'Densidad compacta'">
+          <GcIcon :name="density === 'compact' ? 'layout-rows' : 'layout-list'" :size="16" />
+        </button>
         <button class="gc-shell__icon-btn" type="button" @click="toggleTheme" :title="theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'" :aria-label="theme === 'dark' ? 'Tema claro' : 'Tema oscuro'">
           <GcIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />
         </button>
@@ -69,6 +72,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { useShell } from '@/composables/useShell';
 import { useTheme } from '@/composables/useTheme';
+import { useDensity } from '@/composables/useDensity';
 import GcIcon from '@/components/ui/GcIcon.vue';
 
 const router = useRouter();
@@ -76,6 +80,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 const { regions, reset } = useShell();
 const { theme, toggleTheme } = useTheme();
+const { density, toggleDensity } = useDensity();
 
 // Al ENTRAR al mundo 'app' (AppShell se crea de nuevo) partimos sin zonas.
 // Se hace en setup (no en onMounted) para correr ANTES de que las vistas hijas

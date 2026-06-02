@@ -99,6 +99,11 @@
   /* --- Transición base --- */
   --gc-t-fast: 120ms ease;
   --gc-t-normal: 200ms ease;
+
+  /* --- Densidad (RF8.3): valores "cómodo" por defecto --- */
+  --gc-row-pad-y: 12px;       /* padding vertical de renglones (.gc-row) */
+  --gc-row-pad-x: 16px;       /* padding horizontal de renglones */
+  --gc-row-gap: 12px;         /* separación interna del renglón */
 }
 
 /* ----------------------------------------------------------------------------
@@ -233,3 +238,16 @@ a:hover { text-decoration: underline; }
 /* Spinner del rediseño (algunas vistas usan .animate-spin como utilidad) */
 @keyframes gc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .animate-spin { animation: gc-spin 1s linear infinite; }
+
+
+/* ============================================================================
+   DENSIDAD COMPACTA (RF8.3) — vía <html data-density="compact">
+   Reduce el padding de los renglones (elemento que domina la densidad visual).
+   Las variables heredan por el árbol DOM, por lo que atraviesan el <style scoped>
+   de los componentes (a diferencia de un override de clase, que el scoping bloquea).
+   ========================================================================== */
+[data-density='compact'] {
+  --gc-row-pad-y: 6px;
+  --gc-row-pad-x: 12px;
+  --gc-row-gap: 8px;
+}

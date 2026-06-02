@@ -11,12 +11,14 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppShell from '@/components/layout/AppShell.vue';
 import { useTheme } from '@/composables/useTheme';
+import { useDensity } from '@/composables/useDensity';
 
 const route = useRoute();
 
-// Inicializa el tema (claro/oscuro) desde el arranque, en cualquier pantalla
-// (incluido el login, que no monta AppShell). Lee localStorage / sistema.
+// Inicializa tema (claro/oscuro) y densidad (cómodo/compacto) desde el arranque,
+// en cualquier pantalla (incluido login). Leen localStorage / sistema.
 useTheme();
+useDensity();
 
 /**
  * meta.layout por ruta:
